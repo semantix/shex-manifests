@@ -1,0 +1,6 @@
+- schemaLabel: ts1
+  schemaURL: ts1.shex
+  dataLabel: good
+  dataURL: ts1.ttl
+  queryMap: |
+    <ts1>@<Shape1>
