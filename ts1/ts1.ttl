@@ -4,3 +4,5 @@ PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 
 <ts1> fhir:value [ fhir:v 55.0 ] .
+
+<ts2> fhir:value [ fhir:v "abcd" ] . 
