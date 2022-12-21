@@ -3,7 +3,6 @@ PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
 BASE <http://hl7.org/fhir/shape/>
 
-
 # A measured or measurable amount
 <Quantity> EXTENDS @<DataType> CLOSED {   
 
@@ -27,10 +26,26 @@ BASE <http://hl7.org/fhir/shape/>
 
  { fhir:code .? }  OR  { fhir:system . } 
 
-)
- 
+) 
 
 #---------------------- Data Types -------------------
+
+<Base> CLOSED {  }
+
+<Element> EXTENDS @<Base> CLOSED {
+  fhir:id xsd:string?;
+  fhir:extension @<Extension>*;
+}
+
+<Extension> EXTENDS @<DataType> CLOSED {
+  fhir:id @<string>?;
+  fhir:extension @<Extension>*;
+  fhir:url @<uri>;
+  fhir:value @<code> OR @<string> OR @<boolean>?;
+}
+
+<DataType> EXTENDS @<Element> CLOSED {
+}
 
 # Primitive Type code
 <code> EXTENDS @<string> CLOSED {   
@@ -62,12 +77,6 @@ BASE <http://hl7.org/fhir/shape/>
     fhir:nodeRole [fhir:treeRoot]?;
     fhir:v xsd:anyURI?;                     # Primitive value for uri
 }  
-
-#---------------------- Cardinality Types (OneOrMore) -------------------
-
-#---------------------- Reference Types -------------------
-
-#---------------------- Value Sets ------------------------
 
 # How the Quantity should be understood and represented.
 fhirvs:quantity-comparator ["<" "<=" ">=" ">" "ad"]
