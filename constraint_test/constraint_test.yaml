@@ -1,0 +1,13 @@
+- schemaLabel: Constraint Test
+  schemaURL: constraint_test.shex
+  dataLabel: Valid cases
+  dataURL: constraint_test.ttl
+  queryMap: |
+    <inst1>@<Quantity>
+
+- schemaLabel: Constraint Test
+  schemaURL: constraint_test.shex
+  dataLabel: Invalid cases
+  dataURL: constraint_test.ttl
+  queryMap: |
+    <inst2>@!<Quantity>
