@@ -24,7 +24,7 @@ echo "| ------- | ----------- |" >> $FILE_NAME
 for exmp in "${examples[@]}"
 do
 	IFS='#' read -r -a exmpstrs <<< "$exmp"
-	echo "| [${exmpstrs[0]}]($SHEX_VALIDATOR$SHEX_MANIFEST/${exmpstrs[0]}/${exmpstrs[0]}.yaml) $NEW_WINDOW | ${exmpstrs[1]} |" >> $FILE_NAME
+	echo "| [${exmpstrs[0]}]($SHEX_VALIDATOR$SHEX_MANIFEST/${exmpstrs[0]}/${exmpstrs[0]}.yaml) " $NEW_WINDOW "| ${exmpstrs[1]} |" >> $FILE_NAME
 done
 
 
