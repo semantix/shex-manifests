@@ -8,4 +8,5 @@
 
 declare -a examples=( "basic_type_test#A Basic Type Test"
 	                 "ts1#for testing - a simple example"
+	                 "quantity_test#Quantity Resource Tests"
 	                 )
