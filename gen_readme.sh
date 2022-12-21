@@ -12,7 +12,7 @@ source $DIR/examples.sh
 FILE_NAME=README.md
 SHEX_VALIDATOR=http://shex.io/webapps/shex.js/doc/shex-simple?manifestURL=
 SHEX_MANIFEST=https://semantix.github.io/shex-manifests
-NEW_WINDOW={:target=\"_blank\" rel=\"noopener\"}
+NEW_WINDOW={:target="_blank" rel="noopener"}
 
 echo "# ShEx-mainfests" > $FILE_NAME
 echo "Manifest tests and examples for FHIR ShEx" >> $FILE_NAME
