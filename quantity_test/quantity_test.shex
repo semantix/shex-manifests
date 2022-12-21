@@ -70,6 +70,10 @@ BASE <http://hl7.org/fhir/shape/>
     fhir:v xsd:decimal OR xsd:double?;      # Primitive value for decimal
 }  
 
+<boolean> EXTENDS @<DataType> CLOSED {
+  fhir:v xsd:boolean
+}
+
 # Primitive Type uri
 <uri> EXTENDS @<PrimitiveType> CLOSED {   
 
