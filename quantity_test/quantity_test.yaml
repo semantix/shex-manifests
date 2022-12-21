@@ -11,3 +11,4 @@
   dataURL: quantity_test.ttl
   queryMap: |
     <inst2>@!<Quantity>
+    <inst3>@!<Quantity>
