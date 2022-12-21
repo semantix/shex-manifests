@@ -82,5 +82,11 @@ BASE <http://hl7.org/fhir/shape/>
     fhir:v xsd:anyURI?;                     # Primitive value for uri
 }  
 
+<PrimitiveType> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:PrimitiveType];
+    fhir:nodeRole [fhir:treeRoot]?;
+}  
+
 # How the Quantity should be understood and represented.
 fhirvs:quantity-comparator ["<" "<=" ">=" ">" "ad"]
