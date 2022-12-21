@@ -11,7 +11,7 @@ source $DIR/examples.sh
 
 FILE_NAME=README.md
 SHEX_VALIDATOR=http://shex.io/webapps/shex.js/doc/shex-simple?manifestURL=
-SHEX_MANIFEST=//semantix.github.io/shex-manifests
+SHEX_MANIFEST=https://semantix.github.io/shex-manifests
 
 echo "# ShEx-mainfests" > $FILE_NAME
 echo "Manifest tests and examples for FHIR ShEx" >> $FILE_NAME
