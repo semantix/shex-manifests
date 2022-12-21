@@ -5,8 +5,6 @@ BASE <http://hl7.org/fhir/shape/>
 
 # A measured or measurable amount
 <Quantity> EXTENDS @<DataType> CLOSED {   
-
-    a [fhir:Quantity];
     fhir:nodeRole [fhir:treeRoot]?;
     fhir:value @<decimal>?;                 # Numerical value (with implicit 
                                             # precision) 
@@ -49,23 +47,17 @@ BASE <http://hl7.org/fhir/shape/>
 
 # Primitive Type code
 <code> EXTENDS @<string> CLOSED {   
-
-    a [fhir:code];
     fhir:nodeRole [fhir:treeRoot]?;
 }  
 
 # Primitive Type string
 <string> EXTENDS @<PrimitiveType> CLOSED {   
-
-    a [fhir:string];
     fhir:nodeRole [fhir:treeRoot]?;
     fhir:v xsd:string MAXLENGTH 1048576?;   # Primitive value for string
 }  
 
 # Primitive Type decimal
 <decimal> EXTENDS @<PrimitiveType> CLOSED {   
-
-    a [fhir:decimal];
     fhir:nodeRole [fhir:treeRoot]?;
     fhir:v xsd:decimal OR xsd:double?;      # Primitive value for decimal
 }  
@@ -76,15 +68,11 @@ BASE <http://hl7.org/fhir/shape/>
 
 # Primitive Type uri
 <uri> EXTENDS @<PrimitiveType> CLOSED {   
-
-    a [fhir:uri];
     fhir:nodeRole [fhir:treeRoot]?;
     fhir:v xsd:anyURI?;                     # Primitive value for uri
 }  
 
 <PrimitiveType> EXTENDS @<DataType> CLOSED {   
-
-    a [fhir:PrimitiveType];
     fhir:nodeRole [fhir:treeRoot]?;
 }  
 
