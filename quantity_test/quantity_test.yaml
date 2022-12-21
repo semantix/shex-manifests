@@ -10,5 +10,5 @@
   dataLabel: Invalid types
   dataURL: quantity_test.ttl
   queryMap: |
-    <inst2>@!<Quantity>
+    <inst2>@!<Quantity>,
     <inst3>@!<Quantity>
