@@ -4,7 +4,7 @@
   dataURL: constraint_test.ttl
   queryMap: |
     <inst1>@<Quantity>,
-    <inst1>@<Age>
+    <inst3>@<Age>
 
 - schemaLabel: Constraint Test
   schemaURL: constraint_test.shex
