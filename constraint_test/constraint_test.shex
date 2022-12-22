@@ -1,4 +1,4 @@
-sdPREFIX fhir: <http://hl7.org/fhir/> 
+PREFIX fhir: <http://hl7.org/fhir/> 
 PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
 BASE <http://hl7.org/fhir/shape/>
@@ -39,8 +39,11 @@ fhirvs:quantity-comparator ["<" "<=" ">=" ">" "ad"]
 # Constraint:(code.exists() or value.empty()) and (system.empty() or system = %ucum) and (value.empty() or value.hasValue().not() or value > 0)
 # ShEx:
 
+# Currently it generates
 ({ fhir:code . } OR { fhir:value .? }) AND ({ fhir:system .? } OR ({ fhir:system ['%ucum']  })) AND ({ fhir:value .? } OR {  ^fhir:value  .  } OR ({ fhir:value MinExclusive 0 }))
 
+# I might need to generate what is below
+# ({ fhir:code . } OR { fhir:value NOT {fhir:v .} }) AND ({ fhir:system .? } OR ({ fhir:system ['%ucum']  })) AND ({ fhir:value .? } OR { fhir:value NOT {fhir:v .?} }  OR ({ fhir:value MinExclusive 0 }))
 )
 
 #---------------------- Data Types -------------------
