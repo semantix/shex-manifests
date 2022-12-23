@@ -4,7 +4,9 @@
   dataLabel: Valid cases
   dataURL: empty_exists_test.ttl
   queryMap: |
-    <inst1>@<Quantity>
+    <inst1>@<Quantity>,
+    <inst3>@<Quantity>,
+    <inst4>@<Quantity>
 
 - schemaLabel: Empty-or-Exists
   schemaURL: empty_exists_test.shex
@@ -19,7 +21,7 @@
   dataLabel: Valid cases
   dataURL: value_test.ttl
   queryMap: |
-    <inst1>@<Age>
+    <inst1>@<Age>,
     <inst3>@<Age>
 
 - schemaLabel: Values
@@ -27,5 +29,5 @@
   dataLabel: Invalid cases
   dataURL: value_test.ttl
   queryMap: |
-    <inst2>@!<Age>
+    <inst2>@!<Age>,
     <inst4>@!<Age>
