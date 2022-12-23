@@ -21,7 +21,7 @@ BASE <http://hl7.org/fhir/shape/>
 # Constraint:code.empty() or system.exists()
 # ShEx:
 
-not { fhir:code [fhir:v .] } OR { fhir:system . }
+ { NOT { fhir:code [fhir:v .] } OR { fhir:system . } }
 )
 
 # How the Quantity should be understood and represented.
