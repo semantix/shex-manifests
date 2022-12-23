@@ -22,12 +22,15 @@
   dataURL: value_test.ttl
   queryMap: |
     <inst1>@<Age>,
-    <inst3>@<Age>
+    <inst2>@<Age>,
+    <inst3>@<Age>,
+    <inst4>@<Age>,
+    <inst5>@<Age>
 
 - schemaLabel: Values
   schemaURL: value_test.shex
   dataLabel: Invalid cases
   dataURL: value_test.ttl
   queryMap: |
-    <inst2>@!<Age>,
-    <inst4>@!<Age>
+    <inst6>@!<Age>,
+    <inst7>@!<Age>
