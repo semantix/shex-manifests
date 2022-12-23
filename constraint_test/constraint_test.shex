@@ -21,7 +21,7 @@ BASE <http://hl7.org/fhir/shape/>
 # Constraint:code.empty() or system.exists()
 # ShEx:
 
-{ fhir:code .? } OR { fhir:system . }
+not { fhir:code [fhir:v .] } OR { fhir:system . }
 )
 
 # How the Quantity should be understood and represented.
@@ -40,7 +40,9 @@ fhirvs:quantity-comparator ["<" "<=" ">=" ">" "ad"]
 # ShEx:
 
 # Currently it generates
-({ fhir:code . } OR { fhir:value .? }) AND ({ fhir:system .? } OR ({ fhir:system ['%ucum']  })) AND ({ fhir:value .? } OR {  ^fhir:value  .  } OR ({ fhir:value MinExclusive 0 }))
+({ fhir:code . } OR {  NOT { fhir:value [fhir:v .] }  }) AND ({  NOT { fhir:system [fhir:v .] }  } OR ({ fhir:system ['%ucum']  })) AND ({  NOT { fhir:value [fhir:v .] }  } OR {  NOT { fhir:value  . } } OR ({ fhir:value MinExclusive 0 }))
+
+#({ fhir:code . } OR { fhir:value .? }) AND ({ fhir:system .? } OR ({ fhir:system ['%ucum']  })) AND ({ fhir:value .? } OR {  ^fhir:value  .  } OR ({ fhir:value MinExclusive 0 }))
 
 # I might need to generate what is below
 # ({ fhir:code . } OR { fhir:value NOT {fhir:v .} }) AND ({ fhir:system .? } OR ({ fhir:system ['%ucum']  })) AND ({ fhir:value .? } OR { fhir:value NOT {fhir:v .?} }  OR ({ fhir:value MinExclusive 0 }))
