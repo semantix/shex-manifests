@@ -1,0 +1,29 @@
+- schemaLabel: Empty-or-Exists
+  schemaURL: empty_exists_test.shex
+  dataURL: empty_exists_test.ttl
+  dataLabel: Valid cases
+  queryMap: |
+    <inst1>@<Quantity>
+
+- sschemaLabel: Empty-or-Exists
+  schemaURL: empty_exists_test.shex
+  dataURL: empty_exists_test.ttl
+  dataLabel: Invalid cases
+  queryMap: |
+    <inst2>@!<Quantity>
+
+- schemaLabel: Values
+  schemaURL: value_test.shex
+  dataURL: value_test.ttl
+  dataLabel: Valid cases
+  queryMap: |
+    <inst1>@<Age>
+    <inst3>@<Age>
+
+- sschemaLabel: Values
+  schemaURL: value_test.shex
+  dataURL: value_test.ttl
+  dataLabel: Invalid cases
+  queryMap: |
+    <inst2>@!<Age>
+    <inst4>@!<Age>

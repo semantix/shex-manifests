@@ -19,7 +19,6 @@ echo "Generating New README.md ...."
 echo "# ShEx-mainfests" > $FILE_NAME
 echo "Manifest tests and examples for FHIR ShEx" >> $FILE_NAME
 echo " " >> $FILE_NAME
-echo "[Try it](fhircat.github.io/FHIR-ShEx-manifests/-fhir-constraints.yaml)" >> $FILE_NAME
 echo "| Example | Description |" >> $FILE_NAME
 echo "| ------- | ----------- |" >> $FILE_NAME
 
