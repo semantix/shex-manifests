@@ -1,3 +1,4 @@
+# This tests if value exists or empty clauses
 - schemaLabel: Empty-or-Exists
   schemaURL: empty_exists_test.shex
   dataURL: empty_exists_test.ttl
@@ -5,13 +6,14 @@
   queryMap: |
     <inst1>@<Quantity>
 
-- sschemaLabel: Empty-or-Exists
+- schemaLabel: Empty-or-Exists
   schemaURL: empty_exists_test.shex
   dataURL: empty_exists_test.ttl
   dataLabel: Invalid cases
   queryMap: |
     <inst2>@!<Quantity>
 
+# This tests values presence/absence of a property wrt constraint spec.
 - schemaLabel: Values
   schemaURL: value_test.shex
   dataURL: value_test.ttl
@@ -20,7 +22,7 @@
     <inst1>@<Age>
     <inst3>@<Age>
 
-- sschemaLabel: Values
+- schemaLabel: Values
   schemaURL: value_test.shex
   dataURL: value_test.ttl
   dataLabel: Invalid cases
