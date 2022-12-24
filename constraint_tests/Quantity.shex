@@ -7,23 +7,16 @@ IMPORT <datatypes.shex>
 
 # A measured or measurable amount
 <Quantity> EXTENDS @<DataType> CLOSED {   
-    fhir:value @<decimal>?;                 # Numerical value (with implicit 
-                                            # precision) 
+    fhir:value @<decimal>?;                 
+                                           
     fhir:comparator @<code> AND
-    	{fhir:value @fhirvs:quantity-comparator}?;  # < | <= | >= | > | ad - how to 
-                                            # understand the value 
-    fhir:unit @<string>?;                   # Unit representation
-    fhir:system @<uri>?;                    # System that defines coded unit form
-    fhir:code @<code>?;                     # Coded form of the unit
+    	{fhir:value @fhirvs:quantity-comparator}?; 
+                                            
+    fhir:unit @<string>?;                  
+    fhir:system @<uri>?;                    
+    fhir:code @<code>?;                    
 } AND (
-
-# Constraint: UniqueKey:qty-3
-# Human readable:If a code for the unit is present, the system SHALL also be present
-# XPath:not(exists(f:code)) or exists(f:system)
-# Constraint:code.empty() or system.exists()
-# ShEx:
-
- NOT { fhir:code {fhir:v .} } OR { fhir:system . } 
+    NOT { fhir:code {fhir:v .} } OR { fhir:system . } 
 )
 
 # How the Quantity should be understood and represented.
