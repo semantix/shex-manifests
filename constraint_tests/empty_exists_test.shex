@@ -5,6 +5,4 @@ PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 IMPORT <types.shex>
 IMPORT <datatypes.shex>
 
-<Quantity> AND (
-    NOT { fhir:code {fhir:v .} } OR { fhir:system . } 
-)
+<Quantity> NOT { fhir:code {fhir:v .} } OR { fhir:system . } 
