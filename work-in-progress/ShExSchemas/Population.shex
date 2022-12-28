@@ -1,0 +1,65 @@
+﻿PREFIX fhir: <http://hl7.org/fhir/> 
+PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+BASE <http://hl7.org/fhir/shape/>
+
+
+# A definition of a set of people that apply to some clinically related context, for example people contraindicated for a certain medication
+<Population> EXTENDS @<BackboneType> CLOSED {   
+
+    a [fhir:Population];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:age (@<Range>  OR 
+    			@<CodeableConcept> )  AND { rdf:type IRI } ?;  # The age of the specific population
+    fhir:gender @<Population.gender>?;      # The gender of the specific 
+                                            # population 
+    fhir:race @<Population.race>?;          # Race of the specific population
+    fhir:physiologicalCondition @<Population.physiologicalCondition>?;  # The existing physiological 
+                                            # conditions of the specific 
+                                            # population to which this applies 
+}  
+
+#---------------------- Data Types -------------------
+
+# Set of values bounded by low and high
+<Range> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Range];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:low @<Range.low>?;                 # Low limit
+    fhir:high @<Range.high>?;               # High limit
+} AND (
+
+# Constraint: UniqueKey:rng-2
+# Human readable:If present, low SHALL have a lower value than high
+# XPath:not(exists(f:low/f:value/@value)) or not(exists(f:high/f:value/@value)) or (number(f:low/f:value/@value) <= number(f:high/f:value/@value))
+# Constraint:low.value.empty() or high.value.empty() or (low <= high)
+# ShEx:
+
+ NOT { fhir:low fhir:value {fhir:v .} }  OR  NOT { fhir:high fhir:value {fhir:v .} }  OR ({ fhir:low { fhir:v MaxInclusive { fhir:high } }  })
+
+)
+ 
+
+# Concept - reference to a terminology or just  text
+<CodeableConcept> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:CodeableConcept];
+    fhir:nodeRole [fhir:treeRoot]?;
+    a NONLITERAL*;
+    fhir:coding @<OneOrMore_CodeableConcept.coding>?;  # Code defined by a terminology 
+                                            # system 
+    fhir:text @<CodeableConcept.text>?;     # Plain text representation of the 
+                                            # concept 
+}  
+
+#---------------------- Cardinality Types (OneOrMore) -------------------
+
+<OneOrMore_CodeableConcept.coding> CLOSED {
+    rdf:first @<CodeableConcept.coding>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_CodeableConcept.coding> 
+}
+
+#---------------------- Reference Types -------------------
+
+#---------------------- Value Sets ------------------------

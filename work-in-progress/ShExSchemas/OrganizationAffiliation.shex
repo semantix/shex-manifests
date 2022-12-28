@@ -1,0 +1,105 @@
+﻿PREFIX fhir: <http://hl7.org/fhir/> 
+PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+BASE <http://hl7.org/fhir/shape/>
+
+
+start=@<OrganizationAffiliation> AND {fhir:nodeRole [fhir:treeRoot]}
+
+
+# Defines an affiliation/assotiation/relationship between 2 distinct organizations, that is not a part-of relationship/sub-division relationship
+<OrganizationAffiliation> EXTENDS @<DomainResource> CLOSED {   
+
+    a [fhir:OrganizationAffiliation];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:identifier @<OneOrMore_OrganizationAffiliation.identifier>?;  # Business identifiers that are 
+                                            # specific to this role 
+    fhir:active @<OrganizationAffiliation.active>?;  # Whether this organization 
+                                            # affiliation record is in active 
+                                            # use 
+    fhir:period @<OrganizationAffiliation.period>?;  # The period during which the 
+                                            # participatingOrganization is 
+                                            # affiliated with the primary 
+                                            # organization 
+    fhir:organization @<OrganizationAffiliation.organization> AND {fhir:link 
+    			@<Organization> }?;  # Organization where the role is 
+                                            # available 
+    fhir:participatingOrganization @<OrganizationAffiliation.participatingOrganization> AND {fhir:link 
+    			@<Organization> }?;  # Organization that 
+                                            # provides/performs the role (e.g. 
+                                            # providing services or is a member 
+                                            # of) 
+    fhir:network @<OneOrMore_OrganizationAffiliation.network_Organization>?;  # Health insurance provider network 
+                                            # in which the 
+                                            # participatingOrganization provides 
+                                            # the role's services (if defined) 
+                                            # at the indicated locations (if 
+                                            # defined) 
+    fhir:code @<OneOrMore_OrganizationAffiliation.code>?;  # Definition of the role the 
+                                            # participatingOrganization plays 
+    fhir:specialty @<OneOrMore_OrganizationAffiliation.specialty>?;  # Specific specialty of the 
+                                            # participatingOrganization in the 
+                                            # context of the role 
+    fhir:location @<OneOrMore_OrganizationAffiliation.location_Location>?;  # The location(s) at which the role 
+                                            # occurs 
+    fhir:healthcareService @<OneOrMore_OrganizationAffiliation.healthcareService_HealthcareService>?;  # Healthcare services provided 
+                                            # through the role 
+    fhir:telecom @<OneOrMore_OrganizationAffiliation.telecom>?;  # Contact details at the 
+                                            # participatingOrganization relevant 
+                                            # to this Affiliation 
+    fhir:endpoint @<OneOrMore_OrganizationAffiliation.endpoint_Endpoint>?;  # Technical endpoints providing 
+                                            # access to services operated for 
+                                            # this role 
+}  
+
+#---------------------- Data Types -------------------
+
+#---------------------- Cardinality Types (OneOrMore) -------------------
+
+<OneOrMore_OrganizationAffiliation.identifier> CLOSED {
+    rdf:first @<OrganizationAffiliation.identifier>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_OrganizationAffiliation.identifier> 
+}
+
+<OneOrMore_OrganizationAffiliation.network_Organization> CLOSED {
+    rdf:first @<OrganizationAffiliation.network> AND {fhir:link 
+			@<Organization> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_OrganizationAffiliation.network_Organization> 
+}
+
+<OneOrMore_OrganizationAffiliation.code> CLOSED {
+    rdf:first @<OrganizationAffiliation.code>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_OrganizationAffiliation.code> 
+}
+
+<OneOrMore_OrganizationAffiliation.specialty> CLOSED {
+    rdf:first @<OrganizationAffiliation.specialty>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_OrganizationAffiliation.specialty> 
+}
+
+<OneOrMore_OrganizationAffiliation.location_Location> CLOSED {
+    rdf:first @<OrganizationAffiliation.location> AND {fhir:link 
+			@<Location> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_OrganizationAffiliation.location_Location> 
+}
+
+<OneOrMore_OrganizationAffiliation.healthcareService_HealthcareService> CLOSED {
+    rdf:first @<OrganizationAffiliation.healthcareService> AND {fhir:link 
+			@<HealthcareService> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_OrganizationAffiliation.healthcareService_HealthcareService> 
+}
+
+<OneOrMore_OrganizationAffiliation.telecom> CLOSED {
+    rdf:first @<OrganizationAffiliation.telecom>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_OrganizationAffiliation.telecom> 
+}
+
+<OneOrMore_OrganizationAffiliation.endpoint_Endpoint> CLOSED {
+    rdf:first @<OrganizationAffiliation.endpoint> AND {fhir:link 
+			@<Endpoint> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_OrganizationAffiliation.endpoint_Endpoint> 
+}
+
+#---------------------- Reference Types -------------------
+
+#---------------------- Value Sets ------------------------

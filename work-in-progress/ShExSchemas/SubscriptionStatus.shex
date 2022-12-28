@@ -1,0 +1,75 @@
+﻿PREFIX fhir: <http://hl7.org/fhir/> 
+PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+BASE <http://hl7.org/fhir/shape/>
+
+
+start=@<SubscriptionStatus> AND {fhir:nodeRole [fhir:treeRoot]}
+
+
+# Status information about a Subscription provided during event notification
+<SubscriptionStatus> EXTENDS @<DomainResource> CLOSED {   
+
+    a [fhir:SubscriptionStatus];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:status @<SubscriptionStatus.status>?;  # requested | active | error | off | 
+                                            # entered-in-error 
+    fhir:type @<SubscriptionStatus.type>;   # handshake | heartbeat | 
+                                            # event-notification | query-status 
+                                            # | query-event 
+    fhir:eventsSinceSubscriptionStart @<SubscriptionStatus.eventsSinceSubscriptionStart>?;  # Events since the Subscription was 
+                                            # created 
+    fhir:notificationEvent @<OneOrMore_SubscriptionStatus.notificationEvent>?;  # Detailed information about any 
+                                            # events relevant to this 
+                                            # notification 
+    fhir:subscription @<SubscriptionStatus.subscription> AND {fhir:link 
+    			@<Subscription> };  # Reference to the Subscription 
+                                            # responsible for this notification 
+    fhir:topic @<SubscriptionStatus.topic>?;  # Reference to the SubscriptionTopic 
+                                            # this notification relates to 
+    fhir:error @<OneOrMore_SubscriptionStatus.error>?;  # List of errors on the subscription
+} AND (
+
+# Constraint: UniqueKey:sst-1
+# Human readable:events listed in event notifications
+# XPath:not(f:type/@value='event-notification') or exists(f:notificationEvent[1])
+# Constraint:type = 'event-notification' implies (notificationEvent.exists() and notificationEvent.first().exists())
+# ShEx:
+
+({ fhir:type { fhir:v ['event-notification'] }  }) AND ({ fhir:notificationEvent . } AND  first( fhir:notificationEvent ) .)
+
+)
+ 
+
+# Detailed information about any events relevant to this notification
+<SubscriptionStatus.notificationEvent> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:eventNumber @<SubscriptionStatus.notificationEvent.eventNumber>;  # Event number
+    fhir:timestamp @<SubscriptionStatus.notificationEvent.timestamp>?;  # The instant this event occurred
+    fhir:focus @<SubscriptionStatus.notificationEvent.focus> AND {fhir:link 
+    			@<Resource> }?;  # The focus of this event
+    fhir:additionalContext @<OneOrMore_SubscriptionStatus.notificationEvent.additionalContext_Resource>?;  # Additional context for this event
+}  
+
+#---------------------- Data Types -------------------
+
+#---------------------- Cardinality Types (OneOrMore) -------------------
+
+<OneOrMore_SubscriptionStatus.notificationEvent> CLOSED {
+    rdf:first @<SubscriptionStatus.notificationEvent>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_SubscriptionStatus.notificationEvent> 
+}
+
+<OneOrMore_SubscriptionStatus.error> CLOSED {
+    rdf:first @<SubscriptionStatus.error>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_SubscriptionStatus.error> 
+}
+
+<OneOrMore_SubscriptionStatus.notificationEvent.additionalContext_Resource> CLOSED {
+    rdf:first @<SubscriptionStatus.notificationEvent.additionalContext> AND {fhir:link 
+			@<Resource> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_SubscriptionStatus.notificationEvent.additionalContext_Resource> 
+}
+
+#---------------------- Reference Types -------------------
+
+#---------------------- Value Sets ------------------------

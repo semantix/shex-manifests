@@ -1,0 +1,67 @@
+﻿PREFIX fhir: <http://hl7.org/fhir/> 
+PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+BASE <http://hl7.org/fhir/shape/>
+
+
+start=@<MetadataResource> AND {fhir:nodeRole [fhir:treeRoot]}
+
+
+# Common Ancestor declaration for definitional resources
+<MetadataResource> EXTENDS @<CanonicalResource> CLOSED {   
+
+    a [fhir:MetadataResource];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:approvalDate @<MetadataResource.approvalDate>?;  # When the {{title}} was approved by 
+                                            # publisher 
+    fhir:lastReviewDate @<MetadataResource.lastReviewDate>?;  # When the {{title}} was last 
+                                            # reviewed 
+    fhir:effectivePeriod @<MetadataResource.effectivePeriod>?;  # When the {{title}} is expected to 
+                                            # be used 
+    fhir:topic @<OneOrMore_MetadataResource.topic>?;  # E.g. Education, Treatment, 
+                                            # Assessment, etc. 
+    fhir:author @<OneOrMore_MetadataResource.author>?;  # Who authored the {{title}}
+    fhir:editor @<OneOrMore_MetadataResource.editor>?;  # Who edited the {{title}}
+    fhir:reviewer @<OneOrMore_MetadataResource.reviewer>?;  # Who reviewed the {{title}}
+    fhir:endorser @<OneOrMore_MetadataResource.endorser>?;  # Who endorsed the {{title}}
+    fhir:relatedArtifact @<OneOrMore_MetadataResource.relatedArtifact>?;  # Additional documentation, 
+                                            # citations, etc. 
+}  
+
+#---------------------- Data Types -------------------
+
+#---------------------- Cardinality Types (OneOrMore) -------------------
+
+<OneOrMore_MetadataResource.topic> CLOSED {
+    rdf:first @<MetadataResource.topic>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_MetadataResource.topic> 
+}
+
+<OneOrMore_MetadataResource.author> CLOSED {
+    rdf:first @<MetadataResource.author>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_MetadataResource.author> 
+}
+
+<OneOrMore_MetadataResource.editor> CLOSED {
+    rdf:first @<MetadataResource.editor>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_MetadataResource.editor> 
+}
+
+<OneOrMore_MetadataResource.reviewer> CLOSED {
+    rdf:first @<MetadataResource.reviewer>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_MetadataResource.reviewer> 
+}
+
+<OneOrMore_MetadataResource.endorser> CLOSED {
+    rdf:first @<MetadataResource.endorser>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_MetadataResource.endorser> 
+}
+
+<OneOrMore_MetadataResource.relatedArtifact> CLOSED {
+    rdf:first @<MetadataResource.relatedArtifact>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_MetadataResource.relatedArtifact> 
+}
+
+#---------------------- Reference Types -------------------
+
+#---------------------- Value Sets ------------------------

@@ -1,0 +1,33 @@
+﻿PREFIX fhir: <http://hl7.org/fhir/> 
+PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+BASE <http://hl7.org/fhir/shape/>
+
+
+# Where server websocket end point is found
+<capabilitystatement2-websocket> EXTENDS @<Extension> CLOSED {   
+
+    a [fhir:capabilitystatement2-websocket];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v @<Extension.url> AND
+    	{fhir:value ["http://hl7.org/fhir/StructureDefinition/capabilitystatement2-websocket"]}; 
+    fhir:value (@<uri> )  AND { rdf:type IRI } ; 
+    ^fhir:extension { ^fhir:rest {a [fhir:CapabilityStatement2]}
+    		}
+}  
+
+#---------------------- Data Types -------------------
+
+# Primitive Type uri
+<uri> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:uri];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v @<uri.value>?;                   # Primitive value for uri
+}  
+
+#---------------------- Cardinality Types (OneOrMore) -------------------
+
+#---------------------- Reference Types -------------------
+
+#---------------------- Value Sets ------------------------

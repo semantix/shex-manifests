@@ -1,0 +1,83 @@
+﻿PREFIX fhir: <http://hl7.org/fhir/> 
+PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+BASE <http://hl7.org/fhir/shape/>
+
+
+start=@<Slot> AND {fhir:nodeRole [fhir:treeRoot]}
+
+
+# A slot of time on a schedule that may be available for booking appointments
+<Slot> EXTENDS @<DomainResource> CLOSED {   
+
+    a [fhir:Slot];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:identifier @<OneOrMore_Slot.identifier>?;  # External Ids for this item
+    fhir:serviceCategory @<OneOrMore_Slot.serviceCategory>?;  # A broad categorization of the 
+                                            # service that is to be performed 
+                                            # during this appointment 
+    fhir:serviceType @<OneOrMore_Slot.serviceType>?;  # The type of appointments that can 
+                                            # be booked into this slot (ideally 
+                                            # this would be an identifiable 
+                                            # service - which is at a location, 
+                                            # rather than the location itself). 
+                                            # If provided then this overrides 
+                                            # the value provided on the Schedule 
+                                            # resource 
+    fhir:specialty @<OneOrMore_Slot.specialty>?;  # The specialty of a practitioner 
+                                            # that would be required to perform 
+                                            # the service requested in this 
+                                            # appointment 
+    fhir:appointmentType @<OneOrMore_Slot.appointmentType>?;  # The style of appointment or 
+                                            # patient that may be booked in the 
+                                            # slot (not service type) 
+    fhir:schedule @<Slot.schedule> AND {fhir:link 
+    			@<Schedule> };  # The schedule resource that this 
+                                            # slot defines an interval of status 
+                                            # information 
+    fhir:status @<Slot.status>;             # busy | free | busy-unavailable | 
+                                            # busy-tentative | entered-in-error 
+    fhir:start @<Slot.start>;               # Date/Time that the slot is to begin
+    fhir:end @<Slot.end>;                   # Date/Time that the slot is to 
+                                            # conclude 
+    fhir:overbooked @<Slot.overbooked>?;    # This slot has already been 
+                                            # overbooked, appointments are 
+                                            # unlikely to be accepted for this 
+                                            # time 
+    fhir:comment @<Slot.comment>?;          # Comments on the slot to describe 
+                                            # any extended information. Such as 
+                                            # custom constraints on the slot 
+}  
+
+#---------------------- Data Types -------------------
+
+#---------------------- Cardinality Types (OneOrMore) -------------------
+
+<OneOrMore_Slot.identifier> CLOSED {
+    rdf:first @<Slot.identifier>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Slot.identifier> 
+}
+
+<OneOrMore_Slot.serviceCategory> CLOSED {
+    rdf:first @<Slot.serviceCategory>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Slot.serviceCategory> 
+}
+
+<OneOrMore_Slot.serviceType> CLOSED {
+    rdf:first @<Slot.serviceType>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Slot.serviceType> 
+}
+
+<OneOrMore_Slot.specialty> CLOSED {
+    rdf:first @<Slot.specialty>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Slot.specialty> 
+}
+
+<OneOrMore_Slot.appointmentType> CLOSED {
+    rdf:first @<Slot.appointmentType>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Slot.appointmentType> 
+}
+
+#---------------------- Reference Types -------------------
+
+#---------------------- Value Sets ------------------------

@@ -1,0 +1,26 @@
+﻿PREFIX fhir: <http://hl7.org/fhir/> 
+PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+BASE <http://hl7.org/fhir/shape/>
+
+
+# Patient Friendly Insructions
+<devicerequest-patientInstruction> EXTENDS @<Extension> CLOSED {   
+
+    a [fhir:devicerequest-patientInstruction];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:lang @<Extension>; 
+    fhir:content @<Extension>; 
+    fhir:v @<Extension.url> AND
+    	{fhir:value ["http://hl7.org/fhir/StructureDefinition/devicerequest-patientInstruction"]}; 
+    ^fhir:extension { a [fhir:DeviceRequest]
+    		}
+}  
+
+#---------------------- Data Types -------------------
+
+#---------------------- Cardinality Types (OneOrMore) -------------------
+
+#---------------------- Reference Types -------------------
+
+#---------------------- Value Sets ------------------------

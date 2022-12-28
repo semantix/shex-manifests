@@ -1,0 +1,34 @@
+﻿PREFIX fhir: <http://hl7.org/fhir/> 
+PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+BASE <http://hl7.org/fhir/shape/>
+
+
+# Max size in MB
+<maxSize> EXTENDS @<Extension> CLOSED {   
+
+    a [fhir:maxSize];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v @<Extension.url> AND
+    	{fhir:value ["http://hl7.org/fhir/StructureDefinition/maxSize"]}; 
+    fhir:value (@<decimal> )  AND { rdf:type IRI } ; 
+    ^fhir:extension { ^fhir:item {a [fhir:Questionnaire]} OR 
+    				a [fhir:ElementDefinition]
+    		}
+}  
+
+#---------------------- Data Types -------------------
+
+# Primitive Type decimal
+<decimal> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:decimal];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v @<decimal.value>?;               # Primitive value for decimal
+}  
+
+#---------------------- Cardinality Types (OneOrMore) -------------------
+
+#---------------------- Reference Types -------------------
+
+#---------------------- Value Sets ------------------------

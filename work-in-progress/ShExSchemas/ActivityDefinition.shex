@@ -1,0 +1,997 @@
+﻿PREFIX fhir: <http://hl7.org/fhir/> 
+PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+BASE <http://hl7.org/fhir/shape/>
+
+
+start=@<ActivityDefinition> AND {fhir:nodeRole [fhir:treeRoot]}
+
+
+# The definition of a specific activity to be taken, independent of any particular patient or context
+<ActivityDefinition> EXTENDS @<MetadataResource> CLOSED {   
+
+    a [fhir:ActivityDefinition];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:url @<uri>?;                       # Canonical identifier for this 
+                                            # activity definition, represented 
+                                            # as a URI (globally unique) 
+    fhir:identifier @<OneOrMore_Identifier>?;  # Additional identifier for the 
+                                            # activity definition 
+    fhir:version @<string>?;                # Business version of the activity 
+                                            # definition 
+    fhir:name @<string>?;                   # Name for this activity definition 
+                                            # (computer friendly) 
+    fhir:title @<string>?;                  # Name for this activity definition 
+                                            # (human friendly) 
+    fhir:subtitle @<string>?;               # Subordinate title of the activity 
+                                            # definition 
+    fhir:status @<code> AND
+    	{fhir:value @fhirvs:publication-status};  # draft | active | retired | unknown
+    fhir:experimental @<boolean>?;          # For testing purposes, not real 
+                                            # usage 
+    fhir:subject (@<CodeableConcept>  OR 
+    			(@<Reference>  AND {fhir:link @<Group> })  OR 
+    			@<canonical> )  AND { rdf:type IRI } ?;  # Type of individual the activity 
+                                            # definition is intended for 
+    fhir:date @<dateTime>?;                 # Date last changed
+    fhir:publisher @<string>?;              # Name of the publisher 
+                                            # (organization or individual) 
+    fhir:contact @<OneOrMore_ContactDetail>?;  # Contact details for the publisher
+    fhir:description @<markdown>?;          # Natural language description of 
+                                            # the activity definition 
+    fhir:useContext @<OneOrMore_UsageContext>?;  # The context that the content is 
+                                            # intended to support 
+    fhir:jurisdiction @<OneOrMore_CodeableConcept>?;  # Intended jurisdiction for activity 
+                                            # definition (if applicable) 
+    fhir:purpose @<markdown>?;              # Why this activity definition is 
+                                            # defined 
+    fhir:usage @<string>?;                  # Describes the clinical usage of 
+                                            # the activity definition 
+    fhir:copyright @<markdown>?;            # Use and/or publishing restrictions
+    fhir:approvalDate @<date>?;             # When the activity definition was 
+                                            # approved by publisher 
+    fhir:lastReviewDate @<date>?;           # When the activity definition was 
+                                            # last reviewed 
+    fhir:effectivePeriod @<Period>?;        # When the activity definition is 
+                                            # expected to be used 
+    fhir:topic @<OneOrMore_CodeableConcept>?;  # E.g. Education, Treatment, 
+                                            # Assessment, etc. 
+    fhir:author @<OneOrMore_ContactDetail>?;  # Who authored the content
+    fhir:editor @<OneOrMore_ContactDetail>?;  # Who edited the content
+    fhir:reviewer @<OneOrMore_ContactDetail>?;  # Who reviewed the content
+    fhir:endorser @<OneOrMore_ContactDetail>?;  # Who endorsed the content
+    fhir:relatedArtifact @<OneOrMore_RelatedArtifact>?;  # Additional documentation, 
+                                            # citations, etc. 
+    fhir:library @<OneOrMore_canonical>?;   # Logic used by the activity 
+                                            # definition 
+    fhir:kind @<code> AND
+    	{fhir:value @fhirvs:request-resource-types}?;  # Kind of resource
+    fhir:profile @<canonical>?;             # What profile the resource needs to 
+                                            # conform to 
+    fhir:code @<CodeableConcept>?;          # Detail type of activity
+    fhir:intent @<code> AND
+    	{fhir:value @fhirvs:request-intent}?;  # proposal | plan | directive | 
+                                            # order | original-order | 
+                                            # reflex-order | filler-order | 
+                                            # instance-order | option 
+    fhir:priority @<code> AND
+    	{fhir:value @fhirvs:request-priority}?;  # routine | urgent | asap | stat
+    fhir:doNotPerform @<boolean>?;          # True if the activity should not be 
+                                            # performed 
+    fhir:timing (@<Timing>  OR 
+    			@<Age>  OR 
+    			@<Range>  OR 
+    			@<Duration> )  AND { rdf:type IRI } ?;  # When activity is to occur
+    fhir:location @<CodeableReference>?;    # Where it should happen
+    fhir:participant @<OneOrMore_ActivityDefinition.participant>?;  # Who should participate in the 
+                                            # action 
+    fhir:product ((@<Reference>  AND {fhir:link @<Medication> OR 
+    			 @<Substance> OR 
+    			 @<Ingredient> })  OR 
+    			@<CodeableConcept> )  AND { rdf:type IRI } ?;  # What's administered/supplied
+    fhir:quantity @<SimpleQuantity>?;       # How much is 
+                                            # administered/consumed/supplied 
+    fhir:dosage @<OneOrMore_Dosage>?;       # Detailed dosage instructions
+    fhir:bodySite @<OneOrMore_CodeableConcept>?;  # What part of body to perform on
+    fhir:specimenRequirement @<OneOrMore_Reference_SpecimenDefinition>?;  # What specimens are required to 
+                                            # perform this action 
+    fhir:observationRequirement @<OneOrMore_Reference_ObservationDefinition>?;  # What observations are required to 
+                                            # perform this action 
+    fhir:observationResultRequirement @<OneOrMore_Reference_ObservationDefinition>?;  # What observations must be produced 
+                                            # by this action 
+    fhir:transform @<canonical>?;           # Transform to apply the template
+    fhir:dynamicValue @<OneOrMore_ActivityDefinition.dynamicValue>?;  # Dynamic aspects of the definition
+} AND (
+
+# Constraint: UniqueKey:cnl-0
+# Human readable:Name should be usable as an identifier for the module by machine processing applications such as code generation
+# XPath:not(exists(f:name/@value)) or matches(f:name/@value, '[A-Z]([A-Za-z0-9_]){0,254}')
+# Constraint:name.exists() implies name.matches('[A-Z]([A-Za-z0-9_]){0,254}')
+# ShEx:
+
+{ fhir:name . } SHEX_Implies_SHEX { fhir:name SHEX_matches_SHEX ('[A-Z]([A-Za-z0-9_]){0,254}') }
+
+)
+ 
+
+# Who should participate in the action
+<ActivityDefinition.participant> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:type @<code> AND
+    	{fhir:value @fhirvs:action-participant-type}?;  # careteam | device | group | 
+                                            # healthcareservice | location | 
+                                            # organization | patient | 
+                                            # practitioner | practitionerrole | 
+                                            # relatedperson 
+    fhir:typeReference @<Reference> AND {fhir:link 
+    			@<CareTeam> OR 
+    			@<Device> OR 
+    			@<Group> OR 
+    			@<HealthcareService> OR 
+    			@<Location> OR 
+    			@<Organization> OR 
+    			@<Patient> OR 
+    			@<Practitioner> OR 
+    			@<PractitionerRole> OR 
+    			@<RelatedPerson> }?;  # Who or what can participate
+    fhir:role @<CodeableConcept>?;          # E.g. Nurse, Surgeon, Parent, etc.
+    fhir:function @<CodeableConcept>?;      # E.g. Author, Reviewer, Witness, 
+                                            # etc. 
+}  
+
+# Dynamic aspects of the definition
+<ActivityDefinition.dynamicValue> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:path @<string>;                    # The path to the element to be set 
+                                            # dynamically 
+    fhir:expression @<Expression>;          # An expression that provides the 
+                                            # dynamic value for the 
+                                            # customization 
+}  
+
+#---------------------- Data Types -------------------
+
+# Primitive Type dateTime
+<dateTime> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:dateTime];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v xsd:gYear OR xsd:gYearMonth OR xsd:date OR xsd:dateTime?;  # Primitive value for dateTime
+}  
+
+# Primitive Type date
+<date> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:date];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v xsd:gYear OR xsd:gYearMonth OR xsd:date?;  # Primitive value for date
+}  
+
+# Primitive Type code
+<code> EXTENDS @<string> CLOSED {   
+
+    a [fhir:code];
+    fhir:nodeRole [fhir:treeRoot]?;
+}  
+
+# Primitive Type string
+<string> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:string];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v xsd:string MAXLENGTH 1048576?;   # Primitive value for string
+}  
+
+# A reference from one resource to another
+<Reference> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Reference];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:link IRI?;
+    fhir:reference @<string>?;              # Literal reference, Relative, 
+                                            # internal or absolute URL 
+    fhir:type @<uri>?;                      # Type the reference refers to (e.g. 
+                                            # "Patient") 
+    fhir:identifier @<Identifier>?;         # Logical reference, when literal 
+                                            # reference is not known 
+    fhir:display @<string>?;                # Text alternative for the resource
+} AND (
+
+# Constraint: UniqueKey:ref-1
+# Human readable:SHALL have a contained resource if a local reference is provided
+# XPath:not(starts-with(f:reference/@value, '#')) or exists(ancestor::*[self::f:entry or self::f:parameter]/f:resource/f:*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')]|/*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')])
+# Constraint:reference.startsWith('#').not() or (reference.substring(1).trace('url') in %rootResource.contained.id.trace('ids')) or (reference='#' and %rootResource!=%resource)
+# ShEx:
+
+ NOT { fhir:reference  SHEX_startsWith_SHEX ('#') } OR ({ fhir:reference SHEX_substring_SHEX (1) SHEX_trace_SHEX ('url') } { fhir:v ['%rootResource'.contained.id SHEX_trace_SHEX ('ids')] } ) OR (({ fhir:reference { fhir:v ['#'] }  }) AND ('%rootResource' { fhir:v [ . -'%resource'] }))
+
+)
+ 
+
+# A fixed quantity (no comparator)
+<SimpleQuantity> EXTENDS @<Quantity> CLOSED {   
+
+    a [fhir:SimpleQuantity];
+    fhir:nodeRole [fhir:treeRoot]?;
+} AND (
+
+# Constraint: UniqueKey:sqty-1
+# Human readable:The comparator is not used on a SimpleQuantity
+# XPath:not(exists(f:comparator))
+# Constraint:comparator.empty()
+# ShEx:
+
+ NOT { fhir:comparator {fhir:v .} } 
+
+)
+ 
+
+# Time range defined by start and end date/time
+<Period> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Period];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:start @<dateTime>?;                # Starting time with inclusive 
+                                            # boundary 
+    fhir:end @<dateTime>?;                  # End time with inclusive boundary, 
+                                            # if not ongoing 
+} AND (
+
+# Constraint: UniqueKey:per-1
+# Human readable:If present, start SHALL have a lower or equal value than end
+# XPath:not(exists(f:start/@value)) or not(exists(f:end/@value)) or (xs:dateTime(f:start/@value) <= xs:dateTime(f:end/@value))
+# Constraint:start.hasValue().not() or end.hasValue().not() or (start <= end)
+# ShEx:
+
+ NOT { fhir:start  . } OR  NOT { fhir:end  . } OR ({ fhir:start { fhir:v MaxInclusive { fhir:end } }  })
+
+)
+ 
+
+# A length of time
+<Duration> EXTENDS @<Quantity> CLOSED {   
+
+    a [fhir:Duration];
+    fhir:nodeRole [fhir:treeRoot]?;
+} AND (
+
+# Constraint: UniqueKey:drt-1
+# Human readable:There SHALL be a code if there is a value and it SHALL be an expression of time.  If system is present, it SHALL be UCUM.
+# XPath:(f:code or not(f:value)) and (not(exists(f:system)) or f:system/@value='http://unitsofmeasure.org')
+# Constraint:code.exists() implies ((system = %ucum) and value.exists())
+# ShEx:
+
+{ fhir:code . } SHEX_Implies_SHEX (({ fhir:system { fhir:v ['%ucum'] }  }) AND { fhir:value . })
+
+)
+ 
+
+# Primitive Type canonical
+<canonical> EXTENDS @<uri> CLOSED {   
+
+    a [fhir:canonical];
+    fhir:nodeRole [fhir:treeRoot]?;
+}  
+
+# Related artifacts for a knowledge resource
+<RelatedArtifact> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:RelatedArtifact];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:type @<code> AND
+    	{fhir:value @fhirvs:related-artifact-type};  # documentation | justification | 
+                                            # citation | predecessor | successor 
+                                            # | derived-from | depends-on | 
+                                            # composed-of | part-of | amends | 
+                                            # amended-with | appends | 
+                                            # appended-with | cites | cited-by | 
+                                            # comments-on | comment-in | 
+                                            # contains | contained-in | corrects 
+                                            # | correction-in | replaces | 
+                                            # replaced-with | retracts | 
+                                            # retracted-by | signs | similar-to 
+                                            # | supports | supported-with | 
+                                            # transforms | transformed-into | 
+                                            # transformed-with 
+    fhir:classifier @<OneOrMore_CodeableConcept>?;  # Additional classifiers
+    fhir:label @<string>?;                  # Short label
+    fhir:display @<string>?;                # Brief description of the related 
+                                            # artifact 
+    fhir:citation @<markdown>?;             # Bibliographic citation for the 
+                                            # artifact 
+    fhir:document @<Attachment>?;           # What document is being referenced
+    fhir:resource @<canonical>?;            # What artifact is being referenced
+    fhir:resourceReference @<Reference> AND {fhir:link 
+    			@<Resource> }?;  # What artifact, if not a 
+                                            # conformance resource 
+}  
+
+# Set of values bounded by low and high
+<Range> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Range];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:low @<SimpleQuantity>?;            # Low limit
+    fhir:high @<SimpleQuantity>?;           # High limit
+} AND (
+
+# Constraint: UniqueKey:rng-2
+# Human readable:If present, low SHALL have a lower value than high
+# XPath:not(exists(f:low/f:value/@value)) or not(exists(f:high/f:value/@value)) or (number(f:low/f:value/@value) <= number(f:high/f:value/@value))
+# Constraint:low.value.empty() or high.value.empty() or (low <= high)
+# ShEx:
+
+ NOT { fhir:low fhir:value {fhir:v .} }  OR  NOT { fhir:high fhir:value {fhir:v .} }  OR ({ fhir:low { fhir:v MaxInclusive { fhir:high } }  })
+
+)
+ 
+
+# How the medication is/was taken or should be taken
+<Dosage> EXTENDS @<BackboneType> CLOSED {   
+
+    a [fhir:Dosage];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:sequence @<integer>?;              # The order of the dosage 
+                                            # instructions 
+    fhir:text @<string>?;                   # Free text dosage instructions e.g. 
+                                            # SIG 
+    fhir:additionalInstruction @<OneOrMore_CodeableConcept>?;  # Supplemental instruction or 
+                                            # warnings to the patient - e.g. 
+                                            # "with meals", "may cause 
+                                            # drowsiness" 
+    fhir:patientInstruction @<string>?;     # Patient or consumer oriented 
+                                            # instructions 
+    fhir:timing @<Timing>?;                 # When medication should be 
+                                            # administered 
+    fhir:asNeeded @<boolean>?;              # Take "as needed"
+    fhir:asNeededFor @<OneOrMore_CodeableConcept>?;  # Take "as needed" (for x)
+    fhir:site @<CodeableConcept>?;          # Body site to administer to
+    fhir:route @<CodeableConcept>?;         # How drug should enter body
+    fhir:method @<CodeableConcept>?;        # Technique for administering 
+                                            # medication 
+    fhir:doseAndRate @<OneOrMore_Dosage.doseAndRate>?;  # Amount of medication administered, 
+                                            # to be administered or typical 
+                                            # amount to be administered 
+    fhir:maxDosePerPeriod @<OneOrMore_Ratio>?;  # Upper limit on medication per unit 
+                                            # of time 
+    fhir:maxDosePerAdministration @<SimpleQuantity>?;  # Upper limit on medication per 
+                                            # administration 
+    fhir:maxDosePerLifetime @<SimpleQuantity>?;  # Upper limit on medication per 
+                                            # lifetime of the patient 
+} AND (
+
+# Constraint: UniqueKey:dosage-1
+# Human readable:AsNeededFor can only be set if AsNeeded is empty or true
+# XPath:not(exists(f:asneededfor)) or (not(exists(f:asneeded)) or (f:asneeded/@value = 'true')
+# Constraint:asNeededFor.empty() or asNeeded.empty() or asNeeded
+# ShEx:
+
+ NOT { fhir:asNeededFor {fhir:v .} }  OR  NOT { fhir:asNeeded {fhir:v .} }  OR { fhir:asNeeded }
+
+)
+ 
+
+# Primitive Type uri
+<uri> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:uri];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v xsd:anyURI?;                     # Primitive value for uri
+}  
+
+# Contact information
+<ContactDetail> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:ContactDetail];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:name @<string>?;                   # Name of an individual to contact
+    fhir:telecom @<OneOrMore_ContactPoint>?;  # Contact details for individual or 
+                                            # organization 
+}  
+
+# An identifier intended for computation
+<Identifier> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Identifier];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:use @<code> AND
+    	{fhir:value @fhirvs:identifier-use}?;  # usual | official | temp | 
+                                            # secondary | old (If known) 
+    fhir:type @<CodeableConcept>?;          # Description of identifier
+    fhir:system @<uri>?;                    # The namespace for the identifier 
+                                            # value 
+    fhir:value @<string>?;                  # The value that is unique
+    fhir:period @<Period>?;                 # Time period when id is/was valid 
+                                            # for use 
+    fhir:assigner @<Reference> AND {fhir:link 
+    			@<Organization> }?;  # Organization that issued id (may 
+                                            # be just text) 
+}  
+
+# Primitive Type boolean
+<boolean> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:boolean];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v xsd:boolean?;                    # Primitive value for boolean
+}  
+
+# Describes the context of use for a conformance or knowledge resource
+<UsageContext> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:UsageContext];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:code @<Coding>;                    # Type of context being specified
+    fhir:value (@<CodeableConcept>  OR 
+    			@<Quantity>  OR 
+    			@<Range>  OR 
+    			(@<Reference>  AND {fhir:link @<PlanDefinition> OR 
+    			 @<ResearchStudy> OR 
+    			 @<InsurancePlan> OR 
+    			 @<HealthcareService> OR 
+    			 @<Group> OR 
+    			 @<Location> OR 
+    			 @<Organization> }) )  AND { rdf:type IRI } ;  # Value that defines the context
+}  
+
+# An expression that can be used to generate a value
+<Expression> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Expression];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:description @<string>?;            # Natural language description of 
+                                            # the condition 
+    fhir:name @<id>?;                       # Short name assigned to expression 
+                                            # for reuse 
+    fhir:language @<code>;                  # text/cql | text/fhirpath | 
+                                            # application/x-fhir-query | etc. 
+    fhir:expression @<string>?;             # Expression in specified language
+    fhir:reference @<uri>?;                 # Where the expression is found
+} AND (
+
+# Constraint: UniqueKey:exp-1
+# Human readable:An expression or a reference must be provided
+# XPath:exists(f:expression) or exists(f:reference)
+# Constraint:expression.exists() or reference.exists()
+# ShEx:
+
+{ fhir:expression . } OR { fhir:reference . }
+
+)
+ 
+
+# Reference to a resource or a concept
+<CodeableReference> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:CodeableReference];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:concept @<CodeableConcept>?;       # Reference to a concept (by class)
+    fhir:reference @<Reference>?;           # Reference to a resource (by 
+                                            # instance) 
+}  
+
+# Primitive Type markdown
+<markdown> EXTENDS @<string> CLOSED {   
+
+    a [fhir:markdown];
+    fhir:nodeRole [fhir:treeRoot]?;
+}  
+
+# A timing schedule that specifies an event that may occur multiple times
+<Timing> EXTENDS @<BackboneType> CLOSED {   
+
+    a [fhir:Timing];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:event @<OneOrMore_dateTime>?;      # When the event occurs
+    fhir:repeat @<Timing.repeat>?;          # When the event is to occur
+    fhir:code @<CodeableConcept>?;          # C | BID | TID | QID | AM | PM | QD 
+                                            # | QOD | + 
+} AND (
+
+# Constraint: UniqueKey:tim-9
+# Human readable:If there's an offset, there must be a when (and not C, CM, CD, CV)
+# XPath:not(exists(f:offset)) or exists(f:when)
+# Constraint:offset.empty() or (when.exists() and ((when in ('C' | 'CM' | 'CD' | 'CV')).not()))
+# ShEx:
+
+ NOT { fhir:offset {fhir:v .} }  OR ({ fhir:when . } AND ( NOT { { fhir:when { fhir:v [('C' | 'CM' | 'CD' | 'CV')] }  } }))
+
+) AND (
+
+# Constraint: UniqueKey:tim-5
+# Human readable:period SHALL be a non-negative value
+# XPath:f:period/@value >= 0 or not(f:period/@value)
+# Constraint:period.exists() implies period >= 0
+# ShEx:
+
+{ fhir:period . } SHEX_Implies_SHEX ({ fhir:period { fhir:v MinInclusive 0 }  })
+
+) AND (
+
+# Constraint: UniqueKey:tim-6
+# Human readable:If there's a periodMax, there must be a period
+# XPath:not(exists(f:periodMax)) or exists(f:period)
+# Constraint:periodMax.empty() or period.exists()
+# ShEx:
+
+ NOT { fhir:periodMax {fhir:v .} }  OR { fhir:period . }
+
+) AND (
+
+# Constraint: UniqueKey:tim-7
+# Human readable:If there's a durationMax, there must be a duration
+# XPath:not(exists(f:durationMax)) or exists(f:duration)
+# Constraint:durationMax.empty() or duration.exists()
+# ShEx:
+
+ NOT { fhir:durationMax {fhir:v .} }  OR { fhir:duration . }
+
+) AND (
+
+# Constraint: UniqueKey:tim-8
+# Human readable:If there's a countMax, there must be a count
+# XPath:not(exists(f:countMax)) or exists(f:count)
+# Constraint:countMax.empty() or count.exists()
+# ShEx:
+
+ NOT { fhir:countMax {fhir:v .} }  OR { fhir:count . }
+
+) AND (
+
+# Constraint: UniqueKey:tim-1
+# Human readable:if there's a duration, there needs to be duration units
+# XPath:not(exists(f:duration)) or exists(f:durationUnit)
+# Constraint:duration.empty() or durationUnit.exists()
+# ShEx:
+
+ NOT { fhir:duration {fhir:v .} }  OR { fhir:durationUnit . }
+
+) AND (
+
+# Constraint: UniqueKey:tim-10
+# Human readable:If there's a timeOfDay, there cannot be a when, or vice versa
+# XPath:not(exists(f:timeOfDay)) or not(exists(f:when))
+# Constraint:timeOfDay.empty() or when.empty()
+# ShEx:
+
+ NOT { fhir:timeOfDay {fhir:v .} }  OR  NOT { fhir:when {fhir:v .} } 
+
+) AND (
+
+# Constraint: UniqueKey:tim-2
+# Human readable:if there's a period, there needs to be period units
+# XPath:not(exists(f:period)) or exists(f:periodUnit)
+# Constraint:period.empty() or periodUnit.exists()
+# ShEx:
+
+ NOT { fhir:period {fhir:v .} }  OR { fhir:periodUnit . }
+
+) AND (
+
+# Constraint: UniqueKey:tim-4
+# Human readable:duration SHALL be a non-negative value
+# XPath:f:duration/@value >= 0 or not(f:duration/@value)
+# Constraint:duration.exists() implies duration >= 0
+# ShEx:
+
+{ fhir:duration . } SHEX_Implies_SHEX ({ fhir:duration { fhir:v MinInclusive 0 }  })
+
+)
+ 
+
+# A duration of time during which an organism (or a process) has existed
+<Age> EXTENDS @<Quantity> CLOSED {   
+
+    a [fhir:Age];
+    fhir:nodeRole [fhir:treeRoot]?;
+} AND (
+
+# Constraint: UniqueKey:age-1
+# Human readable:There SHALL be a code if there is a value and it SHALL be an expression of time.  If system is present, it SHALL be UCUM.  If value is present, it SHALL be positive.
+# XPath:(f:code or not(f:value)) and (not(exists(f:system)) or f:system/@value='http://unitsofmeasure.org') and (not(f:value/@value) or f:value/@value >=0)
+# Constraint:(code.exists() or value.empty()) and (system.empty() or system = %ucum) and (value.empty() or value.hasValue().not() or value > 0)
+# ShEx:
+
+({ fhir:code . } OR  NOT { fhir:value {fhir:v .} } ) AND ( NOT { fhir:system {fhir:v .} }  OR ({ fhir:system { fhir:v ['%ucum'] }  })) AND ( NOT { fhir:value {fhir:v .} }  OR  NOT { fhir:value  . } OR ({ fhir:value { fhir:v MinExclusive 0 }  }))
+
+)
+ 
+
+# Concept - reference to a terminology or just  text
+<CodeableConcept> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:CodeableConcept];
+    fhir:nodeRole [fhir:treeRoot]?;
+    a NONLITERAL*;
+    fhir:coding @<OneOrMore_Coding>?;       # Code defined by a terminology 
+                                            # system 
+    fhir:text @<string>?;                   # Plain text representation of the 
+                                            # concept 
+}  
+
+# Content in a format defined elsewhere
+<Attachment> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Attachment];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:contentType @<code> AND
+    	{fhir:value @fhirvs:mimetypes}?;  # Mime type of the content, with 
+                                            # charset etc. 
+    fhir:language @<code>?;                 # Human language of the content 
+                                            # (BCP-47) 
+    fhir:data @<base64Binary>?;             # Data inline, base64ed
+    fhir:url @<url>?;                       # Uri where the data can be found
+    fhir:size @<integer64>?;                # Number of bytes of content (if url 
+                                            # provided) 
+    fhir:hash @<base64Binary>?;             # Hash of the data (sha-1, base64ed)
+    fhir:title @<string>?;                  # Label to display in place of the 
+                                            # data 
+    fhir:creation @<dateTime>?;             # Date attachment was first created
+    fhir:height @<positiveInt>?;            # Height of the image in pixels 
+                                            # (photo/video) 
+    fhir:width @<positiveInt>?;             # Width of the image in pixels 
+                                            # (photo/video) 
+    fhir:frames @<positiveInt>?;            # Number of frames if > 1 (photo)
+    fhir:duration @<decimal>?;              # Length in seconds (audio / video)
+    fhir:pages @<positiveInt>?;             # Number of printed pages
+} AND (
+
+# Constraint: UniqueKey:att-1
+# Human readable:If the Attachment has data, it SHALL have a contentType
+# XPath:not(exists(f:data)) or exists(f:contentType)
+# Constraint:data.empty() or contentType.exists()
+# ShEx:
+
+ NOT { fhir:data {fhir:v .} }  OR { fhir:contentType . }
+
+)
+ 
+
+# Primitive Type integer
+<integer> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:integer];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v xsd:int MININCLUSIVE -2147483648 MAXINCLUSIVE 2147483647?;  # Primitive value for integer
+}  
+
+# Details of a Technology mediated contact point (phone, fax, email, etc.)
+<ContactPoint> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:ContactPoint];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:system @<code> AND
+    	{fhir:value @fhirvs:contact-point-system}?;  # phone | fax | email | pager | url 
+                                            # | sms | other 
+    fhir:value @<string>?;                  # The actual contact point details
+    fhir:use @<code> AND
+    	{fhir:value @fhirvs:contact-point-use}?;  # home | work | temp | old | mobile 
+                                            # - purpose of this contact point 
+    fhir:rank @<positiveInt>?;              # Specify preferred order of use (1 
+                                            # = highest) 
+    fhir:period @<Period>?;                 # Time period when the contact point 
+                                            # was/is in use 
+} AND (
+
+# Constraint: UniqueKey:cpt-2
+# Human readable:A system is required if a value is provided.
+# XPath:not(exists(f:value)) or exists(f:system)
+# Constraint:value.empty() or system.exists()
+# ShEx:
+
+ NOT { fhir:value {fhir:v .} }  OR { fhir:system . }
+
+)
+ 
+
+# A reference to a code defined by a terminology system
+<Coding> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Coding];
+    fhir:nodeRole [fhir:treeRoot]?;
+    a NONLITERAL?;
+    fhir:system @<uri>?;                    # Identity of the terminology system
+    fhir:version @<string>?;                # Version of the system - if relevant
+    fhir:code @<code>?;                     # Symbol in syntax defined by the 
+                                            # system 
+    fhir:display @<string>?;                # Representation defined by the 
+                                            # system 
+    fhir:userSelected @<boolean>?;          # If this coding was chosen directly 
+                                            # by the user 
+}  
+
+# A ratio of two Quantity values - a numerator and a denominator
+<Ratio> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Ratio];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:numerator @<Quantity>?;            # Numerator value
+    fhir:denominator @<SimpleQuantity>?;    # Denominator value
+} AND (
+
+# Constraint: UniqueKey:rat-1
+# Human readable:Numerator and denominator SHALL both be present, or both are absent. If both are absent, there SHALL be some extension present
+# XPath:(count(f:numerator) = count(f:denominator)) and ((count(f:numerator) > 0) or (count(f:extension) > 0))
+# Constraint:(numerator.empty() xor denominator.exists()) and (numerator.exists() or extension.exists())
+# ShEx:
+
+( NOT { fhir:numerator {fhir:v .} }  SHEX_Xor_SHEX { fhir:denominator . }) AND ({ fhir:numerator . } OR { fhir:extension . })
+
+)
+ 
+
+# Primitive Type id
+<id> EXTENDS @<string> CLOSED {   
+
+    a [fhir:id];
+    fhir:nodeRole [fhir:treeRoot]?;
+}  
+
+# A measured or measurable amount
+<Quantity> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Quantity];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:value @<decimal>?;                 # Numerical value (with implicit 
+                                            # precision) 
+    fhir:comparator @<code> AND
+    	{fhir:value @fhirvs:quantity-comparator}?;  # < | <= | >= | > | ad - how to 
+                                            # understand the value 
+    fhir:unit @<string>?;                   # Unit representation
+    fhir:system @<uri>?;                    # System that defines coded unit form
+    fhir:code @<code>?;                     # Coded form of the unit
+} AND (
+
+# Constraint: UniqueKey:qty-3
+# Human readable:If a code for the unit is present, the system SHALL also be present
+# XPath:not(exists(f:code)) or exists(f:system)
+# Constraint:code.empty() or system.exists()
+# ShEx:
+
+ NOT { fhir:code {fhir:v .} }  OR { fhir:system . }
+
+)
+ 
+
+# Primitive Type positiveInt
+<positiveInt> EXTENDS @<integer> CLOSED {   
+
+    a [fhir:positiveInt];
+    fhir:nodeRole [fhir:treeRoot]?;
+}  
+
+# Primitive Type integer64
+<integer64> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:integer64];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v xsd:long MININCLUSIVE -9223372036854775808 MAXINCLUSIVE 9223372036854775807?;  # Primitive value for integer64
+}  
+
+# Primitive Type url
+<url> EXTENDS @<uri> CLOSED {   
+
+    a [fhir:url];
+    fhir:nodeRole [fhir:treeRoot]?;
+}  
+
+# Primitive Type base64Binary
+<base64Binary> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:base64Binary];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v xsd:base64Binary?;               # Primitive value for base64Binary
+}  
+
+# Primitive Type decimal
+<decimal> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:decimal];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v xsd:decimal OR xsd:double?;      # Primitive value for decimal
+}  
+
+# Amount of medication administered, to be administered or typical amount to be administered
+<Dosage.doseAndRate> EXTENDS @<Element> CLOSED {   
+    fhir:type @<CodeableConcept>?;          # The kind of dose or rate specified
+    fhir:dose (@<Range>  OR 
+    			@<SimpleQuantity> )  AND { rdf:type IRI } ?;  # Amount of medication per dose
+    fhir:rate (@<Ratio>  OR 
+    			@<Range>  OR 
+    			@<SimpleQuantity> )  AND { rdf:type IRI } ?;  # Amount of medication per unit of 
+                                            # time 
+}  
+
+# When the event is to occur
+<Timing.repeat> EXTENDS @<Element> CLOSED {   
+    fhir:bounds (@<Duration>  OR 
+    			@<Range>  OR 
+    			@<Period> )  AND { rdf:type IRI } ?;  # Length/Range of lengths, or (Start 
+                                            # and/or end) limits 
+    fhir:count @<positiveInt>?;             # Number of times to repeat
+    fhir:countMax @<positiveInt>?;          # Maximum number of times to repeat
+    fhir:duration @<decimal>?;              # How long when it happens
+    fhir:durationMax @<decimal>?;           # How long when it happens (Max)
+    fhir:durationUnit @<code> AND
+    	{fhir:value @fhirvs:units-of-time}?;  # s | min | h | d | wk | mo | a - 
+                                            # unit of time (UCUM) 
+    fhir:frequency @<positiveInt>?;         # Indicates the number of 
+                                            # repetitions that should occur 
+                                            # within a period. I.e. Event occurs 
+                                            # frequency times per period 
+    fhir:frequencyMax @<positiveInt>?;      # Event occurs up to frequencyMax 
+                                            # times per period 
+    fhir:period @<decimal>?;                # The duration to which the 
+                                            # frequency applies. I.e. Event 
+                                            # occurs frequency times per period 
+    fhir:periodMax @<decimal>?;             # Upper limit of period (3-4 hours)
+    fhir:periodUnit @<code> AND
+    	{fhir:value @fhirvs:units-of-time}?;  # s | min | h | d | wk | mo | a - 
+                                            # unit of time (UCUM) 
+    fhir:dayOfWeek @<OneOrMore_code> AND
+    	{fhir:value @fhirvs:days-of-week}?;  # mon | tue | wed | thu | fri | sat 
+                                            # | sun 
+    fhir:timeOfDay @<OneOrMore_time>?;      # Time of day for action
+    fhir:when @<OneOrMore_code> AND
+    	{fhir:value @fhirvs:event-timing}?;  # Code for time period of occurrence
+    fhir:offset @<unsignedInt>?;            # Minutes from event (before or 
+                                            # after) 
+} AND (
+
+
+
+)
+ 
+
+# Primitive Type unsignedInt
+<unsignedInt> EXTENDS @<integer> CLOSED {   
+
+    a [fhir:unsignedInt];
+    fhir:nodeRole [fhir:treeRoot]?;
+}  
+
+# Primitive Type time
+<time> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:time];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v xsd:time?;                       # Primitive value for time
+}  
+
+#---------------------- Cardinality Types (OneOrMore) -------------------
+
+<OneOrMore_Identifier> CLOSED {
+    rdf:first @<Identifier>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Identifier> 
+}
+
+<OneOrMore_ContactDetail> CLOSED {
+    rdf:first @<ContactDetail>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ContactDetail> 
+}
+
+<OneOrMore_UsageContext> CLOSED {
+    rdf:first @<UsageContext>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_UsageContext> 
+}
+
+<OneOrMore_CodeableConcept> CLOSED {
+    rdf:first @<CodeableConcept>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_CodeableConcept> 
+}
+
+<OneOrMore_RelatedArtifact> CLOSED {
+    rdf:first @<RelatedArtifact>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_RelatedArtifact> 
+}
+
+<OneOrMore_canonical> CLOSED {
+    rdf:first @<canonical>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_canonical> 
+}
+
+<OneOrMore_ActivityDefinition.participant> CLOSED {
+    rdf:first @<ActivityDefinition.participant>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ActivityDefinition.participant> 
+}
+
+<OneOrMore_Dosage> CLOSED {
+    rdf:first @<Dosage>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Dosage> 
+}
+
+<OneOrMore_Reference_SpecimenDefinition> CLOSED {
+    rdf:first @<Reference> AND {fhir:link 
+			@<SpecimenDefinition> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Reference_SpecimenDefinition> 
+}
+
+<OneOrMore_Reference_ObservationDefinition> CLOSED {
+    rdf:first @<Reference> AND {fhir:link 
+			@<ObservationDefinition> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Reference_ObservationDefinition> 
+}
+
+<OneOrMore_ActivityDefinition.dynamicValue> CLOSED {
+    rdf:first @<ActivityDefinition.dynamicValue>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ActivityDefinition.dynamicValue> 
+}
+
+<OneOrMore_Dosage.doseAndRate> CLOSED {
+    rdf:first @<Dosage.doseAndRate>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Dosage.doseAndRate> 
+}
+
+<OneOrMore_Ratio> CLOSED {
+    rdf:first @<Ratio>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Ratio> 
+}
+
+<OneOrMore_ContactPoint> CLOSED {
+    rdf:first @<ContactPoint>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ContactPoint> 
+}
+
+<OneOrMore_dateTime> CLOSED {
+    rdf:first @<dateTime>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_dateTime> 
+}
+
+<OneOrMore_Coding> CLOSED {
+    rdf:first @<Coding>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Coding> 
+}
+
+<OneOrMore_code> CLOSED {
+    rdf:first @<code>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_code> 
+}
+
+<OneOrMore_time> CLOSED {
+    rdf:first @<time>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_time> 
+}
+
+#---------------------- Reference Types -------------------
+
+#---------------------- Value Sets ------------------------
+
+# The lifecycle status of an artifact.
+fhirvs:publication-status ["draft" "active" "retired" "unknown"]
+
+# Use of contact point.
+fhirvs:contact-point-use ["home" "work" "temp" "old" "mobile"]
+
+# This value set includes all possible codes from BCP-13 (http://tools.ietf.org/html/bcp13)
+fhirvs:mimetypes EXTERNAL
+
+# Real world event relating to the schedule.
+fhirvs:event-timing ["MORN" "MORN.early" "MORN.late" "NOON" "AFT" "AFT.early" "AFT.late" "EVE" "EVE.early" "EVE.late" "NIGHT" "PHS" "IMD" "HS" "WAKE" "C" "CM" "CD" "CV" "AC" "ACM" "ACD" "ACV" "PC" "PCM" "PCD" "PCV"]
+
+# Identifies the level of importance to be assigned to actioning the request.
+fhirvs:request-priority ["routine" "urgent" "asap" "stat"]
+
+# Codes indicating the degree of authority/intentionality associated with a request.
+fhirvs:request-intent ["proposal" "plan" "directive" "order" "original-order" "reflex-order" "filler-order" "instance-order" "option"]
+
+# The days of the week.
+fhirvs:days-of-week ["mon" "tue" "wed" "thu" "fri" "sat" "sun"]
+
+# The type of participant for the action.
+fhirvs:action-participant-type ["careteam" "device" "group" "healthcareservice" "location" "organization" "patient" "practitioner" "practitionerrole" "relatedperson"]
+
+# Identifies the purpose for this identifier, if known .
+fhirvs:identifier-use ["usual" "official" "temp" "secondary" "old"]
+
+# The type of relationship to the related artifact.
+fhirvs:related-artifact-type ["documentation" "justification" "citation" "predecessor" "successor" "derived-from" "depends-on" "composed-of" "part-of" "amends" "amended-with" "appends" "appended-with" "cites" "cited-by" "comments-on" "comment-in" "contains" "contained-in" "corrects" "correction-in" "replaces" "replaced-with" "retracts" "retracted-by" "signs" "similar-to" "supports" "supported-with" "transforms" "transformed-into" "transformed-with"]
+
+# A unit of time (units from UCUM).
+fhirvs:units-of-time EXTERNAL
+
+# Telecommunications form for contact point.
+fhirvs:contact-point-system ["phone" "fax" "email" "pager" "url" "sms" "other"]
+
+# A list of all the request resource types defined in this version of the FHIR specification.
+fhirvs:request-resource-types ["Appointment" "AppointmentResponse" "CarePlan" "Claim" "CommunicationRequest" "Contract" "DeviceRequest" "EnrollmentRequest" "ImmunizationRecommendation" "MedicationRequest" "NutritionOrder" "ServiceRequest" "SupplyRequest" "Task" "VisionPrescription"]
+
+# How the Quantity should be understood and represented.
+fhirvs:quantity-comparator ["<" "<=" ">=" ">" "ad"]

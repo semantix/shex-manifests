@@ -1,0 +1,62 @@
+﻿PREFIX fhir: <http://hl7.org/fhir/> 
+PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+BASE <http://hl7.org/fhir/shape/>
+
+
+# A boundary shape that represents the outside edge of the location (in GeoJSON format)
+<location-boundary-geojson> EXTENDS @<Extension> CLOSED {   
+
+    a [fhir:location-boundary-geojson];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v @<Extension.url> AND
+    	{fhir:value ["http://hl7.org/fhir/StructureDefinition/location-boundary-geojson"]}; 
+    fhir:value (@<Attachment> )  AND { rdf:type IRI } ; 
+    ^fhir:extension { a [fhir:Location]
+    		}
+}  
+
+#---------------------- Data Types -------------------
+
+# Content in a format defined elsewhere
+<Attachment> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Attachment];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:contentType @<Attachment.contentType>?;  # Mime type of the content, with 
+                                            # charset etc. 
+    fhir:language @<Attachment.language>?;  # Human language of the content 
+                                            # (BCP-47) 
+    fhir:data @<Attachment.data>?;          # Data inline, base64ed
+    fhir:url @<Attachment.url>?;            # Uri where the data can be found
+    fhir:size @<Attachment.size>?;          # Number of bytes of content (if url 
+                                            # provided) 
+    fhir:hash @<Attachment.hash>?;          # Hash of the data (sha-1, base64ed)
+    fhir:title @<Attachment.title>?;        # Label to display in place of the 
+                                            # data 
+    fhir:creation @<Attachment.creation>?;  # Date attachment was first created
+    fhir:height @<Attachment.height>?;      # Height of the image in pixels 
+                                            # (photo/video) 
+    fhir:width @<Attachment.width>?;        # Width of the image in pixels 
+                                            # (photo/video) 
+    fhir:frames @<Attachment.frames>?;      # Number of frames if > 1 (photo)
+    fhir:duration @<Attachment.duration>?;  # Length in seconds (audio / video)
+    fhir:pages @<Attachment.pages>?;        # Number of printed pages
+} AND (
+
+# Constraint: UniqueKey:att-1
+# Human readable:If the Attachment has data, it SHALL have a contentType
+# XPath:not(exists(f:data)) or exists(f:contentType)
+# Constraint:data.empty() or contentType.exists()
+# ShEx:
+
+ NOT { fhir:data {fhir:v .} }  OR { fhir:contentType . }
+
+)
+ 
+
+#---------------------- Cardinality Types (OneOrMore) -------------------
+
+#---------------------- Reference Types -------------------
+
+#---------------------- Value Sets ------------------------

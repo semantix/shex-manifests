@@ -1,0 +1,252 @@
+﻿PREFIX fhir: <http://hl7.org/fhir/> 
+PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+BASE <http://hl7.org/fhir/shape/>
+
+
+start=@<MedicationRequest> AND {fhir:nodeRole [fhir:treeRoot]}
+
+
+# Ordering of medication for patient or group
+<MedicationRequest> EXTENDS @<DomainResource> CLOSED {   
+
+    a [fhir:MedicationRequest];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:identifier @<OneOrMore_MedicationRequest.identifier>?;  # External ids for this request
+    fhir:instantiatesCanonical @<OneOrMore_MedicationRequest.instantiatesCanonical>?;  # Instantiates FHIR protocol or 
+                                            # definition 
+    fhir:instantiatesUri @<OneOrMore_MedicationRequest.instantiatesUri>?;  # Instantiates external protocol or 
+                                            # definition 
+    fhir:basedOn @<OneOrMore_MedicationRequest.basedOn_CarePlan_OR_ImmunizationRecommendation_OR_MedicationRequest_OR_ServiceRequest>?;  # What request fulfills
+    fhir:priorPrescription @<MedicationRequest.priorPrescription> AND {fhir:link 
+    			@<MedicationRequest> }?;  # An order/prescription that is 
+                                            # being replaced 
+    fhir:groupIdentifier @<MedicationRequest.groupIdentifier>?;  # Composite request this is part of
+    fhir:status @<MedicationRequest.status>;  # active | on-hold | ended | stopped 
+                                            # | completed | cancelled | 
+                                            # entered-in-error | draft | unknown 
+    fhir:statusReason @<MedicationRequest.statusReason>?;  # Reason for current status
+    fhir:statusChanged @<MedicationRequest.statusChanged>?;  # When the status was changed
+    fhir:intent @<MedicationRequest.intent>;  # proposal | plan | order | 
+                                            # original-order | reflex-order | 
+                                            # filler-order | instance-order | 
+                                            # option 
+    fhir:category @<OneOrMore_MedicationRequest.category>?;  # Grouping or category of medication 
+                                            # request 
+    fhir:priority @<MedicationRequest.priority>?;  # routine | urgent | asap | stat
+    fhir:doNotPerform @<MedicationRequest.doNotPerform>?;  # True if patient is to stop taking 
+                                            # or not to start taking the 
+                                            # medication 
+    fhir:medication @<MedicationRequest.medication>;  # Medication to be taken
+    fhir:subject @<MedicationRequest.subject> AND {fhir:link 
+    			@<Group> OR 
+    			@<Patient> };  # Who or group medication request is 
+                                            # for 
+    fhir:informationSource @<OneOrMore_MedicationRequest.informationSource_Organization_OR_Patient_OR_Practitioner_OR_PractitionerRole_OR_RelatedPerson>?;  # The person or organization who 
+                                            # provided the information about 
+                                            # this request, if the source is 
+                                            # someone other than the requestor 
+    fhir:encounter @<MedicationRequest.encounter> AND {fhir:link 
+    			@<Encounter> }?;  # Encounter created as part of 
+                                            # encounter/admission/stay 
+    fhir:supportingInformation @<OneOrMore_MedicationRequest.supportingInformation_Resource>?;  # Information to support fulfilling 
+                                            # of the medication 
+    fhir:authoredOn @<MedicationRequest.authoredOn>?;  # When request was initially authored
+    fhir:requester @<MedicationRequest.requester> AND {fhir:link 
+    			@<Device> OR 
+    			@<Organization> OR 
+    			@<Patient> OR 
+    			@<Practitioner> OR 
+    			@<PractitionerRole> OR 
+    			@<RelatedPerson> }?;  # Who/What requested the Request
+    fhir:reported @<MedicationRequest.reported>?;  # Reported rather than primary record
+    fhir:performerType @<MedicationRequest.performerType>?;  # Desired kind of performer of the 
+                                            # medication administration 
+    fhir:performer @<OneOrMore_MedicationRequest.performer_CareTeam_OR_Device_OR_HealthcareService_OR_Organization_OR_Patient_OR_Practitioner_OR_PractitionerRole_OR_RelatedPerson>?;  # Intended performer of 
+                                            # administration 
+    fhir:device @<MedicationRequest.device>?;  # Intended type of device for the 
+                                            # administration 
+    fhir:recorder @<MedicationRequest.recorder> AND {fhir:link 
+    			@<Practitioner> OR 
+    			@<PractitionerRole> }?;  # Person who entered the request
+    fhir:reason @<OneOrMore_MedicationRequest.reason>?;  # Reason or indication for ordering 
+                                            # or not ordering the medication 
+    fhir:courseOfTherapyType @<MedicationRequest.courseOfTherapyType>?;  # Overall pattern of medication 
+                                            # administration 
+    fhir:insurance @<OneOrMore_MedicationRequest.insurance_ClaimResponse_OR_Coverage>?;  # Associated insurance coverage
+    fhir:note @<OneOrMore_MedicationRequest.note>?;  # Information about the prescription
+    fhir:dose @<MedicationRequest.dose>?;   # How the medication should be taken
+    fhir:dispenseRequest @<MedicationRequest.dispenseRequest>?;  # Medication supply authorization
+    fhir:substitution @<MedicationRequest.substitution>?;  # Any restrictions on medication 
+                                            # substitution 
+    fhir:eventHistory @<OneOrMore_MedicationRequest.eventHistory_Provenance>?;  # A list of events of interest in 
+                                            # the lifecycle 
+}  
+
+# How the medication should be taken
+<MedicationRequest.dose> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:renderedDosageInstruction @<MedicationRequest.dose.renderedDosageInstruction>?;  # Full representation of the dosage 
+                                            # instructions 
+    fhir:effectiveDosePeriod @<MedicationRequest.dose.effectiveDosePeriod>?;  # Period over which the medication 
+                                            # is to be taken 
+    fhir:dosageInstruction @<OneOrMore_MedicationRequest.dose.dosageInstruction>?;  # Specific instructions for how the 
+                                            # medication should be taken 
+}  
+
+# Any restrictions on medication substitution
+<MedicationRequest.substitution> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:allowed (@<boolean>  OR 
+    			@<CodeableConcept> )  AND { rdf:type IRI } ;  # Whether substitution is allowed or 
+                                            # not 
+    fhir:reason @<MedicationRequest.substitution.reason>?;  # Why should (not) substitution be 
+                                            # made 
+}  
+
+# Medication supply authorization
+<MedicationRequest.dispenseRequest> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:initialFill @<MedicationRequest.dispenseRequest.initialFill>?;  # First fill details
+    fhir:dispenseInterval @<MedicationRequest.dispenseRequest.dispenseInterval>?;  # Minimum period of time between 
+                                            # dispenses 
+    fhir:validityPeriod @<MedicationRequest.dispenseRequest.validityPeriod>?;  # Time period supply is authorized 
+                                            # for 
+    fhir:numberOfRepeatsAllowed @<MedicationRequest.dispenseRequest.numberOfRepeatsAllowed>?;  # Number of refills authorized
+    fhir:quantity @<MedicationRequest.dispenseRequest.quantity>?;  # Amount of medication to supply per 
+                                            # dispense 
+    fhir:expectedSupplyDuration @<MedicationRequest.dispenseRequest.expectedSupplyDuration>?;  # Number of days supply per dispense
+    fhir:dispenser @<MedicationRequest.dispenseRequest.dispenser> AND {fhir:link 
+    			@<Organization> }?;  # Intended performer of dispense
+    fhir:dispenserInstruction @<OneOrMore_MedicationRequest.dispenseRequest.dispenserInstruction>?;  # Additional information for the 
+                                            # dispenser 
+    fhir:doseAdministrationAid @<MedicationRequest.dispenseRequest.doseAdministrationAid>?;  # Type of adherence packaging to use 
+                                            # for the dispense 
+}  
+
+# First fill details
+<MedicationRequest.dispenseRequest.initialFill> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:quantity @<MedicationRequest.dispenseRequest.initialFill.quantity>?;  # First fill quantity
+    fhir:duration @<MedicationRequest.dispenseRequest.initialFill.duration>?;  # First fill duration
+}  
+
+#---------------------- Data Types -------------------
+
+# Primitive Type boolean
+<boolean> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:boolean];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v @<boolean.value>?;               # Primitive value for boolean
+}  
+
+# Concept - reference to a terminology or just  text
+<CodeableConcept> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:CodeableConcept];
+    fhir:nodeRole [fhir:treeRoot]?;
+    a NONLITERAL*;
+    fhir:coding @<OneOrMore_CodeableConcept.coding>?;  # Code defined by a terminology 
+                                            # system 
+    fhir:text @<CodeableConcept.text>?;     # Plain text representation of the 
+                                            # concept 
+}  
+
+#---------------------- Cardinality Types (OneOrMore) -------------------
+
+<OneOrMore_MedicationRequest.identifier> CLOSED {
+    rdf:first @<MedicationRequest.identifier>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_MedicationRequest.identifier> 
+}
+
+<OneOrMore_MedicationRequest.instantiatesCanonical> CLOSED {
+    rdf:first @<MedicationRequest.instantiatesCanonical>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_MedicationRequest.instantiatesCanonical> 
+}
+
+<OneOrMore_MedicationRequest.instantiatesUri> CLOSED {
+    rdf:first @<MedicationRequest.instantiatesUri>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_MedicationRequest.instantiatesUri> 
+}
+
+<OneOrMore_MedicationRequest.basedOn_CarePlan_OR_ImmunizationRecommendation_OR_MedicationRequest_OR_ServiceRequest> CLOSED {
+    rdf:first @<MedicationRequest.basedOn> AND {fhir:link 
+			@<CarePlan> OR 
+			@<ImmunizationRecommendation> OR 
+			@<MedicationRequest> OR 
+			@<ServiceRequest> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_MedicationRequest.basedOn_CarePlan_OR_ImmunizationRecommendation_OR_MedicationRequest_OR_ServiceRequest> 
+}
+
+<OneOrMore_MedicationRequest.category> CLOSED {
+    rdf:first @<MedicationRequest.category>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_MedicationRequest.category> 
+}
+
+<OneOrMore_MedicationRequest.informationSource_Organization_OR_Patient_OR_Practitioner_OR_PractitionerRole_OR_RelatedPerson> CLOSED {
+    rdf:first @<MedicationRequest.informationSource> AND {fhir:link 
+			@<Organization> OR 
+			@<Patient> OR 
+			@<Practitioner> OR 
+			@<PractitionerRole> OR 
+			@<RelatedPerson> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_MedicationRequest.informationSource_Organization_OR_Patient_OR_Practitioner_OR_PractitionerRole_OR_RelatedPerson> 
+}
+
+<OneOrMore_MedicationRequest.supportingInformation_Resource> CLOSED {
+    rdf:first @<MedicationRequest.supportingInformation> AND {fhir:link 
+			@<Resource> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_MedicationRequest.supportingInformation_Resource> 
+}
+
+<OneOrMore_MedicationRequest.performer_CareTeam_OR_Device_OR_HealthcareService_OR_Organization_OR_Patient_OR_Practitioner_OR_PractitionerRole_OR_RelatedPerson> CLOSED {
+    rdf:first @<MedicationRequest.performer> AND {fhir:link 
+			@<CareTeam> OR 
+			@<Device> OR 
+			@<HealthcareService> OR 
+			@<Organization> OR 
+			@<Patient> OR 
+			@<Practitioner> OR 
+			@<PractitionerRole> OR 
+			@<RelatedPerson> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_MedicationRequest.performer_CareTeam_OR_Device_OR_HealthcareService_OR_Organization_OR_Patient_OR_Practitioner_OR_PractitionerRole_OR_RelatedPerson> 
+}
+
+<OneOrMore_MedicationRequest.reason> CLOSED {
+    rdf:first @<MedicationRequest.reason>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_MedicationRequest.reason> 
+}
+
+<OneOrMore_MedicationRequest.insurance_ClaimResponse_OR_Coverage> CLOSED {
+    rdf:first @<MedicationRequest.insurance> AND {fhir:link 
+			@<ClaimResponse> OR 
+			@<Coverage> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_MedicationRequest.insurance_ClaimResponse_OR_Coverage> 
+}
+
+<OneOrMore_MedicationRequest.note> CLOSED {
+    rdf:first @<MedicationRequest.note>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_MedicationRequest.note> 
+}
+
+<OneOrMore_MedicationRequest.eventHistory_Provenance> CLOSED {
+    rdf:first @<MedicationRequest.eventHistory> AND {fhir:link 
+			@<Provenance> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_MedicationRequest.eventHistory_Provenance> 
+}
+
+<OneOrMore_MedicationRequest.dose.dosageInstruction> CLOSED {
+    rdf:first @<MedicationRequest.dose.dosageInstruction>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_MedicationRequest.dose.dosageInstruction> 
+}
+
+<OneOrMore_MedicationRequest.dispenseRequest.dispenserInstruction> CLOSED {
+    rdf:first @<MedicationRequest.dispenseRequest.dispenserInstruction>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_MedicationRequest.dispenseRequest.dispenserInstruction> 
+}
+
+<OneOrMore_CodeableConcept.coding> CLOSED {
+    rdf:first @<CodeableConcept.coding>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_CodeableConcept.coding> 
+}
+
+#---------------------- Reference Types -------------------
+
+#---------------------- Value Sets ------------------------

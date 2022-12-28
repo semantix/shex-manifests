@@ -1,0 +1,196 @@
+﻿PREFIX fhir: <http://hl7.org/fhir/> 
+PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+BASE <http://hl7.org/fhir/shape/>
+
+
+start=@<HealthcareService> AND {fhir:nodeRole [fhir:treeRoot]}
+
+
+# The details of a healthcare service available at a location
+<HealthcareService> EXTENDS @<DomainResource> CLOSED {   
+
+    a [fhir:HealthcareService];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:identifier @<OneOrMore_HealthcareService.identifier>?;  # External identifiers for this item
+    fhir:active @<HealthcareService.active>?;  # Whether this HealthcareService 
+                                            # record is in active use 
+    fhir:providedBy @<HealthcareService.providedBy> AND {fhir:link 
+    			@<Organization> }?;  # Organization that provides this 
+                                            # service 
+    fhir:category @<OneOrMore_HealthcareService.category>?;  # Broad category of service being 
+                                            # performed or delivered 
+    fhir:type @<OneOrMore_HealthcareService.type>?;  # Type of service that may be 
+                                            # delivered or performed 
+    fhir:specialty @<OneOrMore_HealthcareService.specialty>?;  # Specialties handled by the 
+                                            # HealthcareService 
+    fhir:location @<OneOrMore_HealthcareService.location_Location>?;  # Location(s) where service may be 
+                                            # provided 
+    fhir:name @<HealthcareService.name>?;   # Description of service as 
+                                            # presented to a consumer while 
+                                            # searching 
+    fhir:comment @<HealthcareService.comment>?;  # Additional description and/or any 
+                                            # specific issues not covered 
+                                            # elsewhere 
+    fhir:extraDetails @<HealthcareService.extraDetails>?;  # Extra details about the service 
+                                            # that can't be placed in the other 
+                                            # fields 
+    fhir:photo @<HealthcareService.photo>?;  # Facilitates quick identification 
+                                            # of the service 
+    fhir:contact @<OneOrMore_HealthcareService.contact>?;  # Official contact details for the 
+                                            # HealthcareService 
+    fhir:telecom @<OneOrMore_HealthcareService.telecom>?;  # Deprecated - use contact.telecom
+    fhir:coverageArea @<OneOrMore_HealthcareService.coverageArea_Location>?;  # Location(s) service is intended 
+                                            # for/available to 
+    fhir:serviceProvisionCode @<OneOrMore_HealthcareService.serviceProvisionCode>?;  # Conditions under which service is 
+                                            # available/offered 
+    fhir:eligibility @<OneOrMore_HealthcareService.eligibility>?;  # Specific eligibility requirements 
+                                            # required to use the service 
+    fhir:program @<OneOrMore_HealthcareService.program>?;  # Programs that this service is 
+                                            # applicable to 
+    fhir:characteristic @<OneOrMore_HealthcareService.characteristic>?;  # Collection of characteristics 
+                                            # (attributes) 
+    fhir:communication @<OneOrMore_HealthcareService.communication>?;  # The language that this service is 
+                                            # offered in 
+    fhir:referralMethod @<OneOrMore_HealthcareService.referralMethod>?;  # Ways that the service accepts 
+                                            # referrals 
+    fhir:appointmentRequired @<HealthcareService.appointmentRequired>?;  # If an appointment is required for 
+                                            # access to this service 
+    fhir:availableTime @<OneOrMore_HealthcareService.availableTime>?;  # Times the Service Site is available
+    fhir:notAvailable @<OneOrMore_HealthcareService.notAvailable>?;  # Not available during this time due 
+                                            # to provided reason 
+    fhir:availabilityExceptions @<HealthcareService.availabilityExceptions>?;  # Description of availability 
+                                            # exceptions 
+    fhir:endpoint @<OneOrMore_HealthcareService.endpoint_Endpoint>?;  # Technical endpoints providing 
+                                            # access to electronic services 
+                                            # operated for the healthcare 
+                                            # service 
+}  
+
+# Specific eligibility requirements required to use the service
+<HealthcareService.eligibility> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:code @<HealthcareService.eligibility.code>?;  # Coded value for the eligibility
+    fhir:comment @<HealthcareService.eligibility.comment>?;  # Describes the eligibility 
+                                            # conditions for the service 
+}  
+
+# Times the Service Site is available
+<HealthcareService.availableTime> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:daysOfWeek @<OneOrMore_HealthcareService.availableTime.daysOfWeek>?;  # mon | tue | wed | thu | fri | sat 
+                                            # | sun 
+    fhir:allDay @<HealthcareService.availableTime.allDay>?;  # Always available? i.e. 24 hour 
+                                            # service 
+    fhir:availableStartTime @<HealthcareService.availableTime.availableStartTime>?;  # Opening time of day (ignored if 
+                                            # allDay = true) 
+    fhir:availableEndTime @<HealthcareService.availableTime.availableEndTime>?;  # Closing time of day (ignored if 
+                                            # allDay = true) 
+}  
+
+# Not available during this time due to provided reason
+<HealthcareService.notAvailable> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:description @<HealthcareService.notAvailable.description>;  # Reason presented to the user 
+                                            # explaining why time not available 
+    fhir:during @<HealthcareService.notAvailable.during>?;  # Service not available from this 
+                                            # date 
+}  
+
+#---------------------- Data Types -------------------
+
+#---------------------- Cardinality Types (OneOrMore) -------------------
+
+<OneOrMore_HealthcareService.identifier> CLOSED {
+    rdf:first @<HealthcareService.identifier>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_HealthcareService.identifier> 
+}
+
+<OneOrMore_HealthcareService.category> CLOSED {
+    rdf:first @<HealthcareService.category>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_HealthcareService.category> 
+}
+
+<OneOrMore_HealthcareService.type> CLOSED {
+    rdf:first @<HealthcareService.type>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_HealthcareService.type> 
+}
+
+<OneOrMore_HealthcareService.specialty> CLOSED {
+    rdf:first @<HealthcareService.specialty>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_HealthcareService.specialty> 
+}
+
+<OneOrMore_HealthcareService.location_Location> CLOSED {
+    rdf:first @<HealthcareService.location> AND {fhir:link 
+			@<Location> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_HealthcareService.location_Location> 
+}
+
+<OneOrMore_HealthcareService.contact> CLOSED {
+    rdf:first @<HealthcareService.contact>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_HealthcareService.contact> 
+}
+
+<OneOrMore_HealthcareService.telecom> CLOSED {
+    rdf:first @<HealthcareService.telecom>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_HealthcareService.telecom> 
+}
+
+<OneOrMore_HealthcareService.coverageArea_Location> CLOSED {
+    rdf:first @<HealthcareService.coverageArea> AND {fhir:link 
+			@<Location> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_HealthcareService.coverageArea_Location> 
+}
+
+<OneOrMore_HealthcareService.serviceProvisionCode> CLOSED {
+    rdf:first @<HealthcareService.serviceProvisionCode>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_HealthcareService.serviceProvisionCode> 
+}
+
+<OneOrMore_HealthcareService.eligibility> CLOSED {
+    rdf:first @<HealthcareService.eligibility>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_HealthcareService.eligibility> 
+}
+
+<OneOrMore_HealthcareService.program> CLOSED {
+    rdf:first @<HealthcareService.program>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_HealthcareService.program> 
+}
+
+<OneOrMore_HealthcareService.characteristic> CLOSED {
+    rdf:first @<HealthcareService.characteristic>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_HealthcareService.characteristic> 
+}
+
+<OneOrMore_HealthcareService.communication> CLOSED {
+    rdf:first @<HealthcareService.communication>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_HealthcareService.communication> 
+}
+
+<OneOrMore_HealthcareService.referralMethod> CLOSED {
+    rdf:first @<HealthcareService.referralMethod>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_HealthcareService.referralMethod> 
+}
+
+<OneOrMore_HealthcareService.availableTime> CLOSED {
+    rdf:first @<HealthcareService.availableTime>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_HealthcareService.availableTime> 
+}
+
+<OneOrMore_HealthcareService.notAvailable> CLOSED {
+    rdf:first @<HealthcareService.notAvailable>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_HealthcareService.notAvailable> 
+}
+
+<OneOrMore_HealthcareService.endpoint_Endpoint> CLOSED {
+    rdf:first @<HealthcareService.endpoint> AND {fhir:link 
+			@<Endpoint> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_HealthcareService.endpoint_Endpoint> 
+}
+
+<OneOrMore_HealthcareService.availableTime.daysOfWeek> CLOSED {
+    rdf:first @<HealthcareService.availableTime.daysOfWeek>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_HealthcareService.availableTime.daysOfWeek> 
+}
+
+#---------------------- Reference Types -------------------
+
+#---------------------- Value Sets ------------------------

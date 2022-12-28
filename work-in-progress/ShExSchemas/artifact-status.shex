@@ -1,0 +1,36 @@
+﻿PREFIX fhir: <http://hl7.org/fhir/> 
+PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+BASE <http://hl7.org/fhir/shape/>
+
+
+# draft | active | retired | unknown
+<artifact-status> EXTENDS @<Extension> CLOSED {   
+
+    a [fhir:artifact-status];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v @<Extension.url> AND
+    	{fhir:value ["http://hl7.org/fhir/StructureDefinition/artifact-status"]}; 
+    fhir:value (@<code> AND
+    	{fhir:value @fhirvs:publication-status} )  AND { rdf:type IRI } ; 
+    ^fhir:extension { a [fhir:Element]
+    		}
+}  
+
+#---------------------- Data Types -------------------
+
+# Primitive Type code
+<code> EXTENDS @<string> CLOSED {   
+
+    a [fhir:code];
+    fhir:nodeRole [fhir:treeRoot]?;
+}  
+
+#---------------------- Cardinality Types (OneOrMore) -------------------
+
+#---------------------- Reference Types -------------------
+
+#---------------------- Value Sets ------------------------
+
+# The lifecycle status of an artifact.
+fhirvs:publication-status ["draft" "active" "retired" "unknown"]

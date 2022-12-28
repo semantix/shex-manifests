@@ -1,0 +1,62 @@
+﻿PREFIX fhir: <http://hl7.org/fhir/> 
+PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+BASE <http://hl7.org/fhir/shape/>
+
+
+# A signature attesting to the content
+<questionnaireresponse-signature> EXTENDS @<Extension> CLOSED {   
+
+    a [fhir:questionnaireresponse-signature];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v @<Extension.url> AND
+    	{fhir:value ["http://hl7.org/fhir/StructureDefinition/questionnaireresponse-signature"]}; 
+    fhir:value (@<Signature> )  AND { rdf:type IRI } ; 
+    ^fhir:extension { a [fhir:QuestionnaireResponse] OR 
+    				^fhir:item {a [fhir:QuestionnaireResponse]} OR 
+    				^fhir:item {^fhir:item {a [fhir:QuestionnaireResponse]}}
+    		}
+}  
+
+#---------------------- Data Types -------------------
+
+# A Signature - XML DigSig, JWS, Graphical image of signature, etc.
+<Signature> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Signature];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:type @<OneOrMore_Signature.type>?;  # Indication of the reason the 
+                                            # entity signed the object(s) 
+    fhir:when @<Signature.when>?;           # When the signature was created
+    fhir:who @<Signature.who> AND {fhir:link 
+    			@<Device> OR 
+    			@<Organization> OR 
+    			@<Patient> OR 
+    			@<Practitioner> OR 
+    			@<PractitionerRole> OR 
+    			@<RelatedPerson> }?;  # Who signed
+    fhir:onBehalfOf @<Signature.onBehalfOf> AND {fhir:link 
+    			@<Device> OR 
+    			@<Organization> OR 
+    			@<Patient> OR 
+    			@<Practitioner> OR 
+    			@<PractitionerRole> OR 
+    			@<RelatedPerson> }?;  # The party represented
+    fhir:targetFormat @<Signature.targetFormat>?;  # The technical format of the signed 
+                                            # resources 
+    fhir:sigFormat @<Signature.sigFormat>?;  # The technical format of the 
+                                            # signature 
+    fhir:data @<Signature.data>?;           # The actual signature content (XML 
+                                            # DigSig. JWS, picture, etc.) 
+}  
+
+#---------------------- Cardinality Types (OneOrMore) -------------------
+
+<OneOrMore_Signature.type> CLOSED {
+    rdf:first @<Signature.type>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Signature.type> 
+}
+
+#---------------------- Reference Types -------------------
+
+#---------------------- Value Sets ------------------------

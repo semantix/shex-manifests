@@ -1,0 +1,507 @@
+﻿PREFIX fhir: <http://hl7.org/fhir/> 
+PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+BASE <http://hl7.org/fhir/shape/>
+
+
+start=@<RequestGroup> AND {fhir:nodeRole [fhir:treeRoot]}
+
+
+# A group of related requests
+<RequestGroup> EXTENDS @<DomainResource> CLOSED {   
+
+    a [fhir:RequestGroup];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:identifier @<OneOrMore_RequestGroup.identifier>?;  # Business identifier
+    fhir:instantiatesCanonical @<OneOrMore_RequestGroup.instantiatesCanonical>?;  # Instantiates FHIR protocol or 
+                                            # definition 
+    fhir:instantiatesUri @<OneOrMore_RequestGroup.instantiatesUri>?;  # Instantiates external protocol or 
+                                            # definition 
+    fhir:basedOn @<OneOrMore_RequestGroup.basedOn_Resource>?;  # Fulfills plan, proposal, or order
+    fhir:replaces @<OneOrMore_RequestGroup.replaces_Resource>?;  # Request(s) replaced by this request
+    fhir:groupIdentifier @<RequestGroup.groupIdentifier>?;  # Composite request this is part of
+    fhir:status @<RequestGroup.status>;     # draft | active | on-hold | revoked 
+                                            # | completed | entered-in-error | 
+                                            # unknown 
+    fhir:intent @<RequestGroup.intent>;     # proposal | plan | directive | 
+                                            # order | original-order | 
+                                            # reflex-order | filler-order | 
+                                            # instance-order | option 
+    fhir:priority @<RequestGroup.priority>?;  # routine | urgent | asap | stat
+    fhir:code @<RequestGroup.code>?;        # What's being requested/ordered
+    fhir:subject @<RequestGroup.subject> AND {fhir:link 
+    			@<Group> OR 
+    			@<Patient> }?;  # Who the request group is about
+    fhir:encounter @<RequestGroup.encounter> AND {fhir:link 
+    			@<Encounter> }?;  # Created as part of
+    fhir:authoredOn @<RequestGroup.authoredOn>?;  # When the request group was authored
+    fhir:author @<RequestGroup.author> AND {fhir:link 
+    			@<Device> OR 
+    			@<Practitioner> OR 
+    			@<PractitionerRole> }?;  # Device or practitioner that 
+                                            # authored the request group 
+    fhir:reason @<OneOrMore_RequestGroup.reason>?;  # Why the request group is needed
+    fhir:goal @<OneOrMore_RequestGroup.goal_Goal>?;  # What goals
+    fhir:note @<OneOrMore_RequestGroup.note>?;  # Additional notes about the response
+    fhir:action @<OneOrMore_RequestGroup.action>?;  # Proposed actions, if any
+} AND (
+
+# Constraint: UniqueKey:rqg-1
+# Human readable:Must have resource or action but not both
+# XPath:exists(f:resource) != exists(f:action)
+# Constraint:resource.exists() != action.exists()
+# ShEx:
+
+{ fhir:resource . } { fhir:v [ . -{ fhir:action . }] }
+
+)
+ 
+
+# Proposed actions, if any
+<RequestGroup.action> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:linkId @<RequestGroup.action.linkId>?;  # Pointer to specific item from the 
+                                            # PlanDefinition 
+    fhir:prefix @<RequestGroup.action.prefix>?;  # User-visible prefix for the action 
+                                            # (e.g. 1. or A.) 
+    fhir:title @<RequestGroup.action.title>?;  # User-visible title
+    fhir:description @<RequestGroup.action.description>?;  # Short description of the action
+    fhir:textEquivalent @<RequestGroup.action.textEquivalent>?;  # Static text equivalent of the 
+                                            # action, used if the dynamic 
+                                            # aspects cannot be interpreted by 
+                                            # the receiving system 
+    fhir:priority @<RequestGroup.action.priority>?;  # routine | urgent | asap | stat
+    fhir:code @<OneOrMore_RequestGroup.action.code>?;  # Code representing the meaning of 
+                                            # the action or sub-actions 
+    fhir:documentation @<OneOrMore_RequestGroup.action.documentation>?;  # Supporting documentation for the 
+                                            # intended performer of the action 
+    fhir:goal @<OneOrMore_RequestGroup.action.goal_Goal>?;  # What goals
+    fhir:condition @<OneOrMore_RequestGroup.action.condition>?;  # Whether or not the action is 
+                                            # applicable 
+    fhir:relatedAction @<OneOrMore_RequestGroup.action.relatedAction>?;  # Relationship to another action
+    fhir:timing (@<dateTime>  OR 
+    			@<Age>  OR 
+    			@<Period>  OR 
+    			@<Duration>  OR 
+    			@<Range>  OR 
+    			@<Timing> )  AND { rdf:type IRI } ?;  # When the action should take place
+    fhir:location @<RequestGroup.action.location>?;  # Where it should happen
+    fhir:participant @<OneOrMore_RequestGroup.action.participant>?;  # Who should perform the action
+    fhir:type @<RequestGroup.action.type>?;  # create | update | remove | 
+                                            # fire-event 
+    fhir:groupingBehavior @<RequestGroup.action.groupingBehavior>?;  # visual-group | logical-group | 
+                                            # sentence-group 
+    fhir:selectionBehavior @<RequestGroup.action.selectionBehavior>?;  # any | all | all-or-none | 
+                                            # exactly-one | at-most-one | 
+                                            # one-or-more 
+    fhir:requiredBehavior @<RequestGroup.action.requiredBehavior>?;  # must | could | 
+                                            # must-unless-documented 
+    fhir:precheckBehavior @<RequestGroup.action.precheckBehavior>?;  # yes | no
+    fhir:cardinalityBehavior @<RequestGroup.action.cardinalityBehavior>?;  # single | multiple
+    fhir:resource @<RequestGroup.action.resource> AND {fhir:link 
+    			@<Resource> }?;  # The target of the action
+    fhir:action @<OneOrMore_RequestGroup.action>?;  # Sub action
+} AND (
+
+# Constraint: UniqueKey:rqg-1
+# Human readable:Must have resource or action but not both
+# XPath:exists(f:resource) != exists(f:action)
+# Constraint:resource.exists() != action.exists()
+# ShEx:
+
+{ fhir:resource . } { fhir:v [ . -{ fhir:action . }] }
+
+)
+ 
+
+# Who should perform the action
+<RequestGroup.action.participant> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:type @<RequestGroup.action.participant.type>?;  # careteam | device | group | 
+                                            # healthcareservice | location | 
+                                            # organization | patient | 
+                                            # practitioner | practitionerrole | 
+                                            # relatedperson 
+    fhir:typeReference @<RequestGroup.action.participant.typeReference> AND {fhir:link 
+    			@<CareTeam> OR 
+    			@<Device> OR 
+    			@<Group> OR 
+    			@<HealthcareService> OR 
+    			@<Location> OR 
+    			@<Organization> OR 
+    			@<Patient> OR 
+    			@<Practitioner> OR 
+    			@<PractitionerRole> OR 
+    			@<RelatedPerson> }?;  # Who or what can participate
+    fhir:role @<RequestGroup.action.participant.role>?;  # E.g. Nurse, Surgeon, Parent, etc.
+    fhir:function @<RequestGroup.action.participant.function>?;  # E.g. Author, Reviewer, Witness, 
+                                            # etc. 
+    fhir:actor @<RequestGroup.action.participant.actor> AND {fhir:link 
+    			@<CareTeam> OR 
+    			@<Device> OR 
+    			@<Group> OR 
+    			@<HealthcareService> OR 
+    			@<Location> OR 
+    			@<Organization> OR 
+    			@<Patient> OR 
+    			@<Practitioner> OR 
+    			@<PractitionerRole> OR 
+    			@<RelatedPerson> }?;  # Who/what is participating?
+}  
+
+# Whether or not the action is applicable
+<RequestGroup.action.condition> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:kind @<RequestGroup.action.condition.kind>;  # applicability | start | stop
+    fhir:expression @<RequestGroup.action.condition.expression>?;  # Boolean-valued expression
+}  
+
+# Relationship to another action
+<RequestGroup.action.relatedAction> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:targetId @<RequestGroup.action.relatedAction.targetId>;  # What action this is related to
+    fhir:relationship @<RequestGroup.action.relatedAction.relationship>;  # before-start | before | before-end 
+                                            # | concurrent-with-start | 
+                                            # concurrent | concurrent-with-end | 
+                                            # after-start | after | after-end 
+    fhir:offset (@<Duration>  OR 
+    			@<Range> )  AND { rdf:type IRI } ?;  # Time offset for the relationship
+}  
+
+# Sub action
+<RequestGroup.action.action> CLOSED {   
+}  
+
+#---------------------- Data Types -------------------
+
+# Primitive Type dateTime
+<dateTime> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:dateTime];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v @<dateTime.value>?;              # Primitive value for dateTime
+}  
+
+# Time range defined by start and end date/time
+<Period> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Period];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:start @<Period.start>?;            # Starting time with inclusive 
+                                            # boundary 
+    fhir:end @<Period.end>?;                # End time with inclusive boundary, 
+                                            # if not ongoing 
+} AND (
+
+# Constraint: UniqueKey:per-1
+# Human readable:If present, start SHALL have a lower or equal value than end
+# XPath:not(exists(f:start/@value)) or not(exists(f:end/@value)) or (xs:dateTime(f:start/@value) <= xs:dateTime(f:end/@value))
+# Constraint:start.hasValue().not() or end.hasValue().not() or (start <= end)
+# ShEx:
+
+ NOT { fhir:start  . } OR  NOT { fhir:end  . } OR ({ fhir:start { fhir:v MaxInclusive { fhir:end } }  })
+
+)
+ 
+
+# A length of time
+<Duration> EXTENDS @<Quantity> CLOSED {   
+
+    a [fhir:Duration];
+    fhir:nodeRole [fhir:treeRoot]?;
+} AND (
+
+# Constraint: UniqueKey:drt-1
+# Human readable:There SHALL be a code if there is a value and it SHALL be an expression of time.  If system is present, it SHALL be UCUM.
+# XPath:(f:code or not(f:value)) and (not(exists(f:system)) or f:system/@value='http://unitsofmeasure.org')
+# Constraint:code.exists() implies ((system = %ucum) and value.exists())
+# ShEx:
+
+{ fhir:code . } AND (({ fhir:system { fhir:v ['http://unitsofmeasure.org'] }  }) AND { fhir:value . })
+
+)
+ 
+
+# A timing schedule that specifies an event that may occur multiple times
+<Timing> EXTENDS @<BackboneType> CLOSED {   
+
+    a [fhir:Timing];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:event @<OneOrMore_Timing.event>?;  # When the event occurs
+    fhir:repeat @<Timing.repeat>?;          # When the event is to occur
+    fhir:code @<Timing.code>?;              # C | BID | TID | QID | AM | PM | QD 
+                                            # | QOD | + 
+} AND (
+
+# Constraint: UniqueKey:tim-9
+# Human readable:If there's an offset, there must be a when (and not C, CM, CD, CV)
+# XPath:not(exists(f:offset)) or exists(f:when)
+# Constraint:offset.empty() or (when.exists() and ((when in ('C' | 'CM' | 'CD' | 'CV')).not()))
+# ShEx:
+
+ NOT { fhir:offset {fhir:v .} }  OR ({ fhir:when . } AND ( NOT { { fhir:when { fhir:v [('C' | 'CM' | 'CD' | 'CV')] }  } }))
+
+) AND (
+
+# Constraint: UniqueKey:tim-5
+# Human readable:period SHALL be a non-negative value
+# XPath:f:period/@value >= 0 or not(f:period/@value)
+# Constraint:period.exists() implies period >= 0
+# ShEx:
+
+{ fhir:period . } AND ({ fhir:period { fhir:v MinInclusive 0 }  })
+
+) AND (
+
+# Constraint: UniqueKey:tim-6
+# Human readable:If there's a periodMax, there must be a period
+# XPath:not(exists(f:periodMax)) or exists(f:period)
+# Constraint:periodMax.empty() or period.exists()
+# ShEx:
+
+ NOT { fhir:periodMax {fhir:v .} }  OR { fhir:period . }
+
+) AND (
+
+# Constraint: UniqueKey:tim-7
+# Human readable:If there's a durationMax, there must be a duration
+# XPath:not(exists(f:durationMax)) or exists(f:duration)
+# Constraint:durationMax.empty() or duration.exists()
+# ShEx:
+
+ NOT { fhir:durationMax {fhir:v .} }  OR { fhir:duration . }
+
+) AND (
+
+# Constraint: UniqueKey:tim-8
+# Human readable:If there's a countMax, there must be a count
+# XPath:not(exists(f:countMax)) or exists(f:count)
+# Constraint:countMax.empty() or count.exists()
+# ShEx:
+
+ NOT { fhir:countMax {fhir:v .} }  OR { fhir:count . }
+
+) AND (
+
+# Constraint: UniqueKey:tim-1
+# Human readable:if there's a duration, there needs to be duration units
+# XPath:not(exists(f:duration)) or exists(f:durationUnit)
+# Constraint:duration.empty() or durationUnit.exists()
+# ShEx:
+
+ NOT { fhir:duration {fhir:v .} }  OR { fhir:durationUnit . }
+
+) AND (
+
+# Constraint: UniqueKey:tim-10
+# Human readable:If there's a timeOfDay, there cannot be a when, or vice versa
+# XPath:not(exists(f:timeOfDay)) or not(exists(f:when))
+# Constraint:timeOfDay.empty() or when.empty()
+# ShEx:
+
+ NOT { fhir:timeOfDay {fhir:v .} }  OR  NOT { fhir:when {fhir:v .} } 
+
+) AND (
+
+# Constraint: UniqueKey:tim-2
+# Human readable:if there's a period, there needs to be period units
+# XPath:not(exists(f:period)) or exists(f:periodUnit)
+# Constraint:period.empty() or periodUnit.exists()
+# ShEx:
+
+ NOT { fhir:period {fhir:v .} }  OR { fhir:periodUnit . }
+
+) AND (
+
+# Constraint: UniqueKey:tim-4
+# Human readable:duration SHALL be a non-negative value
+# XPath:f:duration/@value >= 0 or not(f:duration/@value)
+# Constraint:duration.exists() implies duration >= 0
+# ShEx:
+
+{ fhir:duration . } AND ({ fhir:duration { fhir:v MinInclusive 0 }  })
+
+)
+ 
+
+# Set of values bounded by low and high
+<Range> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Range];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:low @<Range.low>?;                 # Low limit
+    fhir:high @<Range.high>?;               # High limit
+} AND (
+
+# Constraint: UniqueKey:rng-2
+# Human readable:If present, low SHALL have a lower value than high
+# XPath:not(exists(f:low/f:value/@value)) or not(exists(f:high/f:value/@value)) or (number(f:low/f:value/@value) <= number(f:high/f:value/@value))
+# Constraint:low.value.empty() or high.value.empty() or (low <= high)
+# ShEx:
+
+ NOT { fhir:low fhir:value {fhir:v .} }  OR  NOT { fhir:high fhir:value {fhir:v .} }  OR ({ fhir:low { fhir:v MaxInclusive { fhir:high } }  })
+
+)
+ 
+
+# A duration of time during which an organism (or a process) has existed
+<Age> EXTENDS @<Quantity> CLOSED {   
+
+    a [fhir:Age];
+    fhir:nodeRole [fhir:treeRoot]?;
+} AND (
+
+# Constraint: UniqueKey:age-1
+# Human readable:There SHALL be a code if there is a value and it SHALL be an expression of time.  If system is present, it SHALL be UCUM.  If value is present, it SHALL be positive.
+# XPath:(f:code or not(f:value)) and (not(exists(f:system)) or f:system/@value='http://unitsofmeasure.org') and (not(f:value/@value) or f:value/@value >=0)
+# Constraint:(code.exists() or value.empty()) and (system.empty() or system = %ucum) and (value.empty() or value.hasValue().not() or value > 0)
+# ShEx:
+
+({ fhir:code . } OR  NOT { fhir:value {fhir:v .} } ) AND ( NOT { fhir:system {fhir:v .} }  OR ({ fhir:system { fhir:v ['http://unitsofmeasure.org'] }  })) AND ( NOT { fhir:value {fhir:v .} }  OR  NOT { fhir:value  . } OR ({ fhir:value { fhir:v MinExclusive 0 }  }))
+
+)
+ 
+
+# When the event is to occur
+<Timing.repeat> EXTENDS @<Element> CLOSED {   
+    fhir:bounds (@<Duration>  OR 
+    			@<Range>  OR 
+    			@<Period> )  AND { rdf:type IRI } ?;  # Length/Range of lengths, or (Start 
+                                            # and/or end) limits 
+    fhir:count @<Timing.repeat.count>?;     # Number of times to repeat
+    fhir:countMax @<Timing.repeat.countMax>?;  # Maximum number of times to repeat
+    fhir:duration @<Timing.repeat.duration>?;  # How long when it happens
+    fhir:durationMax @<Timing.repeat.durationMax>?;  # How long when it happens (Max)
+    fhir:durationUnit @<Timing.repeat.durationUnit>?;  # s | min | h | d | wk | mo | a - 
+                                            # unit of time (UCUM) 
+    fhir:frequency @<Timing.repeat.frequency>?;  # Indicates the number of 
+                                            # repetitions that should occur 
+                                            # within a period. I.e. Event occurs 
+                                            # frequency times per period 
+    fhir:frequencyMax @<Timing.repeat.frequencyMax>?;  # Event occurs up to frequencyMax 
+                                            # times per period 
+    fhir:period @<Timing.repeat.period>?;   # The duration to which the 
+                                            # frequency applies. I.e. Event 
+                                            # occurs frequency times per period 
+    fhir:periodMax @<Timing.repeat.periodMax>?;  # Upper limit of period (3-4 hours)
+    fhir:periodUnit @<Timing.repeat.periodUnit>?;  # s | min | h | d | wk | mo | a - 
+                                            # unit of time (UCUM) 
+    fhir:dayOfWeek @<OneOrMore_Timing.repeat.dayOfWeek>?;  # mon | tue | wed | thu | fri | sat 
+                                            # | sun 
+    fhir:timeOfDay @<OneOrMore_Timing.repeat.timeOfDay>?;  # Time of day for action
+    fhir:when @<OneOrMore_Timing.repeat.when>?;  # Code for time period of occurrence
+    fhir:offset @<Timing.repeat.offset>?;   # Minutes from event (before or 
+                                            # after) 
+} AND (
+
+# Constraint: UniqueKey:age-1
+# Human readable:There SHALL be a code if there is a value and it SHALL be an expression of time.  If system is present, it SHALL be UCUM.  If value is present, it SHALL be positive.
+# XPath:(f:code or not(f:value)) and (not(exists(f:system)) or f:system/@value='http://unitsofmeasure.org') and (not(f:value/@value) or f:value/@value >=0)
+# Constraint:(code.exists() or value.empty()) and (system.empty() or system = %ucum) and (value.empty() or value.hasValue().not() or value > 0)
+# ShEx:
+
+({ fhir:code . } OR  NOT { fhir:value {fhir:v .} } ) AND ( NOT { fhir:system {fhir:v .} }  OR ({ fhir:system { fhir:v ['http://unitsofmeasure.org'] }  })) AND ( NOT { fhir:value {fhir:v .} }  OR  NOT { fhir:value  . } OR ({ fhir:value { fhir:v MinExclusive 0 }  }))
+
+)
+ 
+
+#---------------------- Cardinality Types (OneOrMore) -------------------
+
+<OneOrMore_RequestGroup.identifier> CLOSED {
+    rdf:first @<RequestGroup.identifier>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_RequestGroup.identifier> 
+}
+
+<OneOrMore_RequestGroup.instantiatesCanonical> CLOSED {
+    rdf:first @<RequestGroup.instantiatesCanonical>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_RequestGroup.instantiatesCanonical> 
+}
+
+<OneOrMore_RequestGroup.instantiatesUri> CLOSED {
+    rdf:first @<RequestGroup.instantiatesUri>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_RequestGroup.instantiatesUri> 
+}
+
+<OneOrMore_RequestGroup.basedOn_Resource> CLOSED {
+    rdf:first @<RequestGroup.basedOn> AND {fhir:link 
+			@<Resource> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_RequestGroup.basedOn_Resource> 
+}
+
+<OneOrMore_RequestGroup.replaces_Resource> CLOSED {
+    rdf:first @<RequestGroup.replaces> AND {fhir:link 
+			@<Resource> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_RequestGroup.replaces_Resource> 
+}
+
+<OneOrMore_RequestGroup.reason> CLOSED {
+    rdf:first @<RequestGroup.reason>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_RequestGroup.reason> 
+}
+
+<OneOrMore_RequestGroup.goal_Goal> CLOSED {
+    rdf:first @<RequestGroup.goal> AND {fhir:link 
+			@<Goal> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_RequestGroup.goal_Goal> 
+}
+
+<OneOrMore_RequestGroup.note> CLOSED {
+    rdf:first @<RequestGroup.note>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_RequestGroup.note> 
+}
+
+<OneOrMore_RequestGroup.action> CLOSED {
+    rdf:first @<RequestGroup.action>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_RequestGroup.action> 
+}
+
+<OneOrMore_RequestGroup.action.code> CLOSED {
+    rdf:first @<RequestGroup.action.code>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_RequestGroup.action.code> 
+}
+
+<OneOrMore_RequestGroup.action.documentation> CLOSED {
+    rdf:first @<RequestGroup.action.documentation>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_RequestGroup.action.documentation> 
+}
+
+<OneOrMore_RequestGroup.action.goal_Goal> CLOSED {
+    rdf:first @<RequestGroup.action.goal> AND {fhir:link 
+			@<Goal> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_RequestGroup.action.goal_Goal> 
+}
+
+<OneOrMore_RequestGroup.action.condition> CLOSED {
+    rdf:first @<RequestGroup.action.condition>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_RequestGroup.action.condition> 
+}
+
+<OneOrMore_RequestGroup.action.relatedAction> CLOSED {
+    rdf:first @<RequestGroup.action.relatedAction>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_RequestGroup.action.relatedAction> 
+}
+
+<OneOrMore_RequestGroup.action.participant> CLOSED {
+    rdf:first @<RequestGroup.action.participant>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_RequestGroup.action.participant> 
+}
+
+<OneOrMore_Timing.event> CLOSED {
+    rdf:first @<Timing.event>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Timing.event> 
+}
+
+<OneOrMore_Timing.repeat.dayOfWeek> CLOSED {
+    rdf:first @<Timing.repeat.dayOfWeek>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Timing.repeat.dayOfWeek> 
+}
+
+<OneOrMore_Timing.repeat.timeOfDay> CLOSED {
+    rdf:first @<Timing.repeat.timeOfDay>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Timing.repeat.timeOfDay> 
+}
+
+<OneOrMore_Timing.repeat.when> CLOSED {
+    rdf:first @<Timing.repeat.when>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Timing.repeat.when> 
+}
+
+#---------------------- Reference Types -------------------
+
+#---------------------- Value Sets ------------------------

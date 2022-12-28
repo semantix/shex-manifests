@@ -1,0 +1,441 @@
+﻿PREFIX fhir: <http://hl7.org/fhir/> 
+PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+BASE <http://hl7.org/fhir/shape/>
+
+
+start=@<ClaimResponse> AND {fhir:nodeRole [fhir:treeRoot]}
+
+
+# Response to a claim predetermination or preauthorization
+<ClaimResponse> EXTENDS @<DomainResource> CLOSED {   
+
+    a [fhir:ClaimResponse];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:identifier @<OneOrMore_ClaimResponse.identifier>?;  # Business Identifier for a claim 
+                                            # response 
+    fhir:status @<ClaimResponse.status>;    # active | cancelled | draft | 
+                                            # entered-in-error 
+    fhir:type @<ClaimResponse.type>;        # More granular claim type
+    fhir:subType @<ClaimResponse.subType>?;  # More granular claim type
+    fhir:use @<ClaimResponse.use>;          # claim | preauthorization | 
+                                            # predetermination 
+    fhir:patient @<ClaimResponse.patient> AND {fhir:link 
+    			@<Patient> };  # The recipient of the products and 
+                                            # services 
+    fhir:created @<ClaimResponse.created>;  # Response creation date
+    fhir:insurer @<ClaimResponse.insurer> AND {fhir:link 
+    			@<Organization> };  # Party responsible for reimbursement
+    fhir:requestor @<ClaimResponse.requestor> AND {fhir:link 
+    			@<Organization> OR 
+    			@<Practitioner> OR 
+    			@<PractitionerRole> }?;  # Party responsible for the claim
+    fhir:request @<ClaimResponse.request> AND {fhir:link 
+    			@<Claim> }?;  # Id of resource triggering 
+                                            # adjudication 
+    fhir:outcome @<ClaimResponse.outcome>;  # queued | complete | error | partial
+    fhir:disposition @<ClaimResponse.disposition>?;  # Disposition Message
+    fhir:preAuthRef @<ClaimResponse.preAuthRef>?;  # Preauthorization reference
+    fhir:preAuthPeriod @<ClaimResponse.preAuthPeriod>?;  # Preauthorization reference 
+                                            # effective period 
+    fhir:payeeType @<ClaimResponse.payeeType>?;  # Party to be paid any benefits 
+                                            # payable 
+    fhir:item @<OneOrMore_ClaimResponse.item>?;  # Adjudication for claim line items
+    fhir:addItem @<OneOrMore_ClaimResponse.addItem>?;  # Insurer added line items
+    fhir:adjudication @<OneOrMore_ClaimResponse.item.adjudication>?;  # Header-level adjudication
+    fhir:total @<OneOrMore_ClaimResponse.total>?;  # Adjudication totals
+    fhir:payment @<ClaimResponse.payment>?;  # Payment Details
+    fhir:fundsReserve @<ClaimResponse.fundsReserve>?;  # Funds reserved status
+    fhir:formCode @<ClaimResponse.formCode>?;  # Printed form identifier
+    fhir:form @<ClaimResponse.form>?;       # Printed reference or actual form
+    fhir:processNote @<OneOrMore_ClaimResponse.processNote>?;  # Note concerning adjudication
+    fhir:communicationRequest @<OneOrMore_ClaimResponse.communicationRequest_CommunicationRequest>?;  # Request for additional information
+    fhir:insurance @<OneOrMore_ClaimResponse.insurance>?;  # Patient insurance information
+    fhir:error @<OneOrMore_ClaimResponse.error>?;  # Processing errors
+}  
+
+# Adjudication for claim line items
+<ClaimResponse.item> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:itemSequence @<ClaimResponse.item.itemSequence>;  # Claim item instance identifier
+    fhir:noteNumber @<OneOrMore_ClaimResponse.item.noteNumber>?;  # Applicable note numbers
+    fhir:adjudication @<OneOrMore_ClaimResponse.item.adjudication>;  # Adjudication details
+    fhir:detail @<OneOrMore_ClaimResponse.item.detail>?;  # Adjudication for claim details
+}  
+
+# Insurer added line items
+<ClaimResponse.addItem.detail.subDetail> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:productOrService @<ClaimResponse.addItem.detail.subDetail.productOrService>;  # Billing, service, product, or drug 
+                                            # code 
+    fhir:modifier @<OneOrMore_ClaimResponse.addItem.detail.subDetail.modifier>?;  # Service/Product billing modifiers
+    fhir:quantity @<ClaimResponse.addItem.detail.subDetail.quantity>?;  # Count of products or services
+    fhir:unitPrice @<ClaimResponse.addItem.detail.subDetail.unitPrice>?;  # Fee, charge or cost per item
+    fhir:factor @<ClaimResponse.addItem.detail.subDetail.factor>?;  # Price scaling factor
+    fhir:net @<ClaimResponse.addItem.detail.subDetail.net>?;  # Total item cost
+    fhir:noteNumber @<OneOrMore_ClaimResponse.addItem.detail.subDetail.noteNumber>?;  # Applicable note numbers
+    fhir:adjudication @<OneOrMore_ClaimResponse.item.adjudication>;  # Added items detail adjudication
+}  
+
+# Payment Details
+<ClaimResponse.payment> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:type @<ClaimResponse.payment.type>;  # Partial or complete payment
+    fhir:adjustment @<ClaimResponse.payment.adjustment>?;  # Payment adjustment for non-claim 
+                                            # issues 
+    fhir:adjustmentReason @<ClaimResponse.payment.adjustmentReason>?;  # Explanation for the adjustment
+    fhir:date @<ClaimResponse.payment.date>?;  # Expected date of payment
+    fhir:amount @<ClaimResponse.payment.amount>;  # Payable amount after adjustment
+    fhir:identifier @<ClaimResponse.payment.identifier>?;  # Business identifier for the payment
+}  
+
+# Note concerning adjudication
+<ClaimResponse.processNote> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:number @<ClaimResponse.processNote.number>?;  # Note instance identifier
+    fhir:type @<ClaimResponse.processNote.type>?;  # display | print | printoper
+    fhir:text @<ClaimResponse.processNote.text>;  # Note explanatory text
+    fhir:language @<ClaimResponse.processNote.language>?;  # Language of the text
+}  
+
+# Processing errors
+<ClaimResponse.error> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:itemSequence @<ClaimResponse.error.itemSequence>?;  # Item sequence number
+    fhir:detailSequence @<ClaimResponse.error.detailSequence>?;  # Detail sequence number
+    fhir:subDetailSequence @<ClaimResponse.error.subDetailSequence>?;  # Subdetail sequence number
+    fhir:code @<ClaimResponse.error.code>;  # Error code detailing processing 
+                                            # issues 
+}  
+
+# Adjudication details
+<ClaimResponse.item.adjudication> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:category @<ClaimResponse.item.adjudication.category>;  # Type of adjudication information
+    fhir:reason @<ClaimResponse.item.adjudication.reason>?;  # Explanation of adjudication outcome
+    fhir:amount @<ClaimResponse.item.adjudication.amount>?;  # Monetary amount
+    fhir:value @<ClaimResponse.item.adjudication.value>?;  # Non-monetary value
+}  
+
+# Patient insurance information
+<ClaimResponse.insurance> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:sequence @<ClaimResponse.insurance.sequence>;  # Insurance instance identifier
+    fhir:focal @<ClaimResponse.insurance.focal>;  # Coverage to be used for 
+                                            # adjudication 
+    fhir:coverage @<ClaimResponse.insurance.coverage> AND {fhir:link 
+    			@<Coverage> };  # Insurance information
+    fhir:businessArrangement @<ClaimResponse.insurance.businessArrangement>?;  # Additional provider contract number
+    fhir:claimResponse @<ClaimResponse.insurance.claimResponse> AND {fhir:link 
+    			@<ClaimResponse> }?;  # Adjudication results
+}  
+
+# Adjudication for claim sub-details
+<ClaimResponse.item.detail.subDetail> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:subDetailSequence @<ClaimResponse.item.detail.subDetail.subDetailSequence>;  # Claim sub-detail instance 
+                                            # identifier 
+    fhir:noteNumber @<OneOrMore_ClaimResponse.item.detail.subDetail.noteNumber>?;  # Applicable note numbers
+    fhir:adjudication @<OneOrMore_ClaimResponse.item.adjudication>?;  # Subdetail level adjudication 
+                                            # details 
+}  
+
+# Insurer added line details
+<ClaimResponse.addItem.detail> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:productOrService @<ClaimResponse.addItem.detail.productOrService>;  # Billing, service, product, or drug 
+                                            # code 
+    fhir:modifier @<OneOrMore_ClaimResponse.addItem.detail.modifier>?;  # Service/Product billing modifiers
+    fhir:quantity @<ClaimResponse.addItem.detail.quantity>?;  # Count of products or services
+    fhir:unitPrice @<ClaimResponse.addItem.detail.unitPrice>?;  # Fee, charge or cost per item
+    fhir:factor @<ClaimResponse.addItem.detail.factor>?;  # Price scaling factor
+    fhir:net @<ClaimResponse.addItem.detail.net>?;  # Total item cost
+    fhir:noteNumber @<OneOrMore_ClaimResponse.addItem.detail.noteNumber>?;  # Applicable note numbers
+    fhir:adjudication @<OneOrMore_ClaimResponse.item.adjudication>;  # Added items detail adjudication
+    fhir:subDetail @<OneOrMore_ClaimResponse.addItem.detail.subDetail>?;  # Insurer added line items
+}  
+
+# Adjudication totals
+<ClaimResponse.total> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:category @<ClaimResponse.total.category>;  # Type of adjudication information
+    fhir:amount @<ClaimResponse.total.amount>;  # Financial total for the category
+}  
+
+# Adjudication for claim details
+<ClaimResponse.item.detail> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:detailSequence @<ClaimResponse.item.detail.detailSequence>;  # Claim detail instance identifier
+    fhir:noteNumber @<OneOrMore_ClaimResponse.item.detail.noteNumber>?;  # Applicable note numbers
+    fhir:adjudication @<OneOrMore_ClaimResponse.item.adjudication>;  # Detail level adjudication details
+    fhir:subDetail @<OneOrMore_ClaimResponse.item.detail.subDetail>?;  # Adjudication for claim sub-details
+}  
+
+# Insurer added line items
+<ClaimResponse.addItem> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:itemSequence @<OneOrMore_ClaimResponse.addItem.itemSequence>?;  # Item sequence number
+    fhir:detailSequence @<OneOrMore_ClaimResponse.addItem.detailSequence>?;  # Detail sequence number
+    fhir:subdetailSequence @<OneOrMore_ClaimResponse.addItem.subdetailSequence>?;  # Subdetail sequence number
+    fhir:provider @<OneOrMore_ClaimResponse.addItem.provider_Organization_OR_Practitioner_OR_PractitionerRole>?;  # Authorized providers
+    fhir:productOrService @<ClaimResponse.addItem.productOrService>;  # Billing, service, product, or drug 
+                                            # code 
+    fhir:modifier @<OneOrMore_ClaimResponse.addItem.modifier>?;  # Service/Product billing modifiers
+    fhir:programCode @<OneOrMore_ClaimResponse.addItem.programCode>?;  # Program the product or service is 
+                                            # provided under 
+    fhir:serviced (@<date>  OR 
+    			@<Period> )  AND { rdf:type IRI } ?;  # Date or dates of service or 
+                                            # product delivery 
+    fhir:location (@<CodeableConcept>  OR 
+    			@<Address>  OR 
+    			(@<Reference>  AND {fhir:link @<Location> }) )  AND { rdf:type IRI } ?;  # Place of service or where product 
+                                            # was supplied 
+    fhir:quantity @<ClaimResponse.addItem.quantity>?;  # Count of products or services
+    fhir:unitPrice @<ClaimResponse.addItem.unitPrice>?;  # Fee, charge or cost per item
+    fhir:factor @<ClaimResponse.addItem.factor>?;  # Price scaling factor
+    fhir:net @<ClaimResponse.addItem.net>?;  # Total item cost
+    fhir:bodySite @<ClaimResponse.addItem.bodySite>?;  # Anatomical location
+    fhir:subSite @<OneOrMore_ClaimResponse.addItem.subSite>?;  # Anatomical sub-location
+    fhir:noteNumber @<OneOrMore_ClaimResponse.addItem.noteNumber>?;  # Applicable note numbers
+    fhir:adjudication @<OneOrMore_ClaimResponse.item.adjudication>;  # Added items adjudication
+    fhir:detail @<OneOrMore_ClaimResponse.addItem.detail>?;  # Insurer added line details
+}  
+
+#---------------------- Data Types -------------------
+
+# Primitive Type date
+<date> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:date];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v @<date.value>?;                  # Primitive value for date
+}  
+
+# An address expressed using postal conventions (as opposed to GPS or other location definition formats)
+<Address> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Address];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:use @<Address.use>?;               # home | work | temp | old | billing 
+                                            # - purpose of this address 
+    fhir:type @<Address.type>?;             # postal | physical | both
+    fhir:text @<Address.text>?;             # Text representation of the address
+    fhir:line @<OneOrMore_Address.line>?;   # Street name, number, direction & 
+                                            # P.O. Box etc. 
+    fhir:city @<Address.city>?;             # Name of city, town etc.
+    fhir:district @<Address.district>?;     # District name (aka county)
+    fhir:state @<Address.state>?;           # Sub-unit of country (abbreviations 
+                                            # ok) 
+    fhir:postalCode @<Address.postalCode>?;  # Postal code for area
+    fhir:country @<Address.country>?;       # Country (e.g. may be ISO 3166 2 or 
+                                            # 3 letter code) 
+    fhir:period @<Address.period>?;         # Time period when address was/is in 
+                                            # use 
+}  
+
+# A reference from one resource to another
+<Reference> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Reference];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:link IRI?;
+    fhir:reference @<Reference.reference>?;  # Literal reference, Relative, 
+                                            # internal or absolute URL 
+    fhir:type @<Reference.type>?;           # Type the reference refers to (e.g. 
+                                            # "Patient") 
+    fhir:identifier @<Reference.identifier>?;  # Logical reference, when literal 
+                                            # reference is not known 
+    fhir:display @<Reference.display>?;     # Text alternative for the resource
+} AND (
+
+# Constraint: UniqueKey:ref-1
+# Human readable:SHALL have a contained resource if a local reference is provided
+# XPath:not(starts-with(f:reference/@value, '#')) or exists(ancestor::*[self::f:entry or self::f:parameter]/f:resource/f:*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')]|/*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')])
+# Constraint:reference.startsWith('#').not() or (reference.substring(1).trace('url') in %rootResource.contained.id.trace('ids')) or (reference='#' and %rootResource!=%resource)
+# ShEx:
+
+
+)
+ 
+
+# Time range defined by start and end date/time
+<Period> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Period];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:start @<Period.start>?;            # Starting time with inclusive 
+                                            # boundary 
+    fhir:end @<Period.end>?;                # End time with inclusive boundary, 
+                                            # if not ongoing 
+} AND (
+
+# Constraint: UniqueKey:per-1
+# Human readable:If present, start SHALL have a lower or equal value than end
+# XPath:not(exists(f:start/@value)) or not(exists(f:end/@value)) or (xs:dateTime(f:start/@value) <= xs:dateTime(f:end/@value))
+# Constraint:start.hasValue().not() or end.hasValue().not() or (start <= end)
+# ShEx:
+
+ NOT { fhir:start  . } OR  NOT { fhir:end  . } OR ({ fhir:start { fhir:v MaxInclusive { fhir:end } }  })
+
+)
+ 
+
+# Concept - reference to a terminology or just  text
+<CodeableConcept> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:CodeableConcept];
+    fhir:nodeRole [fhir:treeRoot]?;
+    a NONLITERAL*;
+    fhir:coding @<OneOrMore_CodeableConcept.coding>?;  # Code defined by a terminology 
+                                            # system 
+    fhir:text @<CodeableConcept.text>?;     # Plain text representation of the 
+                                            # concept 
+}  
+
+#---------------------- Cardinality Types (OneOrMore) -------------------
+
+<OneOrMore_ClaimResponse.identifier> CLOSED {
+    rdf:first @<ClaimResponse.identifier>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ClaimResponse.identifier> 
+}
+
+<OneOrMore_ClaimResponse.item> CLOSED {
+    rdf:first @<ClaimResponse.item>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ClaimResponse.item> 
+}
+
+<OneOrMore_ClaimResponse.addItem> CLOSED {
+    rdf:first @<ClaimResponse.addItem>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ClaimResponse.addItem> 
+}
+
+<OneOrMore_ClaimResponse.item.adjudication> CLOSED {
+    rdf:first @<ClaimResponse.item.adjudication>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ClaimResponse.item.adjudication> 
+}
+
+<OneOrMore_ClaimResponse.total> CLOSED {
+    rdf:first @<ClaimResponse.total>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ClaimResponse.total> 
+}
+
+<OneOrMore_ClaimResponse.processNote> CLOSED {
+    rdf:first @<ClaimResponse.processNote>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ClaimResponse.processNote> 
+}
+
+<OneOrMore_ClaimResponse.communicationRequest_CommunicationRequest> CLOSED {
+    rdf:first @<ClaimResponse.communicationRequest> AND {fhir:link 
+			@<CommunicationRequest> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ClaimResponse.communicationRequest_CommunicationRequest> 
+}
+
+<OneOrMore_ClaimResponse.insurance> CLOSED {
+    rdf:first @<ClaimResponse.insurance>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ClaimResponse.insurance> 
+}
+
+<OneOrMore_ClaimResponse.error> CLOSED {
+    rdf:first @<ClaimResponse.error>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ClaimResponse.error> 
+}
+
+<OneOrMore_ClaimResponse.item.noteNumber> CLOSED {
+    rdf:first @<ClaimResponse.item.noteNumber>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ClaimResponse.item.noteNumber> 
+}
+
+<OneOrMore_ClaimResponse.item.detail> CLOSED {
+    rdf:first @<ClaimResponse.item.detail>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ClaimResponse.item.detail> 
+}
+
+<OneOrMore_ClaimResponse.addItem.detail.subDetail.modifier> CLOSED {
+    rdf:first @<ClaimResponse.addItem.detail.subDetail.modifier>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ClaimResponse.addItem.detail.subDetail.modifier> 
+}
+
+<OneOrMore_ClaimResponse.addItem.detail.subDetail.noteNumber> CLOSED {
+    rdf:first @<ClaimResponse.addItem.detail.subDetail.noteNumber>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ClaimResponse.addItem.detail.subDetail.noteNumber> 
+}
+
+<OneOrMore_ClaimResponse.item.detail.subDetail.noteNumber> CLOSED {
+    rdf:first @<ClaimResponse.item.detail.subDetail.noteNumber>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ClaimResponse.item.detail.subDetail.noteNumber> 
+}
+
+<OneOrMore_ClaimResponse.addItem.detail.modifier> CLOSED {
+    rdf:first @<ClaimResponse.addItem.detail.modifier>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ClaimResponse.addItem.detail.modifier> 
+}
+
+<OneOrMore_ClaimResponse.addItem.detail.noteNumber> CLOSED {
+    rdf:first @<ClaimResponse.addItem.detail.noteNumber>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ClaimResponse.addItem.detail.noteNumber> 
+}
+
+<OneOrMore_ClaimResponse.addItem.detail.subDetail> CLOSED {
+    rdf:first @<ClaimResponse.addItem.detail.subDetail>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ClaimResponse.addItem.detail.subDetail> 
+}
+
+<OneOrMore_ClaimResponse.item.detail.noteNumber> CLOSED {
+    rdf:first @<ClaimResponse.item.detail.noteNumber>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ClaimResponse.item.detail.noteNumber> 
+}
+
+<OneOrMore_ClaimResponse.item.detail.subDetail> CLOSED {
+    rdf:first @<ClaimResponse.item.detail.subDetail>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ClaimResponse.item.detail.subDetail> 
+}
+
+<OneOrMore_ClaimResponse.addItem.itemSequence> CLOSED {
+    rdf:first @<ClaimResponse.addItem.itemSequence>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ClaimResponse.addItem.itemSequence> 
+}
+
+<OneOrMore_ClaimResponse.addItem.detailSequence> CLOSED {
+    rdf:first @<ClaimResponse.addItem.detailSequence>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ClaimResponse.addItem.detailSequence> 
+}
+
+<OneOrMore_ClaimResponse.addItem.subdetailSequence> CLOSED {
+    rdf:first @<ClaimResponse.addItem.subdetailSequence>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ClaimResponse.addItem.subdetailSequence> 
+}
+
+<OneOrMore_ClaimResponse.addItem.provider_Organization_OR_Practitioner_OR_PractitionerRole> CLOSED {
+    rdf:first @<ClaimResponse.addItem.provider> AND {fhir:link 
+			@<Organization> OR 
+			@<Practitioner> OR 
+			@<PractitionerRole> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ClaimResponse.addItem.provider_Organization_OR_Practitioner_OR_PractitionerRole> 
+}
+
+<OneOrMore_ClaimResponse.addItem.modifier> CLOSED {
+    rdf:first @<ClaimResponse.addItem.modifier>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ClaimResponse.addItem.modifier> 
+}
+
+<OneOrMore_ClaimResponse.addItem.programCode> CLOSED {
+    rdf:first @<ClaimResponse.addItem.programCode>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ClaimResponse.addItem.programCode> 
+}
+
+<OneOrMore_ClaimResponse.addItem.subSite> CLOSED {
+    rdf:first @<ClaimResponse.addItem.subSite>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ClaimResponse.addItem.subSite> 
+}
+
+<OneOrMore_ClaimResponse.addItem.noteNumber> CLOSED {
+    rdf:first @<ClaimResponse.addItem.noteNumber>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ClaimResponse.addItem.noteNumber> 
+}
+
+<OneOrMore_ClaimResponse.addItem.detail> CLOSED {
+    rdf:first @<ClaimResponse.addItem.detail>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ClaimResponse.addItem.detail> 
+}
+
+<OneOrMore_Address.line> CLOSED {
+    rdf:first @<Address.line>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Address.line> 
+}
+
+<OneOrMore_CodeableConcept.coding> CLOSED {
+    rdf:first @<CodeableConcept.coding>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_CodeableConcept.coding> 
+}
+
+#---------------------- Reference Types -------------------
+
+#---------------------- Value Sets ------------------------

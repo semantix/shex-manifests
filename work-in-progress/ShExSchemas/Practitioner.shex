@@ -1,0 +1,116 @@
+﻿PREFIX fhir: <http://hl7.org/fhir/> 
+PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+BASE <http://hl7.org/fhir/shape/>
+
+
+start=@<Practitioner> AND {fhir:nodeRole [fhir:treeRoot]}
+
+
+# A person with a  formal responsibility in the provisioning of healthcare or related services
+<Practitioner> EXTENDS @<DomainResource> CLOSED {   
+
+    a [fhir:Practitioner];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:identifier @<OneOrMore_Practitioner.identifier>?;  # An identifier for the person as 
+                                            # this agent 
+    fhir:active @<Practitioner.active>?;    # Whether this practitioner's record 
+                                            # is in active use 
+    fhir:name @<OneOrMore_Practitioner.name>?;  # The name(s) associated with the 
+                                            # practitioner 
+    fhir:telecom @<OneOrMore_Practitioner.telecom>?;  # A contact detail for the 
+                                            # practitioner (that apply to all 
+                                            # roles) 
+    fhir:deceased (@<boolean>  OR 
+    			@<dateTime> )  AND { rdf:type IRI } ?;  # Indicates if the practitioner is 
+                                            # deceased or not 
+    fhir:address @<OneOrMore_Practitioner.address>?;  # Address(es) of the practitioner 
+                                            # that are not role specific 
+                                            # (typically home address) 
+    fhir:gender @<Practitioner.gender>?;    # male | female | other | unknown
+    fhir:birthDate @<Practitioner.birthDate>?;  # The date  on which the 
+                                            # practitioner was born 
+    fhir:photo @<OneOrMore_Practitioner.photo>?;  # Image of the person
+    fhir:qualification @<OneOrMore_Practitioner.qualification>?;  # Certification, licenses, or 
+                                            # training pertaining to the 
+                                            # provision of care 
+    fhir:communication @<OneOrMore_Practitioner.communication>?;  # A language the practitioner can 
+                                            # use in patient communication 
+}  
+
+# Certification, licenses, or training pertaining to the provision of care
+<Practitioner.qualification> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:identifier @<OneOrMore_Practitioner.qualification.identifier>?;  # An identifier for this 
+                                            # qualification for the practitioner 
+    fhir:code @<Practitioner.qualification.code>;  # Coded representation of the 
+                                            # qualification 
+    fhir:period @<Practitioner.qualification.period>?;  # Period during which the 
+                                            # qualification is valid 
+    fhir:issuer @<Practitioner.qualification.issuer> AND {fhir:link 
+    			@<Organization> }?;  # Organization that regulates and 
+                                            # issues the qualification 
+}  
+
+#---------------------- Data Types -------------------
+
+# Primitive Type dateTime
+<dateTime> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:dateTime];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v @<dateTime.value>?;              # Primitive value for dateTime
+}  
+
+# Primitive Type boolean
+<boolean> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:boolean];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v @<boolean.value>?;               # Primitive value for boolean
+}  
+
+#---------------------- Cardinality Types (OneOrMore) -------------------
+
+<OneOrMore_Practitioner.identifier> CLOSED {
+    rdf:first @<Practitioner.identifier>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Practitioner.identifier> 
+}
+
+<OneOrMore_Practitioner.name> CLOSED {
+    rdf:first @<Practitioner.name>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Practitioner.name> 
+}
+
+<OneOrMore_Practitioner.telecom> CLOSED {
+    rdf:first @<Practitioner.telecom>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Practitioner.telecom> 
+}
+
+<OneOrMore_Practitioner.address> CLOSED {
+    rdf:first @<Practitioner.address>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Practitioner.address> 
+}
+
+<OneOrMore_Practitioner.photo> CLOSED {
+    rdf:first @<Practitioner.photo>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Practitioner.photo> 
+}
+
+<OneOrMore_Practitioner.qualification> CLOSED {
+    rdf:first @<Practitioner.qualification>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Practitioner.qualification> 
+}
+
+<OneOrMore_Practitioner.communication> CLOSED {
+    rdf:first @<Practitioner.communication>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Practitioner.communication> 
+}
+
+<OneOrMore_Practitioner.qualification.identifier> CLOSED {
+    rdf:first @<Practitioner.qualification.identifier>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Practitioner.qualification.identifier> 
+}
+
+#---------------------- Reference Types -------------------
+
+#---------------------- Value Sets ------------------------

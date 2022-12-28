@@ -1,0 +1,58 @@
+﻿PREFIX fhir: <http://hl7.org/fhir/> 
+PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+BASE <http://hl7.org/fhir/shape/>
+
+
+start=@<Flag> AND {fhir:nodeRole [fhir:treeRoot]}
+
+
+# Key information to flag to healthcare providers
+<Flag> EXTENDS @<DomainResource> CLOSED {   
+
+    a [fhir:Flag];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:identifier @<OneOrMore_Flag.identifier>?;  # Business identifier
+    fhir:status @<Flag.status>;             # active | inactive | 
+                                            # entered-in-error 
+    fhir:category @<OneOrMore_Flag.category>?;  # Clinical, administrative, etc.
+    fhir:code @<Flag.code>;                 # Coded or textual message to 
+                                            # display to user 
+    fhir:subject @<Flag.subject> AND {fhir:link 
+    			@<Group> OR 
+    			@<Location> OR 
+    			@<Medication> OR 
+    			@<Organization> OR 
+    			@<Patient> OR 
+    			@<PlanDefinition> OR 
+    			@<Practitioner> OR 
+    			@<PractitionerRole> OR 
+    			@<Procedure> };  # Who/What is flag about?
+    fhir:period @<Flag.period>?;            # Time period when flag is active
+    fhir:encounter @<Flag.encounter> AND {fhir:link 
+    			@<Encounter> }?;  # Alert relevant during encounter
+    fhir:author @<Flag.author> AND {fhir:link 
+    			@<Device> OR 
+    			@<Organization> OR 
+    			@<Patient> OR 
+    			@<Practitioner> OR 
+    			@<PractitionerRole> }?;  # Flag creator
+}  
+
+#---------------------- Data Types -------------------
+
+#---------------------- Cardinality Types (OneOrMore) -------------------
+
+<OneOrMore_Flag.identifier> CLOSED {
+    rdf:first @<Flag.identifier>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Flag.identifier> 
+}
+
+<OneOrMore_Flag.category> CLOSED {
+    rdf:first @<Flag.category>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Flag.category> 
+}
+
+#---------------------- Reference Types -------------------
+
+#---------------------- Value Sets ------------------------

@@ -1,0 +1,211 @@
+﻿PREFIX fhir: <http://hl7.org/fhir/> 
+PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+BASE <http://hl7.org/fhir/shape/>
+
+
+start=@<CoverageEligibilityRequest> AND {fhir:nodeRole [fhir:treeRoot]}
+
+
+# CoverageEligibilityRequest resource
+<CoverageEligibilityRequest> EXTENDS @<DomainResource> CLOSED {   
+
+    a [fhir:CoverageEligibilityRequest];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:identifier @<OneOrMore_CoverageEligibilityRequest.identifier>?;  # Business Identifier for coverage 
+                                            # eligiblity request 
+    fhir:status @<CoverageEligibilityRequest.status>;  # active | cancelled | draft | 
+                                            # entered-in-error 
+    fhir:priority @<CoverageEligibilityRequest.priority>?;  # Desired processing priority
+    fhir:purpose @<OneOrMore_CoverageEligibilityRequest.purpose>;  # auth-requirements | benefits | 
+                                            # discovery | validation 
+    fhir:patient @<CoverageEligibilityRequest.patient> AND {fhir:link 
+    			@<Patient> };  # Intended recipient of products and 
+                                            # services 
+    fhir:serviced (@<date>  OR 
+    			@<Period> )  AND { rdf:type IRI } ?;  # Estimated date or dates of service
+    fhir:created @<CoverageEligibilityRequest.created>;  # Creation date
+    fhir:enterer @<CoverageEligibilityRequest.enterer> AND {fhir:link 
+    			@<Practitioner> OR 
+    			@<PractitionerRole> }?;  # Author
+    fhir:provider @<CoverageEligibilityRequest.provider> AND {fhir:link 
+    			@<Organization> OR 
+    			@<Practitioner> OR 
+    			@<PractitionerRole> }?;  # Party responsible for the request
+    fhir:insurer @<CoverageEligibilityRequest.insurer> AND {fhir:link 
+    			@<Organization> };  # Coverage issuer
+    fhir:facility @<CoverageEligibilityRequest.facility> AND {fhir:link 
+    			@<Location> }?;  # Servicing facility
+    fhir:supportingInfo @<OneOrMore_CoverageEligibilityRequest.supportingInfo>?;  # Supporting information
+    fhir:insurance @<OneOrMore_CoverageEligibilityRequest.insurance>?;  # Patient insurance information
+    fhir:item @<OneOrMore_CoverageEligibilityRequest.item>?;  # Item to be evaluated for eligibiity
+}  
+
+# Supporting information
+<CoverageEligibilityRequest.supportingInfo> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:sequence @<CoverageEligibilityRequest.supportingInfo.sequence>;  # Information instance identifier
+    fhir:information @<CoverageEligibilityRequest.supportingInfo.information> AND {fhir:link 
+    			@<Resource> };  # Data to be provided
+    fhir:appliesToAll @<CoverageEligibilityRequest.supportingInfo.appliesToAll>?;  # Applies to all items
+}  
+
+# Item to be evaluated for eligibiity
+<CoverageEligibilityRequest.item> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:supportingInfoSequence @<OneOrMore_CoverageEligibilityRequest.item.supportingInfoSequence>?;  # Applicable exception or supporting 
+                                            # information 
+    fhir:category @<CoverageEligibilityRequest.item.category>?;  # Benefit classification
+    fhir:productOrService @<CoverageEligibilityRequest.item.productOrService>?;  # Billing, service, product, or drug 
+                                            # code 
+    fhir:modifier @<OneOrMore_CoverageEligibilityRequest.item.modifier>?;  # Product or service billing 
+                                            # modifiers 
+    fhir:provider @<CoverageEligibilityRequest.item.provider> AND {fhir:link 
+    			@<Practitioner> OR 
+    			@<PractitionerRole> }?;  # Perfoming practitioner
+    fhir:quantity @<CoverageEligibilityRequest.item.quantity>?;  # Count of products or services
+    fhir:unitPrice @<CoverageEligibilityRequest.item.unitPrice>?;  # Fee, charge or cost per item
+    fhir:facility @<CoverageEligibilityRequest.item.facility> AND {fhir:link 
+    			@<Location> OR 
+    			@<Organization> }?;  # Servicing facility
+    fhir:diagnosis @<OneOrMore_CoverageEligibilityRequest.item.diagnosis>?;  # Applicable diagnosis
+    fhir:detail @<OneOrMore_CoverageEligibilityRequest.item.detail_Resource>?;  # Product or service details
+}  
+
+# Patient insurance information
+<CoverageEligibilityRequest.insurance> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:focal @<CoverageEligibilityRequest.insurance.focal>?;  # Applicable coverage
+    fhir:coverage @<CoverageEligibilityRequest.insurance.coverage> AND {fhir:link 
+    			@<Coverage> };  # Insurance information
+    fhir:businessArrangement @<CoverageEligibilityRequest.insurance.businessArrangement>?;  # Additional provider contract number
+}  
+
+# Applicable diagnosis
+<CoverageEligibilityRequest.item.diagnosis> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:diagnosis (@<CodeableConcept>  OR 
+    			(@<Reference>  AND {fhir:link @<Condition> }) )  AND { rdf:type IRI } ?;  # Nature of illness or problem
+}  
+
+#---------------------- Data Types -------------------
+
+# Primitive Type date
+<date> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:date];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v @<date.value>?;                  # Primitive value for date
+}  
+
+# A reference from one resource to another
+<Reference> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Reference];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:link IRI?;
+    fhir:reference @<Reference.reference>?;  # Literal reference, Relative, 
+                                            # internal or absolute URL 
+    fhir:type @<Reference.type>?;           # Type the reference refers to (e.g. 
+                                            # "Patient") 
+    fhir:identifier @<Reference.identifier>?;  # Logical reference, when literal 
+                                            # reference is not known 
+    fhir:display @<Reference.display>?;     # Text alternative for the resource
+} AND (
+
+# Constraint: UniqueKey:ref-1
+# Human readable:SHALL have a contained resource if a local reference is provided
+# XPath:not(starts-with(f:reference/@value, '#')) or exists(ancestor::*[self::f:entry or self::f:parameter]/f:resource/f:*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')]|/*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')])
+# Constraint:reference.startsWith('#').not() or (reference.substring(1).trace('url') in %rootResource.contained.id.trace('ids')) or (reference='#' and %rootResource!=%resource)
+# ShEx:
+
+
+)
+ 
+
+# Time range defined by start and end date/time
+<Period> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Period];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:start @<Period.start>?;            # Starting time with inclusive 
+                                            # boundary 
+    fhir:end @<Period.end>?;                # End time with inclusive boundary, 
+                                            # if not ongoing 
+} AND (
+
+# Constraint: UniqueKey:per-1
+# Human readable:If present, start SHALL have a lower or equal value than end
+# XPath:not(exists(f:start/@value)) or not(exists(f:end/@value)) or (xs:dateTime(f:start/@value) <= xs:dateTime(f:end/@value))
+# Constraint:start.hasValue().not() or end.hasValue().not() or (start <= end)
+# ShEx:
+
+ NOT { fhir:start  . } OR  NOT { fhir:end  . } OR ({ fhir:start { fhir:v MaxInclusive { fhir:end } }  })
+
+)
+ 
+
+# Concept - reference to a terminology or just  text
+<CodeableConcept> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:CodeableConcept];
+    fhir:nodeRole [fhir:treeRoot]?;
+    a NONLITERAL*;
+    fhir:coding @<OneOrMore_CodeableConcept.coding>?;  # Code defined by a terminology 
+                                            # system 
+    fhir:text @<CodeableConcept.text>?;     # Plain text representation of the 
+                                            # concept 
+}  
+
+#---------------------- Cardinality Types (OneOrMore) -------------------
+
+<OneOrMore_CoverageEligibilityRequest.identifier> CLOSED {
+    rdf:first @<CoverageEligibilityRequest.identifier>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_CoverageEligibilityRequest.identifier> 
+}
+
+<OneOrMore_CoverageEligibilityRequest.purpose> CLOSED {
+    rdf:first @<CoverageEligibilityRequest.purpose>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_CoverageEligibilityRequest.purpose> 
+}
+
+<OneOrMore_CoverageEligibilityRequest.supportingInfo> CLOSED {
+    rdf:first @<CoverageEligibilityRequest.supportingInfo>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_CoverageEligibilityRequest.supportingInfo> 
+}
+
+<OneOrMore_CoverageEligibilityRequest.insurance> CLOSED {
+    rdf:first @<CoverageEligibilityRequest.insurance>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_CoverageEligibilityRequest.insurance> 
+}
+
+<OneOrMore_CoverageEligibilityRequest.item> CLOSED {
+    rdf:first @<CoverageEligibilityRequest.item>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_CoverageEligibilityRequest.item> 
+}
+
+<OneOrMore_CoverageEligibilityRequest.item.supportingInfoSequence> CLOSED {
+    rdf:first @<CoverageEligibilityRequest.item.supportingInfoSequence>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_CoverageEligibilityRequest.item.supportingInfoSequence> 
+}
+
+<OneOrMore_CoverageEligibilityRequest.item.modifier> CLOSED {
+    rdf:first @<CoverageEligibilityRequest.item.modifier>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_CoverageEligibilityRequest.item.modifier> 
+}
+
+<OneOrMore_CoverageEligibilityRequest.item.diagnosis> CLOSED {
+    rdf:first @<CoverageEligibilityRequest.item.diagnosis>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_CoverageEligibilityRequest.item.diagnosis> 
+}
+
+<OneOrMore_CoverageEligibilityRequest.item.detail_Resource> CLOSED {
+    rdf:first @<CoverageEligibilityRequest.item.detail> AND {fhir:link 
+			@<Resource> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_CoverageEligibilityRequest.item.detail_Resource> 
+}
+
+<OneOrMore_CodeableConcept.coding> CLOSED {
+    rdf:first @<CodeableConcept.coding>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_CodeableConcept.coding> 
+}
+
+#---------------------- Reference Types -------------------
+
+#---------------------- Value Sets ------------------------

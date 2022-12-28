@@ -1,0 +1,23 @@
+﻿PREFIX fhir: <http://hl7.org/fhir/> 
+PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+BASE <http://hl7.org/fhir/shape/>
+
+
+# An amount of economic utility in some recognized currency
+<Money> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Money];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:value @<Money.value>?;             # Numerical value (with implicit 
+                                            # precision) 
+    fhir:currency @<Money.currency>?;       # ISO 4217 Currency Code
+}  
+
+#---------------------- Data Types -------------------
+
+#---------------------- Cardinality Types (OneOrMore) -------------------
+
+#---------------------- Reference Types -------------------
+
+#---------------------- Value Sets ------------------------

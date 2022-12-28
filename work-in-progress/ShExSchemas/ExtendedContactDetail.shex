@@ -1,0 +1,33 @@
+﻿PREFIX fhir: <http://hl7.org/fhir/> 
+PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+BASE <http://hl7.org/fhir/shape/>
+
+
+# Contact information
+<ExtendedContactDetail> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:ExtendedContactDetail];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:purpose @<ExtendedContactDetail.purpose>?;  # The type of contact
+    fhir:name @<ExtendedContactDetail.name>?;  # Name of an individual to contact
+    fhir:telecom @<OneOrMore_ExtendedContactDetail.telecom>?;  # Contact details (e.g.phone/fax/url)
+    fhir:address @<ExtendedContactDetail.address>?;  # Address for the contact
+    fhir:organization @<ExtendedContactDetail.organization> AND {fhir:link 
+    			@<Organization> }?;  # Organization
+    fhir:period @<ExtendedContactDetail.period>?;  # Period that this contact was valid 
+                                            # for usage 
+}  
+
+#---------------------- Data Types -------------------
+
+#---------------------- Cardinality Types (OneOrMore) -------------------
+
+<OneOrMore_ExtendedContactDetail.telecom> CLOSED {
+    rdf:first @<ExtendedContactDetail.telecom>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ExtendedContactDetail.telecom> 
+}
+
+#---------------------- Reference Types -------------------
+
+#---------------------- Value Sets ------------------------

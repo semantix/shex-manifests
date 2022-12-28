@@ -1,0 +1,27 @@
+﻿PREFIX fhir: <http://hl7.org/fhir/> 
+PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+BASE <http://hl7.org/fhir/shape/>
+
+
+# Base for elements defined inside a resource
+<BackboneElement> EXTENDS @<Element> CLOSED {   
+
+    a [fhir:BackboneElement];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:modifierExtension @<OneOrMore_BackboneElement.modifierExtension>?;  # Extensions that cannot be ignored 
+                                            # even if unrecognized 
+}  
+
+#---------------------- Data Types -------------------
+
+#---------------------- Cardinality Types (OneOrMore) -------------------
+
+<OneOrMore_BackboneElement.modifierExtension> CLOSED {
+    rdf:first @<BackboneElement.modifierExtension>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_BackboneElement.modifierExtension> 
+}
+
+#---------------------- Reference Types -------------------
+
+#---------------------- Value Sets ------------------------

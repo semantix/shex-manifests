@@ -1,0 +1,558 @@
+﻿PREFIX fhir: <http://hl7.org/fhir/> 
+PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+BASE <http://hl7.org/fhir/shape/>
+
+
+start=@<Claim> AND {fhir:nodeRole [fhir:treeRoot]}
+
+
+# Claim, Pre-determination or Pre-authorization
+<Claim> EXTENDS @<DomainResource> CLOSED {   
+
+    a [fhir:Claim];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:identifier @<OneOrMore_Claim.identifier>?;  # Business Identifier for claim
+    fhir:status @<Claim.status>;            # active | cancelled | draft | 
+                                            # entered-in-error 
+    fhir:type @<Claim.type>;                # Category or discipline
+    fhir:subType @<Claim.subType>?;         # More granular claim type
+    fhir:use @<Claim.use>;                  # claim | preauthorization | 
+                                            # predetermination 
+    fhir:patient @<Claim.patient> AND {fhir:link 
+    			@<Patient> };  # The recipient of the products and 
+                                            # services 
+    fhir:billablePeriod @<Claim.billablePeriod>?;  # Relevant time frame for the claim
+    fhir:created @<Claim.created>;          # Resource creation date
+    fhir:enterer @<Claim.enterer> AND {fhir:link 
+    			@<Practitioner> OR 
+    			@<PractitionerRole> }?;  # Author of the claim
+    fhir:insurer @<Claim.insurer> AND {fhir:link 
+    			@<Organization> }?;  # Target
+    fhir:provider @<Claim.provider> AND {fhir:link 
+    			@<Organization> OR 
+    			@<Practitioner> OR 
+    			@<PractitionerRole> };  # Party responsible for the claim
+    fhir:priority @<Claim.priority>;        # Desired processing ugency
+    fhir:fundsReserve @<Claim.fundsReserve>?;  # For whom to reserve funds
+    fhir:related @<OneOrMore_Claim.related>?;  # Prior or corollary claims
+    fhir:prescription @<Claim.prescription> AND {fhir:link 
+    			@<DeviceRequest> OR 
+    			@<MedicationRequest> OR 
+    			@<VisionPrescription> }?;  # Prescription authorizing services 
+                                            # and products 
+    fhir:originalPrescription @<Claim.originalPrescription> AND {fhir:link 
+    			@<DeviceRequest> OR 
+    			@<MedicationRequest> OR 
+    			@<VisionPrescription> }?;  # Original prescription if 
+                                            # superseded by fulfiller 
+    fhir:payee @<Claim.payee>?;             # Recipient of benefits payable
+    fhir:referral @<Claim.referral> AND {fhir:link 
+    			@<ServiceRequest> }?;  # Treatment referral
+    fhir:facility @<Claim.facility> AND {fhir:link 
+    			@<Location> }?;  # Servicing facility
+    fhir:careTeam @<OneOrMore_Claim.careTeam>?;  # Members of the care team
+    fhir:supportingInfo @<OneOrMore_Claim.supportingInfo>?;  # Supporting information
+    fhir:diagnosis @<OneOrMore_Claim.diagnosis>?;  # Pertinent diagnosis information
+    fhir:procedure @<OneOrMore_Claim.procedure>?;  # Clinical procedures performed
+    fhir:insurance @<OneOrMore_Claim.insurance>;  # Patient insurance information
+    fhir:accident @<Claim.accident>?;       # Details of the event
+    fhir:item @<OneOrMore_Claim.item>?;     # Product or service provided
+    fhir:total @<Claim.total>?;             # Total claim cost
+}  
+
+# Members of the care team
+<Claim.careTeam> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:sequence @<Claim.careTeam.sequence>;  # Order of care team
+    fhir:provider @<Claim.careTeam.provider> AND {fhir:link 
+    			@<Organization> OR 
+    			@<Practitioner> OR 
+    			@<PractitionerRole> };  # Practitioner or organization
+    fhir:responsible @<Claim.careTeam.responsible>?;  # Indicator of the lead practitioner
+    fhir:role @<Claim.careTeam.role>?;      # Function within the team
+    fhir:qualification @<Claim.careTeam.qualification>?;  # Practitioner credential or 
+                                            # specialization 
+}  
+
+# Prior or corollary claims
+<Claim.related> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:claim @<Claim.related.claim> AND {fhir:link 
+    			@<Claim> }?;  # Reference to the related claim
+    fhir:relationship @<Claim.related.relationship>?;  # How the reference claim is related
+    fhir:reference @<Claim.related.reference>?;  # File or case reference
+}  
+
+# Patient insurance information
+<Claim.insurance> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:sequence @<Claim.insurance.sequence>;  # Insurance instance identifier
+    fhir:focal @<Claim.insurance.focal>;    # Coverage to be used for 
+                                            # adjudication 
+    fhir:identifier @<Claim.insurance.identifier>?;  # Pre-assigned Claim number
+    fhir:coverage @<Claim.insurance.coverage> AND {fhir:link 
+    			@<Coverage> };  # Insurance information
+    fhir:businessArrangement @<Claim.insurance.businessArrangement>?;  # Additional provider contract number
+    fhir:preAuthRef @<OneOrMore_Claim.insurance.preAuthRef>?;  # Prior authorization reference 
+                                            # number 
+    fhir:claimResponse @<Claim.insurance.claimResponse> AND {fhir:link 
+    			@<ClaimResponse> }?;  # Adjudication results
+}  
+
+# Supporting information
+<Claim.supportingInfo> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:sequence @<Claim.supportingInfo.sequence>;  # Information instance identifier
+    fhir:category @<Claim.supportingInfo.category>;  # Classification of the supplied 
+                                            # information 
+    fhir:code @<Claim.supportingInfo.code>?;  # Type of information
+    fhir:timing (@<date>  OR 
+    			@<Period> )  AND { rdf:type IRI } ?;  # When it occurred
+    fhir:value (@<boolean>  OR 
+    			@<string>  OR 
+    			@<Quantity>  OR 
+    			@<Attachment>  OR 
+    			(@<Reference>  AND {fhir:link @<Resource> }) )  AND { rdf:type IRI } ?;  # Data to be provided
+    fhir:reason @<Claim.supportingInfo.reason>?;  # Explanation for the information
+}  
+
+# Product or service provided
+<Claim.item> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:sequence @<Claim.item.sequence>;   # Item instance identifier
+    fhir:careTeamSequence @<OneOrMore_Claim.item.careTeamSequence>?;  # Applicable careTeam members
+    fhir:diagnosisSequence @<OneOrMore_Claim.item.diagnosisSequence>?;  # Applicable diagnoses
+    fhir:procedureSequence @<OneOrMore_Claim.item.procedureSequence>?;  # Applicable procedures
+    fhir:informationSequence @<OneOrMore_Claim.item.informationSequence>?;  # Applicable exception and 
+                                            # supporting information 
+    fhir:revenue @<Claim.item.revenue>?;    # Revenue or cost center code
+    fhir:category @<Claim.item.category>?;  # Benefit classification
+    fhir:productOrService @<Claim.item.productOrService>;  # Billing, service, product, or drug 
+                                            # code 
+    fhir:modifier @<OneOrMore_Claim.item.modifier>?;  # Product or service billing 
+                                            # modifiers 
+    fhir:programCode @<OneOrMore_Claim.item.programCode>?;  # Program the product or service is 
+                                            # provided under 
+    fhir:serviced (@<date>  OR 
+    			@<Period> )  AND { rdf:type IRI } ?;  # Date or dates of service or 
+                                            # product delivery 
+    fhir:location (@<CodeableConcept>  OR 
+    			@<Address>  OR 
+    			(@<Reference>  AND {fhir:link @<Location> }) )  AND { rdf:type IRI } ?;  # Place of service or where product 
+                                            # was supplied 
+    fhir:quantity @<Claim.item.quantity>?;  # Count of products or services
+    fhir:unitPrice @<Claim.item.unitPrice>?;  # Fee, charge or cost per item
+    fhir:factor @<Claim.item.factor>?;      # Price scaling factor
+    fhir:net @<Claim.item.net>?;            # Total item cost
+    fhir:udi @<OneOrMore_Claim.item.udi_Device>?;  # Unique device identifier
+    fhir:bodySite @<Claim.item.bodySite>?;  # Anatomical location
+    fhir:subSite @<OneOrMore_Claim.item.subSite>?;  # Anatomical sub-location
+    fhir:encounter @<OneOrMore_Claim.item.encounter_Encounter>?;  # Encounters related to this billed 
+                                            # item 
+    fhir:detail @<OneOrMore_Claim.item.detail>?;  # Product or service provided
+}  
+
+# Pertinent diagnosis information
+<Claim.diagnosis> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:sequence @<Claim.diagnosis.sequence>;  # Diagnosis instance identifier
+    fhir:diagnosis (@<CodeableConcept>  OR 
+    			(@<Reference>  AND {fhir:link @<Condition> }) )  AND { rdf:type IRI } ;  # Nature of illness or problem
+    fhir:type @<OneOrMore_Claim.diagnosis.type>?;  # Timing or nature of the diagnosis
+    fhir:onAdmission @<Claim.diagnosis.onAdmission>?;  # Present on admission
+    fhir:packageCode @<Claim.diagnosis.packageCode>?;  # Package billing code
+}  
+
+# Details of the event
+<Claim.accident> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:date @<Claim.accident.date>;       # When the incident occurred
+    fhir:type @<Claim.accident.type>?;      # The nature of the accident
+    fhir:location (@<Address>  OR 
+    			(@<Reference>  AND {fhir:link @<Location> }) )  AND { rdf:type IRI } ?;  # Where the event occurred
+}  
+
+# Product or service provided
+<Claim.item.detail.subDetail> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:sequence @<Claim.item.detail.subDetail.sequence>;  # Item instance identifier
+    fhir:revenue @<Claim.item.detail.subDetail.revenue>?;  # Revenue or cost center code
+    fhir:category @<Claim.item.detail.subDetail.category>?;  # Benefit classification
+    fhir:productOrService @<Claim.item.detail.subDetail.productOrService>;  # Billing, service, product, or drug 
+                                            # code 
+    fhir:modifier @<OneOrMore_Claim.item.detail.subDetail.modifier>?;  # Service/Product billing modifiers
+    fhir:programCode @<OneOrMore_Claim.item.detail.subDetail.programCode>?;  # Program the product or service is 
+                                            # provided under 
+    fhir:quantity @<Claim.item.detail.subDetail.quantity>?;  # Count of products or services
+    fhir:unitPrice @<Claim.item.detail.subDetail.unitPrice>?;  # Fee, charge or cost per item
+    fhir:factor @<Claim.item.detail.subDetail.factor>?;  # Price scaling factor
+    fhir:net @<Claim.item.detail.subDetail.net>?;  # Total item cost
+    fhir:udi @<OneOrMore_Claim.item.detail.subDetail.udi_Device>?;  # Unique device identifier
+}  
+
+# Recipient of benefits payable
+<Claim.payee> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:type @<Claim.payee.type>;          # Category of recipient
+    fhir:party @<Claim.payee.party> AND {fhir:link 
+    			@<Organization> OR 
+    			@<Patient> OR 
+    			@<Practitioner> OR 
+    			@<PractitionerRole> OR 
+    			@<RelatedPerson> }?;  # Recipient reference
+}  
+
+# Clinical procedures performed
+<Claim.procedure> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:sequence @<Claim.procedure.sequence>;  # Procedure instance identifier
+    fhir:type @<OneOrMore_Claim.procedure.type>?;  # Category of Procedure
+    fhir:date @<Claim.procedure.date>?;     # When the procedure was performed
+    fhir:procedure (@<CodeableConcept>  OR 
+    			(@<Reference>  AND {fhir:link @<Procedure> }) )  AND { rdf:type IRI } ;  # Specific clinical procedure
+    fhir:udi @<OneOrMore_Claim.procedure.udi_Device>?;  # Unique device identifier
+}  
+
+# Product or service provided
+<Claim.item.detail> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:sequence @<Claim.item.detail.sequence>;  # Item instance identifier
+    fhir:revenue @<Claim.item.detail.revenue>?;  # Revenue or cost center code
+    fhir:category @<Claim.item.detail.category>?;  # Benefit classification
+    fhir:productOrService @<Claim.item.detail.productOrService>;  # Billing, service, product, or drug 
+                                            # code 
+    fhir:modifier @<OneOrMore_Claim.item.detail.modifier>?;  # Service/Product billing modifiers
+    fhir:programCode @<OneOrMore_Claim.item.detail.programCode>?;  # Program the product or service is 
+                                            # provided under 
+    fhir:quantity @<Claim.item.detail.quantity>?;  # Count of products or services
+    fhir:unitPrice @<Claim.item.detail.unitPrice>?;  # Fee, charge or cost per item
+    fhir:factor @<Claim.item.detail.factor>?;  # Price scaling factor
+    fhir:net @<Claim.item.detail.net>?;     # Total item cost
+    fhir:udi @<OneOrMore_Claim.item.detail.udi_Device>?;  # Unique device identifier
+    fhir:subDetail @<OneOrMore_Claim.item.detail.subDetail>?;  # Product or service provided
+}  
+
+#---------------------- Data Types -------------------
+
+# Primitive Type date
+<date> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:date];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v @<date.value>?;                  # Primitive value for date
+}  
+
+# Primitive Type boolean
+<boolean> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:boolean];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v @<boolean.value>?;               # Primitive value for boolean
+}  
+
+# Primitive Type string
+<string> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:string];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v @<string.value>?;                # Primitive value for string
+}  
+
+# An address expressed using postal conventions (as opposed to GPS or other location definition formats)
+<Address> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Address];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:use @<Address.use>?;               # home | work | temp | old | billing 
+                                            # - purpose of this address 
+    fhir:type @<Address.type>?;             # postal | physical | both
+    fhir:text @<Address.text>?;             # Text representation of the address
+    fhir:line @<OneOrMore_Address.line>?;   # Street name, number, direction & 
+                                            # P.O. Box etc. 
+    fhir:city @<Address.city>?;             # Name of city, town etc.
+    fhir:district @<Address.district>?;     # District name (aka county)
+    fhir:state @<Address.state>?;           # Sub-unit of country (abbreviations 
+                                            # ok) 
+    fhir:postalCode @<Address.postalCode>?;  # Postal code for area
+    fhir:country @<Address.country>?;       # Country (e.g. may be ISO 3166 2 or 
+                                            # 3 letter code) 
+    fhir:period @<Address.period>?;         # Time period when address was/is in 
+                                            # use 
+}  
+
+# A reference from one resource to another
+<Reference> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Reference];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:link IRI?;
+    fhir:reference @<Reference.reference>?;  # Literal reference, Relative, 
+                                            # internal or absolute URL 
+    fhir:type @<Reference.type>?;           # Type the reference refers to (e.g. 
+                                            # "Patient") 
+    fhir:identifier @<Reference.identifier>?;  # Logical reference, when literal 
+                                            # reference is not known 
+    fhir:display @<Reference.display>?;     # Text alternative for the resource
+} AND (
+
+# Constraint: UniqueKey:ref-1
+# Human readable:SHALL have a contained resource if a local reference is provided
+# XPath:not(starts-with(f:reference/@value, '#')) or exists(ancestor::*[self::f:entry or self::f:parameter]/f:resource/f:*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')]|/*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')])
+# Constraint:reference.startsWith('#').not() or (reference.substring(1).trace('url') in %rootResource.contained.id.trace('ids')) or (reference='#' and %rootResource!=%resource)
+# ShEx:
+
+
+)
+ 
+
+# Time range defined by start and end date/time
+<Period> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Period];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:start @<Period.start>?;            # Starting time with inclusive 
+                                            # boundary 
+    fhir:end @<Period.end>?;                # End time with inclusive boundary, 
+                                            # if not ongoing 
+} AND (
+
+# Constraint: UniqueKey:per-1
+# Human readable:If present, start SHALL have a lower or equal value than end
+# XPath:not(exists(f:start/@value)) or not(exists(f:end/@value)) or (xs:dateTime(f:start/@value) <= xs:dateTime(f:end/@value))
+# Constraint:start.hasValue().not() or end.hasValue().not() or (start <= end)
+# ShEx:
+
+ NOT { fhir:start  . } OR  NOT { fhir:end  . } OR ({ fhir:start { fhir:v MaxInclusive { fhir:end } }  })
+
+)
+ 
+
+# A measured or measurable amount
+<Quantity> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Quantity];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:value @<Quantity.value>?;          # Numerical value (with implicit 
+                                            # precision) 
+    fhir:comparator @<Quantity.comparator>?;  # < | <= | >= | > | ad - how to 
+                                            # understand the value 
+    fhir:unit @<Quantity.unit>?;            # Unit representation
+    fhir:system @<Quantity.system>?;        # System that defines coded unit form
+    fhir:code @<Quantity.code>?;            # Coded form of the unit
+} AND (
+
+# Constraint: UniqueKey:qty-3
+# Human readable:If a code for the unit is present, the system SHALL also be present
+# XPath:not(exists(f:code)) or exists(f:system)
+# Constraint:code.empty() or system.exists()
+# ShEx:
+
+ NOT { fhir:code {fhir:v .} }  OR { fhir:system . }
+
+)
+ 
+
+# Content in a format defined elsewhere
+<Attachment> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Attachment];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:contentType @<Attachment.contentType>?;  # Mime type of the content, with 
+                                            # charset etc. 
+    fhir:language @<Attachment.language>?;  # Human language of the content 
+                                            # (BCP-47) 
+    fhir:data @<Attachment.data>?;          # Data inline, base64ed
+    fhir:url @<Attachment.url>?;            # Uri where the data can be found
+    fhir:size @<Attachment.size>?;          # Number of bytes of content (if url 
+                                            # provided) 
+    fhir:hash @<Attachment.hash>?;          # Hash of the data (sha-1, base64ed)
+    fhir:title @<Attachment.title>?;        # Label to display in place of the 
+                                            # data 
+    fhir:creation @<Attachment.creation>?;  # Date attachment was first created
+    fhir:height @<Attachment.height>?;      # Height of the image in pixels 
+                                            # (photo/video) 
+    fhir:width @<Attachment.width>?;        # Width of the image in pixels 
+                                            # (photo/video) 
+    fhir:frames @<Attachment.frames>?;      # Number of frames if > 1 (photo)
+    fhir:duration @<Attachment.duration>?;  # Length in seconds (audio / video)
+    fhir:pages @<Attachment.pages>?;        # Number of printed pages
+} AND (
+
+# Constraint: UniqueKey:att-1
+# Human readable:If the Attachment has data, it SHALL have a contentType
+# XPath:not(exists(f:data)) or exists(f:contentType)
+# Constraint:data.empty() or contentType.exists()
+# ShEx:
+
+ NOT { fhir:data {fhir:v .} }  OR { fhir:contentType . }
+
+)
+ 
+
+# Concept - reference to a terminology or just  text
+<CodeableConcept> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:CodeableConcept];
+    fhir:nodeRole [fhir:treeRoot]?;
+    a NONLITERAL*;
+    fhir:coding @<OneOrMore_CodeableConcept.coding>?;  # Code defined by a terminology 
+                                            # system 
+    fhir:text @<CodeableConcept.text>?;     # Plain text representation of the 
+                                            # concept 
+}  
+
+#---------------------- Cardinality Types (OneOrMore) -------------------
+
+<OneOrMore_Claim.identifier> CLOSED {
+    rdf:first @<Claim.identifier>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Claim.identifier> 
+}
+
+<OneOrMore_Claim.related> CLOSED {
+    rdf:first @<Claim.related>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Claim.related> 
+}
+
+<OneOrMore_Claim.careTeam> CLOSED {
+    rdf:first @<Claim.careTeam>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Claim.careTeam> 
+}
+
+<OneOrMore_Claim.supportingInfo> CLOSED {
+    rdf:first @<Claim.supportingInfo>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Claim.supportingInfo> 
+}
+
+<OneOrMore_Claim.diagnosis> CLOSED {
+    rdf:first @<Claim.diagnosis>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Claim.diagnosis> 
+}
+
+<OneOrMore_Claim.procedure> CLOSED {
+    rdf:first @<Claim.procedure>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Claim.procedure> 
+}
+
+<OneOrMore_Claim.insurance> CLOSED {
+    rdf:first @<Claim.insurance>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Claim.insurance> 
+}
+
+<OneOrMore_Claim.item> CLOSED {
+    rdf:first @<Claim.item>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Claim.item> 
+}
+
+<OneOrMore_Claim.insurance.preAuthRef> CLOSED {
+    rdf:first @<Claim.insurance.preAuthRef>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Claim.insurance.preAuthRef> 
+}
+
+<OneOrMore_Claim.item.careTeamSequence> CLOSED {
+    rdf:first @<Claim.item.careTeamSequence>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Claim.item.careTeamSequence> 
+}
+
+<OneOrMore_Claim.item.diagnosisSequence> CLOSED {
+    rdf:first @<Claim.item.diagnosisSequence>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Claim.item.diagnosisSequence> 
+}
+
+<OneOrMore_Claim.item.procedureSequence> CLOSED {
+    rdf:first @<Claim.item.procedureSequence>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Claim.item.procedureSequence> 
+}
+
+<OneOrMore_Claim.item.informationSequence> CLOSED {
+    rdf:first @<Claim.item.informationSequence>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Claim.item.informationSequence> 
+}
+
+<OneOrMore_Claim.item.modifier> CLOSED {
+    rdf:first @<Claim.item.modifier>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Claim.item.modifier> 
+}
+
+<OneOrMore_Claim.item.programCode> CLOSED {
+    rdf:first @<Claim.item.programCode>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Claim.item.programCode> 
+}
+
+<OneOrMore_Claim.item.udi_Device> CLOSED {
+    rdf:first @<Claim.item.udi> AND {fhir:link 
+			@<Device> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Claim.item.udi_Device> 
+}
+
+<OneOrMore_Claim.item.subSite> CLOSED {
+    rdf:first @<Claim.item.subSite>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Claim.item.subSite> 
+}
+
+<OneOrMore_Claim.item.encounter_Encounter> CLOSED {
+    rdf:first @<Claim.item.encounter> AND {fhir:link 
+			@<Encounter> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Claim.item.encounter_Encounter> 
+}
+
+<OneOrMore_Claim.item.detail> CLOSED {
+    rdf:first @<Claim.item.detail>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Claim.item.detail> 
+}
+
+<OneOrMore_Claim.diagnosis.type> CLOSED {
+    rdf:first @<Claim.diagnosis.type>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Claim.diagnosis.type> 
+}
+
+<OneOrMore_Claim.item.detail.subDetail.modifier> CLOSED {
+    rdf:first @<Claim.item.detail.subDetail.modifier>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Claim.item.detail.subDetail.modifier> 
+}
+
+<OneOrMore_Claim.item.detail.subDetail.programCode> CLOSED {
+    rdf:first @<Claim.item.detail.subDetail.programCode>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Claim.item.detail.subDetail.programCode> 
+}
+
+<OneOrMore_Claim.item.detail.subDetail.udi_Device> CLOSED {
+    rdf:first @<Claim.item.detail.subDetail.udi> AND {fhir:link 
+			@<Device> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Claim.item.detail.subDetail.udi_Device> 
+}
+
+<OneOrMore_Claim.procedure.type> CLOSED {
+    rdf:first @<Claim.procedure.type>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Claim.procedure.type> 
+}
+
+<OneOrMore_Claim.procedure.udi_Device> CLOSED {
+    rdf:first @<Claim.procedure.udi> AND {fhir:link 
+			@<Device> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Claim.procedure.udi_Device> 
+}
+
+<OneOrMore_Claim.item.detail.modifier> CLOSED {
+    rdf:first @<Claim.item.detail.modifier>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Claim.item.detail.modifier> 
+}
+
+<OneOrMore_Claim.item.detail.programCode> CLOSED {
+    rdf:first @<Claim.item.detail.programCode>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Claim.item.detail.programCode> 
+}
+
+<OneOrMore_Claim.item.detail.udi_Device> CLOSED {
+    rdf:first @<Claim.item.detail.udi> AND {fhir:link 
+			@<Device> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Claim.item.detail.udi_Device> 
+}
+
+<OneOrMore_Claim.item.detail.subDetail> CLOSED {
+    rdf:first @<Claim.item.detail.subDetail>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Claim.item.detail.subDetail> 
+}
+
+<OneOrMore_Address.line> CLOSED {
+    rdf:first @<Address.line>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Address.line> 
+}
+
+<OneOrMore_CodeableConcept.coding> CLOSED {
+    rdf:first @<CodeableConcept.coding>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_CodeableConcept.coding> 
+}
+
+#---------------------- Reference Types -------------------
+
+#---------------------- Value Sets ------------------------

@@ -1,0 +1,991 @@
+﻿PREFIX fhir: <http://hl7.org/fhir/> 
+PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+BASE <http://hl7.org/fhir/shape/>
+
+
+start=@<Contract> AND {fhir:nodeRole [fhir:treeRoot]}
+
+
+# Legal Agreement
+<Contract> EXTENDS @<DomainResource> CLOSED {   
+
+    a [fhir:Contract];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:identifier @<OneOrMore_Contract.identifier>?;  # Contract number
+    fhir:url @<Contract.url>?;              # Basal definition
+    fhir:version @<Contract.version>?;      # Business edition
+    fhir:status @<Contract.status>?;        # amended | appended | cancelled | 
+                                            # disputed | entered-in-error | 
+                                            # executable + 
+    fhir:legalState @<Contract.legalState>?;  # Negotiation status
+    fhir:instantiatesCanonical @<Contract.instantiatesCanonical> AND {fhir:link 
+    			@<Contract> }?;  # Source Contract Definition
+    fhir:instantiatesUri @<Contract.instantiatesUri>?;  # External Contract Definition
+    fhir:contentDerivative @<Contract.contentDerivative>?;  # Content derived from the basal 
+                                            # information 
+    fhir:issued @<Contract.issued>?;        # When this Contract was issued
+    fhir:applies @<Contract.applies>?;      # Effective time
+    fhir:expirationType @<Contract.expirationType>?;  # Contract cessation cause
+    fhir:subject @<OneOrMore_Contract.subject_Resource>?;  # Contract Target Entity
+    fhir:authority @<OneOrMore_Contract.authority_Organization>?;  # Authority under which this 
+                                            # Contract has standing 
+    fhir:domain @<OneOrMore_Contract.domain_Location>?;  # A sphere of control governed by an 
+                                            # authoritative jurisdiction, 
+                                            # organization, or person 
+    fhir:site @<OneOrMore_Contract.site_Location>?;  # Specific Location
+    fhir:name @<Contract.name>?;            # Computer friendly designation
+    fhir:title @<Contract.title>?;          # Human Friendly name
+    fhir:subtitle @<Contract.subtitle>?;    # Subordinate Friendly name
+    fhir:alias @<OneOrMore_Contract.alias>?;  # Acronym or short name
+    fhir:author @<Contract.author> AND {fhir:link 
+    			@<Organization> OR 
+    			@<Patient> OR 
+    			@<Practitioner> OR 
+    			@<PractitionerRole> }?;  # Source of Contract
+    fhir:scope @<Contract.scope>?;          # Range of Legal Concerns
+    fhir:topic (@<CodeableConcept>  OR 
+    			(@<Reference>  AND {fhir:link @<Resource> }) )  AND { rdf:type IRI } ?;  # Focus of contract interest
+    fhir:type @<Contract.type>?;            # Legal instrument category
+    fhir:subType @<OneOrMore_Contract.subType>?;  # Subtype within the context of type
+    fhir:contentDefinition @<Contract.contentDefinition>?;  # Contract precursor content
+    fhir:term @<OneOrMore_Contract.term>?;  # Contract Term List
+    fhir:supportingInfo @<OneOrMore_Contract.supportingInfo_Resource>?;  # Extra Information
+    fhir:relevantHistory @<OneOrMore_Contract.relevantHistory_Provenance>?;  # Key event in Contract History
+    fhir:signer @<OneOrMore_Contract.signer>?;  # Contract Signatory
+    fhir:friendly @<OneOrMore_Contract.friendly>?;  # Contract Friendly Language
+    fhir:legal @<OneOrMore_Contract.legal>?;  # Contract Legal Language
+    fhir:rule @<OneOrMore_Contract.rule>?;  # Computable Contract Language
+    fhir:legallyBinding (@<Attachment>  OR 
+    			(@<Reference>  AND {fhir:link @<Composition> OR 
+    			 @<DocumentReference> OR 
+    			 @<QuestionnaireResponse> OR 
+    			 @<Contract> }) )  AND { rdf:type IRI } ?;  # Binding Contract
+}  
+
+# Contract precursor content
+<Contract.contentDefinition> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:type @<Contract.contentDefinition.type>;  # Content structure and use
+    fhir:subType @<Contract.contentDefinition.subType>?;  # Detailed Content Type Definition
+    fhir:publisher @<Contract.contentDefinition.publisher> AND {fhir:link 
+    			@<Organization> OR 
+    			@<Practitioner> OR 
+    			@<PractitionerRole> }?;  # Publisher Entity
+    fhir:publicationDate @<Contract.contentDefinition.publicationDate>?;  # When published
+    fhir:publicationStatus @<Contract.contentDefinition.publicationStatus>;  # amended | appended | cancelled | 
+                                            # disputed | entered-in-error | 
+                                            # executable + 
+    fhir:copyright @<Contract.contentDefinition.copyright>?;  # Publication Ownership
+}  
+
+# Computable Contract Language
+<Contract.rule> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:content (@<Attachment>  OR 
+    			(@<Reference>  AND {fhir:link @<DocumentReference> }) )  AND { rdf:type IRI } ;  # Computable Contract Rules
+}  
+
+# Contract Term List
+<Contract.term> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:identifier @<Contract.term.identifier>?;  # Contract Term Number
+    fhir:issued @<Contract.term.issued>?;   # Contract Term Issue Date Time
+    fhir:applies @<Contract.term.applies>?;  # Contract Term Effective Time
+    fhir:topic (@<CodeableConcept>  OR 
+    			(@<Reference>  AND {fhir:link @<Resource> }) )  AND { rdf:type IRI } ?;  # Term Concern
+    fhir:type @<Contract.term.type>?;       # Contract Term Type or Form
+    fhir:subType @<Contract.term.subType>?;  # Contract Term Type specific 
+                                            # classification 
+    fhir:text @<Contract.term.text>?;       # Term Statement
+    fhir:securityLabel @<OneOrMore_Contract.term.securityLabel>?;  # Protection for the Term
+    fhir:offer @<Contract.term.offer>;      # Context of the Contract term
+    fhir:asset @<OneOrMore_Contract.term.asset>?;  # Contract Term Asset List
+    fhir:action @<OneOrMore_Contract.term.action>?;  # Entity being ascribed 
+                                            # responsibility 
+    fhir:group @<OneOrMore_Contract.term>?;  # Nested Contract Term Group
+}  
+
+# Entity being ascribed responsibility
+<Contract.term.action> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:doNotPerform @<Contract.term.action.doNotPerform>?;  # True if the term prohibits the  
+                                            # action 
+    fhir:type @<Contract.term.action.type>;  # Type or form of the action
+    fhir:subject @<OneOrMore_Contract.term.action.subject>?;  # Entity of the action
+    fhir:intent @<Contract.term.action.intent>;  # Purpose for the Contract Term 
+                                            # Action 
+    fhir:linkId @<OneOrMore_Contract.term.action.linkId>?;  # Pointer to specific item
+    fhir:status @<Contract.term.action.status>;  # State of the action
+    fhir:context @<Contract.term.action.context> AND {fhir:link 
+    			@<Encounter> OR 
+    			@<EpisodeOfCare> }?;  # Episode associated with action
+    fhir:contextLinkId @<OneOrMore_Contract.term.action.contextLinkId>?;  # Pointer to specific item
+    fhir:occurrence (@<dateTime>  OR 
+    			@<Period>  OR 
+    			@<Timing> )  AND { rdf:type IRI } ?;  # When action happens
+    fhir:requester @<OneOrMore_Contract.term.action.requester_Device_OR_Group_OR_Organization_OR_Patient_OR_Practitioner_OR_PractitionerRole_OR_RelatedPerson>?;  # Who asked for action
+    fhir:requesterLinkId @<OneOrMore_Contract.term.action.requesterLinkId>?;  # Pointer to specific item
+    fhir:performerType @<OneOrMore_Contract.term.action.performerType>?;  # Kind of service performer
+    fhir:performerRole @<Contract.term.action.performerRole>?;  # Competency of the performer
+    fhir:performer @<Contract.term.action.performer> AND {fhir:link 
+    			@<CareTeam> OR 
+    			@<Device> OR 
+    			@<Location> OR 
+    			@<Organization> OR 
+    			@<Patient> OR 
+    			@<Practitioner> OR 
+    			@<PractitionerRole> OR 
+    			@<RelatedPerson> OR 
+    			@<Substance> }?;  # Actor that wil execute (or not) 
+                                            # the action 
+    fhir:performerLinkId @<OneOrMore_Contract.term.action.performerLinkId>?;  # Pointer to specific item
+    fhir:reason @<OneOrMore_Contract.term.action.reason>?;  # Why is action (not) needed?
+    fhir:reasonLinkId @<OneOrMore_Contract.term.action.reasonLinkId>?;  # Pointer to specific item
+    fhir:note @<OneOrMore_Contract.term.action.note>?;  # Comments about the action
+    fhir:securityLabelNumber @<OneOrMore_Contract.term.action.securityLabelNumber>?;  # Action restriction numbers
+}  
+
+# Nested Contract Term Group
+<Contract.term.group> CLOSED {   
+}  
+
+# Context of the Contract term
+<Contract.term.offer> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:identifier @<OneOrMore_Contract.term.offer.identifier>?;  # Offer business ID
+    fhir:party @<OneOrMore_Contract.term.offer.party>?;  # Offer Recipient
+    fhir:topic @<Contract.term.offer.topic> AND {fhir:link 
+    			@<Resource> }?;  # Negotiable offer asset
+    fhir:type @<Contract.term.offer.type>?;  # Contract Offer Type or Form
+    fhir:decision @<Contract.term.offer.decision>?;  # Accepting party choice
+    fhir:decisionMode @<OneOrMore_Contract.term.offer.decisionMode>?;  # How decision is conveyed
+    fhir:answer @<OneOrMore_Contract.term.offer.answer>?;  # Response to offer text
+    fhir:text @<Contract.term.offer.text>?;  # Human readable offer text
+    fhir:linkId @<OneOrMore_Contract.term.offer.linkId>?;  # Pointer to text
+    fhir:securityLabelNumber @<OneOrMore_Contract.term.offer.securityLabelNumber>?;  # Offer restriction numbers
+}  
+
+# Protection for the Term
+<Contract.term.securityLabel> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:number @<OneOrMore_Contract.term.securityLabel.number>?;  # Link to Security Labels
+    fhir:classification @<Contract.term.securityLabel.classification>;  # Confidentiality Protection
+    fhir:category @<OneOrMore_Contract.term.securityLabel.category>?;  # Applicable Policy
+    fhir:control @<OneOrMore_Contract.term.securityLabel.control>?;  # Handling Instructions
+}  
+
+# Contract Valued Item List
+<Contract.term.asset.valuedItem> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:entity (@<CodeableConcept>  OR 
+    			(@<Reference>  AND {fhir:link @<Resource> }) )  AND { rdf:type IRI } ?;  # Contract Valued Item Type
+    fhir:identifier @<Contract.term.asset.valuedItem.identifier>?;  # Contract Valued Item Number
+    fhir:effectiveTime @<Contract.term.asset.valuedItem.effectiveTime>?;  # Contract Valued Item Effective Tiem
+    fhir:quantity @<Contract.term.asset.valuedItem.quantity>?;  # Count of Contract Valued Items
+    fhir:unitPrice @<Contract.term.asset.valuedItem.unitPrice>?;  # Contract Valued Item fee, charge, 
+                                            # or cost 
+    fhir:factor @<Contract.term.asset.valuedItem.factor>?;  # Contract Valued Item Price Scaling 
+                                            # Factor 
+    fhir:points @<Contract.term.asset.valuedItem.points>?;  # Contract Valued Item Difficulty 
+                                            # Scaling Factor 
+    fhir:net @<Contract.term.asset.valuedItem.net>?;  # Total Contract Valued Item Value
+    fhir:payment @<Contract.term.asset.valuedItem.payment>?;  # Terms of valuation
+    fhir:paymentDate @<Contract.term.asset.valuedItem.paymentDate>?;  # When payment is due
+    fhir:responsible @<Contract.term.asset.valuedItem.responsible> AND {fhir:link 
+    			@<Organization> OR 
+    			@<Patient> OR 
+    			@<Practitioner> OR 
+    			@<PractitionerRole> OR 
+    			@<RelatedPerson> }?;  # Who will make payment
+    fhir:recipient @<Contract.term.asset.valuedItem.recipient> AND {fhir:link 
+    			@<Organization> OR 
+    			@<Patient> OR 
+    			@<Practitioner> OR 
+    			@<PractitionerRole> OR 
+    			@<RelatedPerson> }?;  # Who will receive payment
+    fhir:linkId @<OneOrMore_Contract.term.asset.valuedItem.linkId>?;  # Pointer to specific item
+    fhir:securityLabelNumber @<OneOrMore_Contract.term.asset.valuedItem.securityLabelNumber>?;  # Security Labels that define 
+                                            # affected terms 
+}  
+
+# Contract Friendly Language
+<Contract.friendly> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:content (@<Attachment>  OR 
+    			(@<Reference>  AND {fhir:link @<Composition> OR 
+    			 @<DocumentReference> OR 
+    			 @<QuestionnaireResponse> }) )  AND { rdf:type IRI } ;  # Easily comprehended representation 
+                                            # of this Contract 
+}  
+
+# Offer Recipient
+<Contract.term.offer.party> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:reference @<OneOrMore_Contract.term.offer.party.reference_Device_OR_Group_OR_Organization_OR_Patient_OR_Practitioner_OR_PractitionerRole_OR_RelatedPerson>;  # Referenced entity
+    fhir:role @<Contract.term.offer.party.role>;  # Participant engagement type
+}  
+
+# Contract Signatory
+<Contract.signer> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:type @<Contract.signer.type>;      # Contract Signatory Role
+    fhir:party @<Contract.signer.party> AND {fhir:link 
+    			@<Organization> OR 
+    			@<Patient> OR 
+    			@<Practitioner> OR 
+    			@<PractitionerRole> OR 
+    			@<RelatedPerson> };  # Contract Signatory Party
+    fhir:signature @<OneOrMore_Contract.signer.signature>;  # Contract Documentation Signature
+}  
+
+# Circumstance of the asset
+<Contract.term.asset.context> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:reference @<Contract.term.asset.context.reference> AND {fhir:link 
+    			@<Resource> }?;  # Creator,custodian or owner
+    fhir:code @<OneOrMore_Contract.term.asset.context.code>?;  # Codeable asset context
+    fhir:text @<Contract.term.asset.context.text>?;  # Context description
+}  
+
+# Response to offer text
+<Contract.term.offer.answer> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:value (@<boolean>  OR 
+    			@<decimal>  OR 
+    			@<integer>  OR 
+    			@<date>  OR 
+    			@<dateTime>  OR 
+    			@<time>  OR 
+    			@<string>  OR 
+    			@<uri>  OR 
+    			@<Attachment>  OR 
+    			@<Coding>  OR 
+    			@<Quantity>  OR 
+    			(@<Reference>  AND {fhir:link @<Resource> }) )  AND { rdf:type IRI } ;  # The actual answer response
+}  
+
+# Contract Term Asset List
+<Contract.term.asset> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:scope @<Contract.term.asset.scope>?;  # Range of asset
+    fhir:type @<OneOrMore_Contract.term.asset.type>?;  # Asset category
+    fhir:typeReference @<OneOrMore_Contract.term.asset.typeReference_Resource>?;  # Associated entities
+    fhir:subtype @<OneOrMore_Contract.term.asset.subtype>?;  # Asset sub-category
+    fhir:relationship @<Contract.term.asset.relationship>?;  # Kinship of the asset
+    fhir:context @<OneOrMore_Contract.term.asset.context>?;  # Circumstance of the asset
+    fhir:condition @<Contract.term.asset.condition>?;  # Quality desctiption of asset
+    fhir:periodType @<OneOrMore_Contract.term.asset.periodType>?;  # Asset availability types
+    fhir:period @<OneOrMore_Contract.term.asset.period>?;  # Time period of the asset
+    fhir:usePeriod @<OneOrMore_Contract.term.asset.usePeriod>?;  # Time period
+    fhir:text @<Contract.term.asset.text>?;  # Asset clause or question text
+    fhir:linkId @<OneOrMore_Contract.term.asset.linkId>?;  # Pointer to asset text
+    fhir:answer @<OneOrMore_Contract.term.offer.answer>?;  # Response to assets
+    fhir:securityLabelNumber @<OneOrMore_Contract.term.asset.securityLabelNumber>?;  # Asset restriction numbers
+    fhir:valuedItem @<OneOrMore_Contract.term.asset.valuedItem>?;  # Contract Valued Item List
+}  
+
+# Entity of the action
+<Contract.term.action.subject> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:reference @<OneOrMore_Contract.term.action.subject.reference_Device_OR_Group_OR_Organization_OR_Patient_OR_Practitioner_OR_PractitionerRole_OR_RelatedPerson>;  # Entity of the action
+    fhir:role @<Contract.term.action.subject.role>?;  # Role type of the agent
+}  
+
+# Contract Legal Language
+<Contract.legal> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:content (@<Attachment>  OR 
+    			(@<Reference>  AND {fhir:link @<Composition> OR 
+    			 @<DocumentReference> OR 
+    			 @<QuestionnaireResponse> }) )  AND { rdf:type IRI } ;  # Contract Legal Text
+}  
+
+#---------------------- Data Types -------------------
+
+# Primitive Type dateTime
+<dateTime> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:dateTime];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v @<dateTime.value>?;              # Primitive value for dateTime
+}  
+
+# Primitive Type date
+<date> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:date];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v @<date.value>?;                  # Primitive value for date
+}  
+
+# Primitive Type string
+<string> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:string];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v @<string.value>?;                # Primitive value for string
+}  
+
+# A reference from one resource to another
+<Reference> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Reference];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:link IRI?;
+    fhir:reference @<Reference.reference>?;  # Literal reference, Relative, 
+                                            # internal or absolute URL 
+    fhir:type @<Reference.type>?;           # Type the reference refers to (e.g. 
+                                            # "Patient") 
+    fhir:identifier @<Reference.identifier>?;  # Logical reference, when literal 
+                                            # reference is not known 
+    fhir:display @<Reference.display>?;     # Text alternative for the resource
+} AND (
+
+# Constraint: UniqueKey:ref-1
+# Human readable:SHALL have a contained resource if a local reference is provided
+# XPath:not(starts-with(f:reference/@value, '#')) or exists(ancestor::*[self::f:entry or self::f:parameter]/f:resource/f:*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')]|/*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')])
+# Constraint:reference.startsWith('#').not() or (reference.substring(1).trace('url') in %rootResource.contained.id.trace('ids')) or (reference='#' and %rootResource!=%resource)
+# ShEx:
+
+
+)
+ 
+
+# Time range defined by start and end date/time
+<Period> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Period];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:start @<Period.start>?;            # Starting time with inclusive 
+                                            # boundary 
+    fhir:end @<Period.end>?;                # End time with inclusive boundary, 
+                                            # if not ongoing 
+} AND (
+
+# Constraint: UniqueKey:per-1
+# Human readable:If present, start SHALL have a lower or equal value than end
+# XPath:not(exists(f:start/@value)) or not(exists(f:end/@value)) or (xs:dateTime(f:start/@value) <= xs:dateTime(f:end/@value))
+# Constraint:start.hasValue().not() or end.hasValue().not() or (start <= end)
+# ShEx:
+
+ NOT { fhir:start  . } OR  NOT { fhir:end  . } OR ({ fhir:start { fhir:v MaxInclusive { fhir:end } }  })
+
+)
+ 
+
+# A measured or measurable amount
+<Quantity> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Quantity];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:value @<Quantity.value>?;          # Numerical value (with implicit 
+                                            # precision) 
+    fhir:comparator @<Quantity.comparator>?;  # < | <= | >= | > | ad - how to 
+                                            # understand the value 
+    fhir:unit @<Quantity.unit>?;            # Unit representation
+    fhir:system @<Quantity.system>?;        # System that defines coded unit form
+    fhir:code @<Quantity.code>?;            # Coded form of the unit
+} AND (
+
+# Constraint: UniqueKey:qty-3
+# Human readable:If a code for the unit is present, the system SHALL also be present
+# XPath:not(exists(f:code)) or exists(f:system)
+# Constraint:code.empty() or system.exists()
+# ShEx:
+
+ NOT { fhir:code {fhir:v .} }  OR { fhir:system . }
+
+)
+ 
+
+# Content in a format defined elsewhere
+<Attachment> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Attachment];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:contentType @<Attachment.contentType>?;  # Mime type of the content, with 
+                                            # charset etc. 
+    fhir:language @<Attachment.language>?;  # Human language of the content 
+                                            # (BCP-47) 
+    fhir:data @<Attachment.data>?;          # Data inline, base64ed
+    fhir:url @<Attachment.url>?;            # Uri where the data can be found
+    fhir:size @<Attachment.size>?;          # Number of bytes of content (if url 
+                                            # provided) 
+    fhir:hash @<Attachment.hash>?;          # Hash of the data (sha-1, base64ed)
+    fhir:title @<Attachment.title>?;        # Label to display in place of the 
+                                            # data 
+    fhir:creation @<Attachment.creation>?;  # Date attachment was first created
+    fhir:height @<Attachment.height>?;      # Height of the image in pixels 
+                                            # (photo/video) 
+    fhir:width @<Attachment.width>?;        # Width of the image in pixels 
+                                            # (photo/video) 
+    fhir:frames @<Attachment.frames>?;      # Number of frames if > 1 (photo)
+    fhir:duration @<Attachment.duration>?;  # Length in seconds (audio / video)
+    fhir:pages @<Attachment.pages>?;        # Number of printed pages
+} AND (
+
+# Constraint: UniqueKey:att-1
+# Human readable:If the Attachment has data, it SHALL have a contentType
+# XPath:not(exists(f:data)) or exists(f:contentType)
+# Constraint:data.empty() or contentType.exists()
+# ShEx:
+
+ NOT { fhir:data {fhir:v .} }  OR { fhir:contentType . }
+
+)
+ 
+
+# Primitive Type integer
+<integer> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:integer];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v @<integer.value>?;               # Primitive value for integer
+}  
+
+# Primitive Type uri
+<uri> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:uri];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v @<uri.value>?;                   # Primitive value for uri
+}  
+
+# Primitive Type boolean
+<boolean> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:boolean];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v @<boolean.value>?;               # Primitive value for boolean
+}  
+
+# A reference to a code defined by a terminology system
+<Coding> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Coding];
+    fhir:nodeRole [fhir:treeRoot]?;
+    a NONLITERAL?;
+    fhir:system @<Coding.system>?;          # Identity of the terminology system
+    fhir:version @<Coding.version>?;        # Version of the system - if relevant
+    fhir:code @<Coding.code>?;              # Symbol in syntax defined by the 
+                                            # system 
+    fhir:display @<Coding.display>?;        # Representation defined by the 
+                                            # system 
+    fhir:userSelected @<Coding.userSelected>?;  # If this coding was chosen directly 
+                                            # by the user 
+}  
+
+# A timing schedule that specifies an event that may occur multiple times
+<Timing> EXTENDS @<BackboneType> CLOSED {   
+
+    a [fhir:Timing];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:event @<OneOrMore_Timing.event>?;  # When the event occurs
+    fhir:repeat @<Timing.repeat>?;          # When the event is to occur
+    fhir:code @<Timing.code>?;              # C | BID | TID | QID | AM | PM | QD 
+                                            # | QOD | + 
+} AND (
+
+# Constraint: UniqueKey:tim-9
+# Human readable:If there's an offset, there must be a when (and not C, CM, CD, CV)
+# XPath:not(exists(f:offset)) or exists(f:when)
+# Constraint:offset.empty() or (when.exists() and ((when in ('C' | 'CM' | 'CD' | 'CV')).not()))
+# ShEx:
+
+ NOT { fhir:offset {fhir:v .} }  OR ({ fhir:when . } AND ( NOT { { fhir:when { fhir:v [('C' | 'CM' | 'CD' | 'CV')] }  } }))
+
+) AND (
+
+# Constraint: UniqueKey:tim-5
+# Human readable:period SHALL be a non-negative value
+# XPath:f:period/@value >= 0 or not(f:period/@value)
+# Constraint:period.exists() implies period >= 0
+# ShEx:
+
+{ fhir:period . } AND ({ fhir:period { fhir:v MinInclusive 0 }  })
+
+) AND (
+
+# Constraint: UniqueKey:tim-6
+# Human readable:If there's a periodMax, there must be a period
+# XPath:not(exists(f:periodMax)) or exists(f:period)
+# Constraint:periodMax.empty() or period.exists()
+# ShEx:
+
+ NOT { fhir:periodMax {fhir:v .} }  OR { fhir:period . }
+
+) AND (
+
+# Constraint: UniqueKey:tim-7
+# Human readable:If there's a durationMax, there must be a duration
+# XPath:not(exists(f:durationMax)) or exists(f:duration)
+# Constraint:durationMax.empty() or duration.exists()
+# ShEx:
+
+ NOT { fhir:durationMax {fhir:v .} }  OR { fhir:duration . }
+
+) AND (
+
+# Constraint: UniqueKey:tim-8
+# Human readable:If there's a countMax, there must be a count
+# XPath:not(exists(f:countMax)) or exists(f:count)
+# Constraint:countMax.empty() or count.exists()
+# ShEx:
+
+ NOT { fhir:countMax {fhir:v .} }  OR { fhir:count . }
+
+) AND (
+
+# Constraint: UniqueKey:tim-1
+# Human readable:if there's a duration, there needs to be duration units
+# XPath:not(exists(f:duration)) or exists(f:durationUnit)
+# Constraint:duration.empty() or durationUnit.exists()
+# ShEx:
+
+ NOT { fhir:duration {fhir:v .} }  OR { fhir:durationUnit . }
+
+) AND (
+
+# Constraint: UniqueKey:tim-10
+# Human readable:If there's a timeOfDay, there cannot be a when, or vice versa
+# XPath:not(exists(f:timeOfDay)) or not(exists(f:when))
+# Constraint:timeOfDay.empty() or when.empty()
+# ShEx:
+
+ NOT { fhir:timeOfDay {fhir:v .} }  OR  NOT { fhir:when {fhir:v .} } 
+
+) AND (
+
+# Constraint: UniqueKey:tim-2
+# Human readable:if there's a period, there needs to be period units
+# XPath:not(exists(f:period)) or exists(f:periodUnit)
+# Constraint:period.empty() or periodUnit.exists()
+# ShEx:
+
+ NOT { fhir:period {fhir:v .} }  OR { fhir:periodUnit . }
+
+) AND (
+
+# Constraint: UniqueKey:tim-4
+# Human readable:duration SHALL be a non-negative value
+# XPath:f:duration/@value >= 0 or not(f:duration/@value)
+# Constraint:duration.exists() implies duration >= 0
+# ShEx:
+
+{ fhir:duration . } AND ({ fhir:duration { fhir:v MinInclusive 0 }  })
+
+)
+ 
+
+# Primitive Type time
+<time> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:time];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v @<time.value>?;                  # Primitive value for time
+}  
+
+# Primitive Type decimal
+<decimal> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:decimal];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v @<decimal.value>?;               # Primitive value for decimal
+}  
+
+# Concept - reference to a terminology or just  text
+<CodeableConcept> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:CodeableConcept];
+    fhir:nodeRole [fhir:treeRoot]?;
+    a NONLITERAL*;
+    fhir:coding @<OneOrMore_CodeableConcept.coding>?;  # Code defined by a terminology 
+                                            # system 
+    fhir:text @<CodeableConcept.text>?;     # Plain text representation of the 
+                                            # concept 
+}  
+
+# When the event is to occur
+<Timing.repeat> EXTENDS @<Element> CLOSED {   
+    fhir:bounds (@<Duration>  OR 
+    			@<Range>  OR 
+    			@<Period> )  AND { rdf:type IRI } ?;  # Length/Range of lengths, or (Start 
+                                            # and/or end) limits 
+    fhir:count @<Timing.repeat.count>?;     # Number of times to repeat
+    fhir:countMax @<Timing.repeat.countMax>?;  # Maximum number of times to repeat
+    fhir:duration @<Timing.repeat.duration>?;  # How long when it happens
+    fhir:durationMax @<Timing.repeat.durationMax>?;  # How long when it happens (Max)
+    fhir:durationUnit @<Timing.repeat.durationUnit>?;  # s | min | h | d | wk | mo | a - 
+                                            # unit of time (UCUM) 
+    fhir:frequency @<Timing.repeat.frequency>?;  # Indicates the number of 
+                                            # repetitions that should occur 
+                                            # within a period. I.e. Event occurs 
+                                            # frequency times per period 
+    fhir:frequencyMax @<Timing.repeat.frequencyMax>?;  # Event occurs up to frequencyMax 
+                                            # times per period 
+    fhir:period @<Timing.repeat.period>?;   # The duration to which the 
+                                            # frequency applies. I.e. Event 
+                                            # occurs frequency times per period 
+    fhir:periodMax @<Timing.repeat.periodMax>?;  # Upper limit of period (3-4 hours)
+    fhir:periodUnit @<Timing.repeat.periodUnit>?;  # s | min | h | d | wk | mo | a - 
+                                            # unit of time (UCUM) 
+    fhir:dayOfWeek @<OneOrMore_Timing.repeat.dayOfWeek>?;  # mon | tue | wed | thu | fri | sat 
+                                            # | sun 
+    fhir:timeOfDay @<OneOrMore_Timing.repeat.timeOfDay>?;  # Time of day for action
+    fhir:when @<OneOrMore_Timing.repeat.when>?;  # Code for time period of occurrence
+    fhir:offset @<Timing.repeat.offset>?;   # Minutes from event (before or 
+                                            # after) 
+} AND (
+
+
+
+)
+ 
+
+# A length of time
+<Duration> EXTENDS @<Quantity> CLOSED {   
+
+    a [fhir:Duration];
+    fhir:nodeRole [fhir:treeRoot]?;
+} AND (
+
+# Constraint: UniqueKey:drt-1
+# Human readable:There SHALL be a code if there is a value and it SHALL be an expression of time.  If system is present, it SHALL be UCUM.
+# XPath:(f:code or not(f:value)) and (not(exists(f:system)) or f:system/@value='http://unitsofmeasure.org')
+# Constraint:code.exists() implies ((system = %ucum) and value.exists())
+# ShEx:
+
+{ fhir:code . } AND (({ fhir:system { fhir:v ['http://unitsofmeasure.org'] }  }) AND { fhir:value . })
+
+)
+ 
+
+# Set of values bounded by low and high
+<Range> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Range];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:low @<Range.low>?;                 # Low limit
+    fhir:high @<Range.high>?;               # High limit
+} AND (
+
+# Constraint: UniqueKey:rng-2
+# Human readable:If present, low SHALL have a lower value than high
+# XPath:not(exists(f:low/f:value/@value)) or not(exists(f:high/f:value/@value)) or (number(f:low/f:value/@value) <= number(f:high/f:value/@value))
+# Constraint:low.value.empty() or high.value.empty() or (low <= high)
+# ShEx:
+
+ NOT { fhir:low fhir:value {fhir:v .} }  OR  NOT { fhir:high fhir:value {fhir:v .} }  OR ({ fhir:low { fhir:v MaxInclusive { fhir:high } }  })
+
+)
+ 
+
+#---------------------- Cardinality Types (OneOrMore) -------------------
+
+<OneOrMore_Contract.identifier> CLOSED {
+    rdf:first @<Contract.identifier>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Contract.identifier> 
+}
+
+<OneOrMore_Contract.subject_Resource> CLOSED {
+    rdf:first @<Contract.subject> AND {fhir:link 
+			@<Resource> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Contract.subject_Resource> 
+}
+
+<OneOrMore_Contract.authority_Organization> CLOSED {
+    rdf:first @<Contract.authority> AND {fhir:link 
+			@<Organization> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Contract.authority_Organization> 
+}
+
+<OneOrMore_Contract.domain_Location> CLOSED {
+    rdf:first @<Contract.domain> AND {fhir:link 
+			@<Location> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Contract.domain_Location> 
+}
+
+<OneOrMore_Contract.site_Location> CLOSED {
+    rdf:first @<Contract.site> AND {fhir:link 
+			@<Location> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Contract.site_Location> 
+}
+
+<OneOrMore_Contract.alias> CLOSED {
+    rdf:first @<Contract.alias>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Contract.alias> 
+}
+
+<OneOrMore_Contract.subType> CLOSED {
+    rdf:first @<Contract.subType>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Contract.subType> 
+}
+
+<OneOrMore_Contract.term> CLOSED {
+    rdf:first @<Contract.term>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Contract.term> 
+}
+
+<OneOrMore_Contract.supportingInfo_Resource> CLOSED {
+    rdf:first @<Contract.supportingInfo> AND {fhir:link 
+			@<Resource> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Contract.supportingInfo_Resource> 
+}
+
+<OneOrMore_Contract.relevantHistory_Provenance> CLOSED {
+    rdf:first @<Contract.relevantHistory> AND {fhir:link 
+			@<Provenance> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Contract.relevantHistory_Provenance> 
+}
+
+<OneOrMore_Contract.signer> CLOSED {
+    rdf:first @<Contract.signer>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Contract.signer> 
+}
+
+<OneOrMore_Contract.friendly> CLOSED {
+    rdf:first @<Contract.friendly>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Contract.friendly> 
+}
+
+<OneOrMore_Contract.legal> CLOSED {
+    rdf:first @<Contract.legal>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Contract.legal> 
+}
+
+<OneOrMore_Contract.rule> CLOSED {
+    rdf:first @<Contract.rule>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Contract.rule> 
+}
+
+<OneOrMore_Contract.term.securityLabel> CLOSED {
+    rdf:first @<Contract.term.securityLabel>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Contract.term.securityLabel> 
+}
+
+<OneOrMore_Contract.term.asset> CLOSED {
+    rdf:first @<Contract.term.asset>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Contract.term.asset> 
+}
+
+<OneOrMore_Contract.term.action> CLOSED {
+    rdf:first @<Contract.term.action>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Contract.term.action> 
+}
+
+<OneOrMore_Contract.term.action.subject> CLOSED {
+    rdf:first @<Contract.term.action.subject>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Contract.term.action.subject> 
+}
+
+<OneOrMore_Contract.term.action.linkId> CLOSED {
+    rdf:first @<Contract.term.action.linkId>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Contract.term.action.linkId> 
+}
+
+<OneOrMore_Contract.term.action.contextLinkId> CLOSED {
+    rdf:first @<Contract.term.action.contextLinkId>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Contract.term.action.contextLinkId> 
+}
+
+<OneOrMore_Contract.term.action.requester_Device_OR_Group_OR_Organization_OR_Patient_OR_Practitioner_OR_PractitionerRole_OR_RelatedPerson> CLOSED {
+    rdf:first @<Contract.term.action.requester> AND {fhir:link 
+			@<Device> OR 
+			@<Group> OR 
+			@<Organization> OR 
+			@<Patient> OR 
+			@<Practitioner> OR 
+			@<PractitionerRole> OR 
+			@<RelatedPerson> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Contract.term.action.requester_Device_OR_Group_OR_Organization_OR_Patient_OR_Practitioner_OR_PractitionerRole_OR_RelatedPerson> 
+}
+
+<OneOrMore_Contract.term.action.requesterLinkId> CLOSED {
+    rdf:first @<Contract.term.action.requesterLinkId>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Contract.term.action.requesterLinkId> 
+}
+
+<OneOrMore_Contract.term.action.performerType> CLOSED {
+    rdf:first @<Contract.term.action.performerType>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Contract.term.action.performerType> 
+}
+
+<OneOrMore_Contract.term.action.performerLinkId> CLOSED {
+    rdf:first @<Contract.term.action.performerLinkId>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Contract.term.action.performerLinkId> 
+}
+
+<OneOrMore_Contract.term.action.reason> CLOSED {
+    rdf:first @<Contract.term.action.reason>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Contract.term.action.reason> 
+}
+
+<OneOrMore_Contract.term.action.reasonLinkId> CLOSED {
+    rdf:first @<Contract.term.action.reasonLinkId>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Contract.term.action.reasonLinkId> 
+}
+
+<OneOrMore_Contract.term.action.note> CLOSED {
+    rdf:first @<Contract.term.action.note>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Contract.term.action.note> 
+}
+
+<OneOrMore_Contract.term.action.securityLabelNumber> CLOSED {
+    rdf:first @<Contract.term.action.securityLabelNumber>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Contract.term.action.securityLabelNumber> 
+}
+
+<OneOrMore_Contract.term.offer.identifier> CLOSED {
+    rdf:first @<Contract.term.offer.identifier>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Contract.term.offer.identifier> 
+}
+
+<OneOrMore_Contract.term.offer.party> CLOSED {
+    rdf:first @<Contract.term.offer.party>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Contract.term.offer.party> 
+}
+
+<OneOrMore_Contract.term.offer.decisionMode> CLOSED {
+    rdf:first @<Contract.term.offer.decisionMode>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Contract.term.offer.decisionMode> 
+}
+
+<OneOrMore_Contract.term.offer.answer> CLOSED {
+    rdf:first @<Contract.term.offer.answer>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Contract.term.offer.answer> 
+}
+
+<OneOrMore_Contract.term.offer.linkId> CLOSED {
+    rdf:first @<Contract.term.offer.linkId>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Contract.term.offer.linkId> 
+}
+
+<OneOrMore_Contract.term.offer.securityLabelNumber> CLOSED {
+    rdf:first @<Contract.term.offer.securityLabelNumber>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Contract.term.offer.securityLabelNumber> 
+}
+
+<OneOrMore_Contract.term.securityLabel.number> CLOSED {
+    rdf:first @<Contract.term.securityLabel.number>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Contract.term.securityLabel.number> 
+}
+
+<OneOrMore_Contract.term.securityLabel.category> CLOSED {
+    rdf:first @<Contract.term.securityLabel.category>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Contract.term.securityLabel.category> 
+}
+
+<OneOrMore_Contract.term.securityLabel.control> CLOSED {
+    rdf:first @<Contract.term.securityLabel.control>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Contract.term.securityLabel.control> 
+}
+
+<OneOrMore_Contract.term.asset.valuedItem.linkId> CLOSED {
+    rdf:first @<Contract.term.asset.valuedItem.linkId>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Contract.term.asset.valuedItem.linkId> 
+}
+
+<OneOrMore_Contract.term.asset.valuedItem.securityLabelNumber> CLOSED {
+    rdf:first @<Contract.term.asset.valuedItem.securityLabelNumber>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Contract.term.asset.valuedItem.securityLabelNumber> 
+}
+
+<OneOrMore_Contract.term.offer.party.reference_Device_OR_Group_OR_Organization_OR_Patient_OR_Practitioner_OR_PractitionerRole_OR_RelatedPerson> CLOSED {
+    rdf:first @<Contract.term.offer.party.reference> AND {fhir:link 
+			@<Device> OR 
+			@<Group> OR 
+			@<Organization> OR 
+			@<Patient> OR 
+			@<Practitioner> OR 
+			@<PractitionerRole> OR 
+			@<RelatedPerson> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Contract.term.offer.party.reference_Device_OR_Group_OR_Organization_OR_Patient_OR_Practitioner_OR_PractitionerRole_OR_RelatedPerson> 
+}
+
+<OneOrMore_Contract.signer.signature> CLOSED {
+    rdf:first @<Contract.signer.signature>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Contract.signer.signature> 
+}
+
+<OneOrMore_Contract.term.asset.context.code> CLOSED {
+    rdf:first @<Contract.term.asset.context.code>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Contract.term.asset.context.code> 
+}
+
+<OneOrMore_Contract.term.asset.type> CLOSED {
+    rdf:first @<Contract.term.asset.type>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Contract.term.asset.type> 
+}
+
+<OneOrMore_Contract.term.asset.typeReference_Resource> CLOSED {
+    rdf:first @<Contract.term.asset.typeReference> AND {fhir:link 
+			@<Resource> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Contract.term.asset.typeReference_Resource> 
+}
+
+<OneOrMore_Contract.term.asset.subtype> CLOSED {
+    rdf:first @<Contract.term.asset.subtype>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Contract.term.asset.subtype> 
+}
+
+<OneOrMore_Contract.term.asset.context> CLOSED {
+    rdf:first @<Contract.term.asset.context>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Contract.term.asset.context> 
+}
+
+<OneOrMore_Contract.term.asset.periodType> CLOSED {
+    rdf:first @<Contract.term.asset.periodType>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Contract.term.asset.periodType> 
+}
+
+<OneOrMore_Contract.term.asset.period> CLOSED {
+    rdf:first @<Contract.term.asset.period>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Contract.term.asset.period> 
+}
+
+<OneOrMore_Contract.term.asset.usePeriod> CLOSED {
+    rdf:first @<Contract.term.asset.usePeriod>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Contract.term.asset.usePeriod> 
+}
+
+<OneOrMore_Contract.term.asset.linkId> CLOSED {
+    rdf:first @<Contract.term.asset.linkId>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Contract.term.asset.linkId> 
+}
+
+<OneOrMore_Contract.term.asset.securityLabelNumber> CLOSED {
+    rdf:first @<Contract.term.asset.securityLabelNumber>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Contract.term.asset.securityLabelNumber> 
+}
+
+<OneOrMore_Contract.term.asset.valuedItem> CLOSED {
+    rdf:first @<Contract.term.asset.valuedItem>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Contract.term.asset.valuedItem> 
+}
+
+<OneOrMore_Contract.term.action.subject.reference_Device_OR_Group_OR_Organization_OR_Patient_OR_Practitioner_OR_PractitionerRole_OR_RelatedPerson> CLOSED {
+    rdf:first @<Contract.term.action.subject.reference> AND {fhir:link 
+			@<Device> OR 
+			@<Group> OR 
+			@<Organization> OR 
+			@<Patient> OR 
+			@<Practitioner> OR 
+			@<PractitionerRole> OR 
+			@<RelatedPerson> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Contract.term.action.subject.reference_Device_OR_Group_OR_Organization_OR_Patient_OR_Practitioner_OR_PractitionerRole_OR_RelatedPerson> 
+}
+
+<OneOrMore_Timing.event> CLOSED {
+    rdf:first @<Timing.event>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Timing.event> 
+}
+
+<OneOrMore_CodeableConcept.coding> CLOSED {
+    rdf:first @<CodeableConcept.coding>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_CodeableConcept.coding> 
+}
+
+<OneOrMore_Timing.repeat.dayOfWeek> CLOSED {
+    rdf:first @<Timing.repeat.dayOfWeek>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Timing.repeat.dayOfWeek> 
+}
+
+<OneOrMore_Timing.repeat.timeOfDay> CLOSED {
+    rdf:first @<Timing.repeat.timeOfDay>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Timing.repeat.timeOfDay> 
+}
+
+<OneOrMore_Timing.repeat.when> CLOSED {
+    rdf:first @<Timing.repeat.when>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Timing.repeat.when> 
+}
+
+#---------------------- Reference Types -------------------
+
+#---------------------- Value Sets ------------------------

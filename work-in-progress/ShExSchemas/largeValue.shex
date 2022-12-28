@@ -1,0 +1,33 @@
+﻿PREFIX fhir: <http://hl7.org/fhir/> 
+PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+BASE <http://hl7.org/fhir/shape/>
+
+
+# A value larger than the bounds of the base integer datatype
+<largeValue> EXTENDS @<Extension> CLOSED {   
+
+    a [fhir:largeValue];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v @<Extension.url> AND
+    	{fhir:value ["http://hl7.org/fhir/StructureDefinition/largeValue"]}; 
+    fhir:value (@<decimal> )  AND { rdf:type IRI } ; 
+    ^fhir:extension { a [fhir:integer]
+    		}
+}  
+
+#---------------------- Data Types -------------------
+
+# Primitive Type decimal
+<decimal> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:decimal];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v @<decimal.value>?;               # Primitive value for decimal
+}  
+
+#---------------------- Cardinality Types (OneOrMore) -------------------
+
+#---------------------- Reference Types -------------------
+
+#---------------------- Value Sets ------------------------

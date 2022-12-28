@@ -1,0 +1,393 @@
+﻿PREFIX fhir: <http://hl7.org/fhir/> 
+PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+BASE <http://hl7.org/fhir/shape/>
+
+
+start=@<Device> AND {fhir:nodeRole [fhir:treeRoot]}
+
+
+# Item used in healthcare
+<Device> EXTENDS @<DomainResource> CLOSED {   
+
+    a [fhir:Device];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:identifier @<OneOrMore_Device.identifier>?;  # Instance identifier
+    fhir:displayName @<Device.displayName>?;  # The name used to display by 
+                                            # default when the device is 
+                                            # referenced 
+    fhir:definition @<Device.definition>?;  # The reference to the definition 
+                                            # for the device 
+    fhir:udiCarrier @<OneOrMore_Device.udiCarrier>?;  # Unique Device Identifier (UDI) 
+                                            # Barcode string 
+    fhir:status @<Device.status>?;          # active | inactive | 
+                                            # entered-in-error | unknown 
+    fhir:statusReason @<OneOrMore_Device.statusReason>?;  # discarded | obsolete | removed
+    fhir:biologicalSourceEvent @<Device.biologicalSourceEvent>?;  # An identifier that supports 
+                                            # traceability to the event during 
+                                            # which material in this product 
+                                            # from one or more biological 
+                                            # entities was obtained or pooled 
+    fhir:manufacturer @<Device.manufacturer>?;  # Name of device manufacturer
+    fhir:manufactureDate @<Device.manufactureDate>?;  # Date when the device was made
+    fhir:expirationDate @<Device.expirationDate>?;  # Date and time of expiry of this 
+                                            # device (if applicable) 
+    fhir:lotNumber @<Device.lotNumber>?;    # Lot number of manufacture
+    fhir:serialNumber @<Device.serialNumber>?;  # Serial number assigned by the 
+                                            # manufacturer 
+    fhir:deviceName @<OneOrMore_Device.deviceName>?;  # The name or names of the device as 
+                                            # known to the manufacturer and/or 
+                                            # patient 
+    fhir:modelNumber @<Device.modelNumber>?;  # The manufacturer's model number 
+                                            # for the device 
+    fhir:partNumber @<Device.partNumber>?;  # The part number or catalog number 
+                                            # of the device 
+    fhir:type @<OneOrMore_Device.type>?;    # The kind or type of device
+    fhir:version @<OneOrMore_Device.version>?;  # The actual design of the device or 
+                                            # software version running on the 
+                                            # device 
+    fhir:specialization @<OneOrMore_Device.specialization>?;  # The standard(s) the device supports
+    fhir:property @<OneOrMore_Device.property>?;  # The actual configuration settings 
+                                            # of a device as it actually 
+                                            # operates, e.g., regulation status, 
+                                            # time properties 
+    fhir:subject @<Device.subject> AND {fhir:link 
+    			@<Patient> OR 
+    			@<Practitioner> }?;  # Patient to whom Device is affixed
+    fhir:operationalState @<OneOrMore_Device.operationalState>?;  # The status of the device itself - 
+                                            # whether it is switched on, or 
+                                            # activated, etc 
+    fhir:association @<OneOrMore_Device.association>?;  # Current association of the device
+    fhir:owner @<Device.owner> AND {fhir:link 
+    			@<Organization> }?;  # Organization responsible for device
+    fhir:contact @<OneOrMore_Device.contact>?;  # Details for human/organization for 
+                                            # support 
+    fhir:location @<Device.location> AND {fhir:link 
+    			@<Location> }?;  # Where the device is found
+    fhir:url @<Device.url>?;                # Network address to contact device
+    fhir:endpoint @<OneOrMore_Device.endpoint_Endpoint>?;  # Technical endpoints providing 
+                                            # access to electronic services 
+                                            # provided by the device 
+    fhir:link @<OneOrMore_Device.link>?;    # An associated device, attached to, 
+                                            # used with, communicating with or 
+                                            # linking a previous or new device 
+                                            # model to the focal device 
+    fhir:note @<OneOrMore_Device.note>?;    # Device notes and comments
+    fhir:safety @<OneOrMore_Device.safety>?;  # Safety Characteristics of Device
+    fhir:parent @<Device.parent> AND {fhir:link 
+    			@<Device> }?;  # The device that this device is 
+                                            # attached to or is part of 
+}  
+
+# The status of the device itself - whether it is switched on, or activated, etc
+<Device.operationalState> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:status @<Device.operationalState.status>;  # Device operational condition
+    fhir:statusReason @<OneOrMore_Device.operationalState.statusReason>?;  # The reasons given for the current 
+                                            # operational status 
+    fhir:operator @<OneOrMore_Device.operationalState.operator_Patient_OR_Practitioner_OR_RelatedPerson>?;  # The current device operator
+    fhir:mode @<Device.operationalState.mode>?;  # Designated condition for task
+    fhir:cycle @<Device.operationalState.cycle>?;  # Number of operationcycles
+    fhir:duration @<Device.operationalState.duration>?;  # Operation time measurement
+}  
+
+# The name or names of the device as known to the manufacturer and/or patient
+<Device.deviceName> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:name @<Device.deviceName.name>;    # The name that identifies the device
+    fhir:type @<Device.deviceName.type>;    # registered-name | 
+                                            # user-friendly-name | 
+                                            # patient-reported-name 
+}  
+
+# The actual design of the device or software version running on the device
+<Device.version> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:type @<Device.version.type>?;      # The type of the device version, 
+                                            # e.g. manufacturer, approved, 
+                                            # internal 
+    fhir:component @<Device.version.component>?;  # The hardware or software module of 
+                                            # the device to which the version 
+                                            # applies 
+    fhir:installDate @<Device.version.installDate>?;  # The date the version was installed 
+                                            # on the device 
+    fhir:value @<Device.version.value>;     # The version text
+}  
+
+# The actual configuration settings of a device as it actually operates, e.g., regulation status, time properties
+<Device.property> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:type @<Device.property.type>;      # Code that specifies the property 
+                                            # being represented 
+    fhir:value (@<Quantity>  OR 
+    			@<CodeableConcept>  OR 
+    			@<string>  OR 
+    			@<boolean>  OR 
+    			@<integer>  OR 
+    			@<Range>  OR 
+    			@<Attachment> )  AND { rdf:type IRI } ;  # Property value - as a code, 
+                                            # quantity, boolean, string or 
+                                            # attachmment 
+}  
+
+# Current association of the device
+<Device.association> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:status @<Device.association.status>;  # Device useage state
+    fhir:statusReason @<OneOrMore_Device.association.statusReason>?;  # The reasons given for the current 
+                                            # association status 
+    fhir:humanSubject @<Device.association.humanSubject> AND {fhir:link 
+    			@<Patient> }?;  # The individual associated with the 
+                                            # device 
+    fhir:bodyStructure @<Device.association.bodyStructure>?;  # Current anatomical location of 
+                                            # device in/on humanSubject 
+}  
+
+# The standard(s) the device supports
+<Device.specialization> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:systemType @<Device.specialization.systemType>;  # Code that specifies the property 
+                                            # being represented 
+    fhir:version @<Device.specialization.version>?;  # Standard version used
+    fhir:category @<Device.specialization.category>?;  # communication | performance | 
+                                            # measurement 
+}  
+
+# Unique Device Identifier (UDI) Barcode string
+<Device.udiCarrier> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:deviceIdentifier @<Device.udiCarrier.deviceIdentifier>;  # Mandatory fixed portion of UDI
+    fhir:issuer @<Device.udiCarrier.issuer>;  # UDI Issuing Organization
+    fhir:jurisdiction @<Device.udiCarrier.jurisdiction>?;  # Regional UDI authority
+    fhir:carrierAIDC @<Device.udiCarrier.carrierAIDC>?;  # UDI Machine Readable Barcode String
+    fhir:carrierHRF @<Device.udiCarrier.carrierHRF>?;  # UDI Human Readable Barcode String
+    fhir:entryType @<Device.udiCarrier.entryType>?;  # barcode | rfid | manual | card | 
+                                            # self-reported | 
+                                            # electronic-transmission | unknown 
+}  
+
+# An associated device, attached to, used with, communicating with or linking a previous or new device model to the focal device
+<Device.link> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:relation @<Device.link.relation>;  # The type indicates the 
+                                            # relationship of the related device 
+                                            # to the device instance 
+    fhir:relatedDevice @<Device.link.relatedDevice>;  # A reference to the linked device
+}  
+
+#---------------------- Data Types -------------------
+
+# Primitive Type boolean
+<boolean> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:boolean];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v @<boolean.value>?;               # Primitive value for boolean
+}  
+
+# Primitive Type string
+<string> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:string];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v @<string.value>?;                # Primitive value for string
+}  
+
+# A measured or measurable amount
+<Quantity> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Quantity];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:value @<Quantity.value>?;          # Numerical value (with implicit 
+                                            # precision) 
+    fhir:comparator @<Quantity.comparator>?;  # < | <= | >= | > | ad - how to 
+                                            # understand the value 
+    fhir:unit @<Quantity.unit>?;            # Unit representation
+    fhir:system @<Quantity.system>?;        # System that defines coded unit form
+    fhir:code @<Quantity.code>?;            # Coded form of the unit
+} AND (
+
+# Constraint: UniqueKey:qty-3
+# Human readable:If a code for the unit is present, the system SHALL also be present
+# XPath:not(exists(f:code)) or exists(f:system)
+# Constraint:code.empty() or system.exists()
+# ShEx:
+
+ NOT { fhir:code {fhir:v .} }  OR { fhir:system . }
+
+)
+ 
+
+# Content in a format defined elsewhere
+<Attachment> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Attachment];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:contentType @<Attachment.contentType>?;  # Mime type of the content, with 
+                                            # charset etc. 
+    fhir:language @<Attachment.language>?;  # Human language of the content 
+                                            # (BCP-47) 
+    fhir:data @<Attachment.data>?;          # Data inline, base64ed
+    fhir:url @<Attachment.url>?;            # Uri where the data can be found
+    fhir:size @<Attachment.size>?;          # Number of bytes of content (if url 
+                                            # provided) 
+    fhir:hash @<Attachment.hash>?;          # Hash of the data (sha-1, base64ed)
+    fhir:title @<Attachment.title>?;        # Label to display in place of the 
+                                            # data 
+    fhir:creation @<Attachment.creation>?;  # Date attachment was first created
+    fhir:height @<Attachment.height>?;      # Height of the image in pixels 
+                                            # (photo/video) 
+    fhir:width @<Attachment.width>?;        # Width of the image in pixels 
+                                            # (photo/video) 
+    fhir:frames @<Attachment.frames>?;      # Number of frames if > 1 (photo)
+    fhir:duration @<Attachment.duration>?;  # Length in seconds (audio / video)
+    fhir:pages @<Attachment.pages>?;        # Number of printed pages
+} AND (
+
+# Constraint: UniqueKey:att-1
+# Human readable:If the Attachment has data, it SHALL have a contentType
+# XPath:not(exists(f:data)) or exists(f:contentType)
+# Constraint:data.empty() or contentType.exists()
+# ShEx:
+
+ NOT { fhir:data {fhir:v .} }  OR { fhir:contentType . }
+
+)
+ 
+
+# Primitive Type integer
+<integer> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:integer];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v @<integer.value>?;               # Primitive value for integer
+}  
+
+# Set of values bounded by low and high
+<Range> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Range];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:low @<Range.low>?;                 # Low limit
+    fhir:high @<Range.high>?;               # High limit
+} AND (
+
+# Constraint: UniqueKey:rng-2
+# Human readable:If present, low SHALL have a lower value than high
+# XPath:not(exists(f:low/f:value/@value)) or not(exists(f:high/f:value/@value)) or (number(f:low/f:value/@value) <= number(f:high/f:value/@value))
+# Constraint:low.value.empty() or high.value.empty() or (low <= high)
+# ShEx:
+
+ NOT { fhir:low fhir:value {fhir:v .} }  OR  NOT { fhir:high fhir:value {fhir:v .} }  OR ({ fhir:low { fhir:v MaxInclusive { fhir:high } }  })
+
+)
+ 
+
+# Concept - reference to a terminology or just  text
+<CodeableConcept> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:CodeableConcept];
+    fhir:nodeRole [fhir:treeRoot]?;
+    a NONLITERAL*;
+    fhir:coding @<OneOrMore_CodeableConcept.coding>?;  # Code defined by a terminology 
+                                            # system 
+    fhir:text @<CodeableConcept.text>?;     # Plain text representation of the 
+                                            # concept 
+}  
+
+#---------------------- Cardinality Types (OneOrMore) -------------------
+
+<OneOrMore_Device.identifier> CLOSED {
+    rdf:first @<Device.identifier>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Device.identifier> 
+}
+
+<OneOrMore_Device.udiCarrier> CLOSED {
+    rdf:first @<Device.udiCarrier>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Device.udiCarrier> 
+}
+
+<OneOrMore_Device.statusReason> CLOSED {
+    rdf:first @<Device.statusReason>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Device.statusReason> 
+}
+
+<OneOrMore_Device.deviceName> CLOSED {
+    rdf:first @<Device.deviceName>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Device.deviceName> 
+}
+
+<OneOrMore_Device.type> CLOSED {
+    rdf:first @<Device.type>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Device.type> 
+}
+
+<OneOrMore_Device.version> CLOSED {
+    rdf:first @<Device.version>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Device.version> 
+}
+
+<OneOrMore_Device.specialization> CLOSED {
+    rdf:first @<Device.specialization>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Device.specialization> 
+}
+
+<OneOrMore_Device.property> CLOSED {
+    rdf:first @<Device.property>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Device.property> 
+}
+
+<OneOrMore_Device.operationalState> CLOSED {
+    rdf:first @<Device.operationalState>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Device.operationalState> 
+}
+
+<OneOrMore_Device.association> CLOSED {
+    rdf:first @<Device.association>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Device.association> 
+}
+
+<OneOrMore_Device.contact> CLOSED {
+    rdf:first @<Device.contact>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Device.contact> 
+}
+
+<OneOrMore_Device.endpoint_Endpoint> CLOSED {
+    rdf:first @<Device.endpoint> AND {fhir:link 
+			@<Endpoint> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Device.endpoint_Endpoint> 
+}
+
+<OneOrMore_Device.link> CLOSED {
+    rdf:first @<Device.link>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Device.link> 
+}
+
+<OneOrMore_Device.note> CLOSED {
+    rdf:first @<Device.note>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Device.note> 
+}
+
+<OneOrMore_Device.safety> CLOSED {
+    rdf:first @<Device.safety>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Device.safety> 
+}
+
+<OneOrMore_Device.operationalState.statusReason> CLOSED {
+    rdf:first @<Device.operationalState.statusReason>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Device.operationalState.statusReason> 
+}
+
+<OneOrMore_Device.operationalState.operator_Patient_OR_Practitioner_OR_RelatedPerson> CLOSED {
+    rdf:first @<Device.operationalState.operator> AND {fhir:link 
+			@<Patient> OR 
+			@<Practitioner> OR 
+			@<RelatedPerson> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Device.operationalState.operator_Patient_OR_Practitioner_OR_RelatedPerson> 
+}
+
+<OneOrMore_Device.association.statusReason> CLOSED {
+    rdf:first @<Device.association.statusReason>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Device.association.statusReason> 
+}
+
+<OneOrMore_CodeableConcept.coding> CLOSED {
+    rdf:first @<CodeableConcept.coding>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_CodeableConcept.coding> 
+}
+
+#---------------------- Reference Types -------------------
+
+#---------------------- Value Sets ------------------------

@@ -1,0 +1,195 @@
+﻿PREFIX fhir: <http://hl7.org/fhir/> 
+PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+BASE <http://hl7.org/fhir/shape/>
+
+
+start=@<DiagnosticReport> AND {fhir:nodeRole [fhir:treeRoot]}
+
+
+# A Diagnostic report - a combination of request information, atomic results, images, interpretation, as well as formatted reports
+<DiagnosticReport> EXTENDS @<DomainResource> CLOSED {   
+
+    a [fhir:DiagnosticReport];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:identifier @<OneOrMore_DiagnosticReport.identifier>?;  # Business identifier for report
+    fhir:basedOn @<OneOrMore_DiagnosticReport.basedOn_CarePlan_OR_ImmunizationRecommendation_OR_MedicationRequest_OR_NutritionOrder_OR_ServiceRequest>?;  # What was requested
+    fhir:status @<DiagnosticReport.status>;  # registered | partial | preliminary 
+                                            # | final + 
+    fhir:category @<OneOrMore_DiagnosticReport.category>?;  # Service category
+    fhir:code @<DiagnosticReport.code>;     # Name/Code for this diagnostic 
+                                            # report 
+    fhir:subject @<DiagnosticReport.subject> AND {fhir:link 
+    			@<BiologicallyDerivedProduct> OR 
+    			@<Device> OR 
+    			@<Group> OR 
+    			@<Location> OR 
+    			@<Medication> OR 
+    			@<Organization> OR 
+    			@<Patient> OR 
+    			@<Practitioner> OR 
+    			@<Procedure> OR 
+    			@<Substance> }?;  # The subject of the report - 
+                                            # usually, but not always, the 
+                                            # patient 
+    fhir:encounter @<DiagnosticReport.encounter> AND {fhir:link 
+    			@<Encounter> }?;  # Health care event when test ordered
+    fhir:effective (@<dateTime>  OR 
+    			@<Period> )  AND { rdf:type IRI } ?;  # Clinically relevant 
+                                            # time/time-period for report 
+    fhir:issued @<DiagnosticReport.issued>?;  # DateTime this version was made
+    fhir:performer @<OneOrMore_DiagnosticReport.performer_CareTeam_OR_Organization_OR_Practitioner_OR_PractitionerRole>?;  # Responsible Diagnostic Service
+    fhir:resultsInterpreter @<OneOrMore_DiagnosticReport.resultsInterpreter_CareTeam_OR_Organization_OR_Practitioner_OR_PractitionerRole>?;  # Primary result interpreter
+    fhir:specimen @<OneOrMore_DiagnosticReport.specimen_Specimen>?;  # Specimens this report is based on
+    fhir:result @<OneOrMore_DiagnosticReport.result_Observation>?;  # Observations
+    fhir:note @<OneOrMore_DiagnosticReport.note>?;  # Comments about the diagnostic 
+                                            # report 
+    fhir:imagingStudy @<OneOrMore_DiagnosticReport.imagingStudy_ImagingStudy>?;  # Reference to full details of 
+                                            # imaging associated with the 
+                                            # diagnostic report 
+    fhir:media @<OneOrMore_DiagnosticReport.media>?;  # Key images or data associated with 
+                                            # this report 
+    fhir:composition @<DiagnosticReport.composition> AND {fhir:link 
+    			@<Composition> }?;  # Reference to a Composition 
+                                            # resource for the DiagnosticReport 
+                                            # structure 
+    fhir:conclusion @<DiagnosticReport.conclusion>?;  # Clinical conclusion 
+                                            # (interpretation) of test results 
+    fhir:conclusionCode @<OneOrMore_DiagnosticReport.conclusionCode>?;  # Codes for the clinical conclusion 
+                                            # of test results 
+    fhir:presentedForm @<OneOrMore_DiagnosticReport.presentedForm>?;  # Entire report as issued
+} AND (
+
+# Constraint: UniqueKey:dgr-1
+# Human readable:A resource referenced in a Composition entry must also be included in the DiagnosticReport result (Observation resources or nested resources via Observation.hasMember)
+# XPath:true()
+# Constraint:composition.exists() implies composition.resolve().section.entry.resolve().descendants().where((id in result.resolve().descendants().id).not()).empty()
+# ShEx:
+
+{ fhir:composition . } AND  NOT { fhir:composition  resolve(  ) fhir:section fhir:entry  resolve(  )  descendants(  )  SHEX_where_SHEX ( NOT {  fhir:id { fhir:v [ descendants(  fhir:result  resolve(  ) ).id] }  }) {fhir:v .} } 
+
+)
+ 
+
+# Key images or data associated with this report
+<DiagnosticReport.media> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:comment @<DiagnosticReport.media.comment>?;  # Comment about the image or data 
+                                            # (e.g. explanation) 
+    fhir:link @<DiagnosticReport.media.link> AND {fhir:link 
+    			@<DocumentReference> };  # Reference to the image or data 
+                                            # source 
+}  
+
+#---------------------- Data Types -------------------
+
+# Primitive Type dateTime
+<dateTime> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:dateTime];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v @<dateTime.value>?;              # Primitive value for dateTime
+}  
+
+# Time range defined by start and end date/time
+<Period> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Period];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:start @<Period.start>?;            # Starting time with inclusive 
+                                            # boundary 
+    fhir:end @<Period.end>?;                # End time with inclusive boundary, 
+                                            # if not ongoing 
+} AND (
+
+# Constraint: UniqueKey:per-1
+# Human readable:If present, start SHALL have a lower or equal value than end
+# XPath:not(exists(f:start/@value)) or not(exists(f:end/@value)) or (xs:dateTime(f:start/@value) <= xs:dateTime(f:end/@value))
+# Constraint:start.hasValue().not() or end.hasValue().not() or (start <= end)
+# ShEx:
+
+ NOT { fhir:start  . } OR  NOT { fhir:end  . } OR ({ fhir:start { fhir:v MaxInclusive { fhir:end } }  })
+
+)
+ 
+
+#---------------------- Cardinality Types (OneOrMore) -------------------
+
+<OneOrMore_DiagnosticReport.identifier> CLOSED {
+    rdf:first @<DiagnosticReport.identifier>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_DiagnosticReport.identifier> 
+}
+
+<OneOrMore_DiagnosticReport.basedOn_CarePlan_OR_ImmunizationRecommendation_OR_MedicationRequest_OR_NutritionOrder_OR_ServiceRequest> CLOSED {
+    rdf:first @<DiagnosticReport.basedOn> AND {fhir:link 
+			@<CarePlan> OR 
+			@<ImmunizationRecommendation> OR 
+			@<MedicationRequest> OR 
+			@<NutritionOrder> OR 
+			@<ServiceRequest> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_DiagnosticReport.basedOn_CarePlan_OR_ImmunizationRecommendation_OR_MedicationRequest_OR_NutritionOrder_OR_ServiceRequest> 
+}
+
+<OneOrMore_DiagnosticReport.category> CLOSED {
+    rdf:first @<DiagnosticReport.category>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_DiagnosticReport.category> 
+}
+
+<OneOrMore_DiagnosticReport.performer_CareTeam_OR_Organization_OR_Practitioner_OR_PractitionerRole> CLOSED {
+    rdf:first @<DiagnosticReport.performer> AND {fhir:link 
+			@<CareTeam> OR 
+			@<Organization> OR 
+			@<Practitioner> OR 
+			@<PractitionerRole> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_DiagnosticReport.performer_CareTeam_OR_Organization_OR_Practitioner_OR_PractitionerRole> 
+}
+
+<OneOrMore_DiagnosticReport.resultsInterpreter_CareTeam_OR_Organization_OR_Practitioner_OR_PractitionerRole> CLOSED {
+    rdf:first @<DiagnosticReport.resultsInterpreter> AND {fhir:link 
+			@<CareTeam> OR 
+			@<Organization> OR 
+			@<Practitioner> OR 
+			@<PractitionerRole> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_DiagnosticReport.resultsInterpreter_CareTeam_OR_Organization_OR_Practitioner_OR_PractitionerRole> 
+}
+
+<OneOrMore_DiagnosticReport.specimen_Specimen> CLOSED {
+    rdf:first @<DiagnosticReport.specimen> AND {fhir:link 
+			@<Specimen> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_DiagnosticReport.specimen_Specimen> 
+}
+
+<OneOrMore_DiagnosticReport.result_Observation> CLOSED {
+    rdf:first @<DiagnosticReport.result> AND {fhir:link 
+			@<Observation> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_DiagnosticReport.result_Observation> 
+}
+
+<OneOrMore_DiagnosticReport.note> CLOSED {
+    rdf:first @<DiagnosticReport.note>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_DiagnosticReport.note> 
+}
+
+<OneOrMore_DiagnosticReport.imagingStudy_ImagingStudy> CLOSED {
+    rdf:first @<DiagnosticReport.imagingStudy> AND {fhir:link 
+			@<ImagingStudy> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_DiagnosticReport.imagingStudy_ImagingStudy> 
+}
+
+<OneOrMore_DiagnosticReport.media> CLOSED {
+    rdf:first @<DiagnosticReport.media>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_DiagnosticReport.media> 
+}
+
+<OneOrMore_DiagnosticReport.conclusionCode> CLOSED {
+    rdf:first @<DiagnosticReport.conclusionCode>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_DiagnosticReport.conclusionCode> 
+}
+
+<OneOrMore_DiagnosticReport.presentedForm> CLOSED {
+    rdf:first @<DiagnosticReport.presentedForm>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_DiagnosticReport.presentedForm> 
+}
+
+#---------------------- Reference Types -------------------
+
+#---------------------- Value Sets ------------------------

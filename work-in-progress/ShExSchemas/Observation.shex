@@ -1,0 +1,735 @@
+﻿PREFIX fhir: <http://hl7.org/fhir/> 
+PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+BASE <http://hl7.org/fhir/shape/>
+
+
+start=@<Observation> AND {fhir:nodeRole [fhir:treeRoot]}
+
+
+# Measurements and simple assertions
+<Observation> EXTENDS @<DomainResource> CLOSED {   
+
+    a [fhir:Observation];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:identifier @<OneOrMore_Observation.identifier>?;  # Business Identifier for observation
+    fhir:instantiates ((@<canonical>  AND {fhir:link @<ObservationDefinition> })  OR 
+    			(@<Reference>  AND {fhir:link @<ObservationDefinition> }) )  AND { rdf:type IRI } ?;  # Instantiates FHIR 
+                                            # ObservationDefinition 
+    fhir:basedOn @<OneOrMore_Observation.basedOn_CarePlan_OR_DeviceRequest_OR_ImmunizationRecommendation_OR_MedicationRequest_OR_NutritionOrder_OR_ServiceRequest>?;  # Fulfills plan, proposal or order
+    fhir:triggeredBy @<OneOrMore_Observation.triggeredBy>?;  # Triggering observation(s)
+    fhir:partOf @<OneOrMore_Observation.partOf_ImagingStudy_OR_Immunization_OR_MedicationAdministration_OR_MedicationDispense_OR_MedicationUsage_OR_Procedure>?;  # Part of referenced event
+    fhir:status @<Observation.status>;      # registered | preliminary | final | 
+                                            # amended + 
+    fhir:category @<OneOrMore_Observation.category>?;  # Classification of  type of 
+                                            # observation 
+    fhir:code @<Observation.code>;          # Type of observation (code / type)
+    fhir:subject @<Observation.subject> AND {fhir:link 
+    			@<BiologicallyDerivedProduct> OR 
+    			@<Device> OR 
+    			@<Group> OR 
+    			@<Location> OR 
+    			@<Medication> OR 
+    			@<NutritionProduct> OR 
+    			@<Organization> OR 
+    			@<Patient> OR 
+    			@<Practitioner> OR 
+    			@<Procedure> OR 
+    			@<Substance> }?;  # Who and/or what the observation is 
+                                            # about 
+    fhir:focus @<OneOrMore_Observation.focus_Resource>?;  # What the observation is about, 
+                                            # when it is not about the subject 
+                                            # of record 
+    fhir:encounter @<Observation.encounter> AND {fhir:link 
+    			@<Encounter> }?;  # Healthcare event during which this 
+                                            # observation is made 
+    fhir:effective (@<dateTime>  OR 
+    			@<Period>  OR 
+    			@<Timing>  OR 
+    			@<instant> )  AND { rdf:type IRI } ?;  # Clinically relevant 
+                                            # time/time-period for observation 
+    fhir:issued @<Observation.issued>?;     # Date/Time this version was made 
+                                            # available 
+    fhir:performer @<OneOrMore_Observation.performer_CareTeam_OR_Organization_OR_Patient_OR_Practitioner_OR_PractitionerRole_OR_RelatedPerson>?;  # Who is responsible for the 
+                                            # observation 
+    fhir:value (@<Quantity>  OR 
+    			@<CodeableConcept>  OR 
+    			@<string>  OR 
+    			@<boolean>  OR 
+    			@<integer>  OR 
+    			@<Range>  OR 
+    			@<Ratio>  OR 
+    			@<SampledData>  OR 
+    			@<time>  OR 
+    			@<dateTime>  OR 
+    			@<Period>  OR 
+    			@<Attachment> )  AND { rdf:type IRI } ?;  # Actual result
+    fhir:dataAbsentReason @<Observation.dataAbsentReason>?;  # Why the result is missing
+    fhir:interpretation @<OneOrMore_Observation.interpretation>?;  # High, low, normal, etc.
+    fhir:note @<OneOrMore_Observation.note>?;  # Comments about the observation
+    fhir:bodySite @<Observation.bodySite>?;  # Observed body part
+    fhir:bodyStructure @<Observation.bodyStructure> AND {fhir:link 
+    			@<BodyStructure> }?;  # Observed body structure
+    fhir:method @<Observation.method>?;     # How it was done
+    fhir:specimen @<Observation.specimen> AND {fhir:link 
+    			@<Specimen> }?;  # Specimen used for this observation
+    fhir:device @<Observation.device> AND {fhir:link 
+    			@<Device> OR 
+    			@<DeviceMetric> }?;  # (Measurement) Device
+    fhir:referenceRange @<OneOrMore_Observation.referenceRange>?;  # Provides guide for interpretation
+    fhir:hasMember @<OneOrMore_Observation.hasMember_MolecularSequence_OR_Observation_OR_QuestionnaireResponse>?;  # Related resource that belongs to 
+                                            # the Observation group 
+    fhir:derivedFrom @<OneOrMore_Observation.derivedFrom_DocumentReference_OR_ImagingSelection_OR_ImagingStudy_OR_MolecularSequence_OR_Observation_OR_QuestionnaireResponse>?;  # Related resource from which the 
+                                            # observation is made 
+    fhir:component @<OneOrMore_Observation.component>?;  # Component results
+} AND (
+
+# Constraint: UniqueKey:obs-8
+# Human readable:bodyStructure SHALL only be present if Observation.bodySite is not present
+# XPath:not(exists(f:bodyStructure)) or (not(exists(f:bodyStructure)))
+# Constraint:bodyStructure.empty() or bodySite.empty()
+# ShEx:
+
+ NOT { fhir:bodyStructure {fhir:v .} }  OR  NOT { fhir:bodySite {fhir:v .} } 
+
+) AND (
+
+# Constraint: UniqueKey:obs-7
+# Human readable:If Observation.code is the same as an Observation.component.code then the value element associated with the code SHALL NOT be present
+# XPath:not(f:*[starts-with(local-name(.), 'value')] and (for $coding in f:code/f:coding return f:component/f:code/f:coding[f:code/@value=$coding/f:code/@value] [f:system/@value=$coding/f:system/@value]))
+# Constraint:value.empty() or component.code.where(coding.intersect(%resource.code.coding).exists()).empty()
+# ShEx:
+
+
+) AND (
+
+# Constraint: UniqueKey:obs-6
+# Human readable:dataAbsentReason SHALL only be present if Observation.value[x] is not present
+# XPath:not(exists(f:dataAbsentReason)) or (not(exists(*[starts-with(local-name(.), 'value')])))
+# Constraint:dataAbsentReason.empty() or value.empty()
+# ShEx:
+
+ NOT { fhir:dataAbsentReason {fhir:v .} }  OR  NOT { fhir:value {fhir:v .} } 
+
+) AND (
+
+# Constraint: UniqueKey:obs-3
+# Human readable:Must have at least a low or a high or text
+# XPath:(exists(f:low) or exists(f:high)or exists(f:text))
+# Constraint:low.exists() or high.exists() or text.exists()
+# ShEx:
+
+{ fhir:low . } OR { fhir:high . } OR { fhir:text . }
+
+)
+ 
+
+# Component results
+<Observation.component> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:code @<Observation.component.code>;  # Type of component observation 
+                                            # (code / type) 
+    fhir:value (@<Quantity>  OR 
+    			@<CodeableConcept>  OR 
+    			@<string>  OR 
+    			@<boolean>  OR 
+    			@<integer>  OR 
+    			@<Range>  OR 
+    			@<Ratio>  OR 
+    			@<SampledData>  OR 
+    			@<time>  OR 
+    			@<dateTime>  OR 
+    			@<Period>  OR 
+    			@<Attachment> )  AND { rdf:type IRI } ?;  # Actual component result
+    fhir:dataAbsentReason @<Observation.component.dataAbsentReason>?;  # Why the component result is missing
+    fhir:interpretation @<OneOrMore_Observation.component.interpretation>?;  # High, low, normal, etc.
+    fhir:referenceRange @<OneOrMore_Observation.referenceRange>?;  # Provides guide for interpretation 
+                                            # of component result 
+}  
+
+# Triggering observation(s)
+<Observation.triggeredBy> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:observation @<Observation.triggeredBy.observation> AND {fhir:link 
+    			@<Observation> };  # Triggering observation
+    fhir:type @<Observation.triggeredBy.type>;  # reflex | repeat | re-run
+    fhir:reason @<Observation.triggeredBy.reason>?;  # Reason that the observation was 
+                                            # triggered 
+}  
+
+# Provides guide for interpretation
+<Observation.referenceRange> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:low @<Observation.referenceRange.low>?;  # Low Range, if relevant
+    fhir:high @<Observation.referenceRange.high>?;  # High Range, if relevant
+    fhir:normalValue @<Observation.referenceRange.normalValue>?;  # Normal value, if relevant
+    fhir:type @<Observation.referenceRange.type>?;  # Reference range qualifier
+    fhir:appliesTo @<OneOrMore_Observation.referenceRange.appliesTo>?;  # Reference range population
+    fhir:age @<Observation.referenceRange.age>?;  # Applicable age range, if relevant
+    fhir:text @<Observation.referenceRange.text>?;  # Text based reference range in an 
+                                            # observation 
+} AND (
+
+# Constraint: UniqueKey:obs-8
+# Human readable:bodyStructure SHALL only be present if Observation.bodySite is not present
+# XPath:not(exists(f:bodyStructure)) or (not(exists(f:bodyStructure)))
+# Constraint:bodyStructure.empty() or bodySite.empty()
+# ShEx:
+
+ NOT { fhir:bodyStructure {fhir:v .} }  OR  NOT { fhir:bodySite {fhir:v .} } 
+
+) AND (
+
+# Constraint: UniqueKey:obs-7
+# Human readable:If Observation.code is the same as an Observation.component.code then the value element associated with the code SHALL NOT be present
+# XPath:not(f:*[starts-with(local-name(.), 'value')] and (for $coding in f:code/f:coding return f:component/f:code/f:coding[f:code/@value=$coding/f:code/@value] [f:system/@value=$coding/f:system/@value]))
+# Constraint:value.empty() or component.code.where(coding.intersect(%resource.code.coding).exists()).empty()
+# ShEx:
+
+
+) AND (
+
+# Constraint: UniqueKey:obs-6
+# Human readable:dataAbsentReason SHALL only be present if Observation.value[x] is not present
+# XPath:not(exists(f:dataAbsentReason)) or (not(exists(*[starts-with(local-name(.), 'value')])))
+# Constraint:dataAbsentReason.empty() or value.empty()
+# ShEx:
+
+ NOT { fhir:dataAbsentReason {fhir:v .} }  OR  NOT { fhir:value {fhir:v .} } 
+
+) AND (
+
+# Constraint: UniqueKey:obs-3
+# Human readable:Must have at least a low or a high or text
+# XPath:(exists(f:low) or exists(f:high)or exists(f:text))
+# Constraint:low.exists() or high.exists() or text.exists()
+# ShEx:
+
+{ fhir:low . } OR { fhir:high . } OR { fhir:text . }
+
+)
+ 
+
+#---------------------- Data Types -------------------
+
+# Primitive Type dateTime
+<dateTime> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:dateTime];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v @<dateTime.value>?;              # Primitive value for dateTime
+}  
+
+# Primitive Type string
+<string> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:string];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v @<string.value>?;                # Primitive value for string
+}  
+
+# A reference from one resource to another
+<Reference> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Reference];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:link IRI?;
+    fhir:reference @<Reference.reference>?;  # Literal reference, Relative, 
+                                            # internal or absolute URL 
+    fhir:type @<Reference.type>?;           # Type the reference refers to (e.g. 
+                                            # "Patient") 
+    fhir:identifier @<Reference.identifier>?;  # Logical reference, when literal 
+                                            # reference is not known 
+    fhir:display @<Reference.display>?;     # Text alternative for the resource
+} AND (
+
+# Constraint: UniqueKey:ref-1
+# Human readable:SHALL have a contained resource if a local reference is provided
+# XPath:not(starts-with(f:reference/@value, '#')) or exists(ancestor::*[self::f:entry or self::f:parameter]/f:resource/f:*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')]|/*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')])
+# Constraint:reference.startsWith('#').not() or (reference.substring(1).trace('url') in %rootResource.contained.id.trace('ids')) or (reference='#' and %rootResource!=%resource)
+# ShEx:
+
+
+)
+ 
+
+# Time range defined by start and end date/time
+<Period> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Period];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:start @<Period.start>?;            # Starting time with inclusive 
+                                            # boundary 
+    fhir:end @<Period.end>?;                # End time with inclusive boundary, 
+                                            # if not ongoing 
+} AND (
+
+# Constraint: UniqueKey:per-1
+# Human readable:If present, start SHALL have a lower or equal value than end
+# XPath:not(exists(f:start/@value)) or not(exists(f:end/@value)) or (xs:dateTime(f:start/@value) <= xs:dateTime(f:end/@value))
+# Constraint:start.hasValue().not() or end.hasValue().not() or (start <= end)
+# ShEx:
+
+ NOT { fhir:start  . } OR  NOT { fhir:end  . } OR ({ fhir:start { fhir:v MaxInclusive { fhir:end } }  })
+
+)
+ 
+
+# A measured or measurable amount
+<Quantity> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Quantity];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:value @<Quantity.value>?;          # Numerical value (with implicit 
+                                            # precision) 
+    fhir:comparator @<Quantity.comparator>?;  # < | <= | >= | > | ad - how to 
+                                            # understand the value 
+    fhir:unit @<Quantity.unit>?;            # Unit representation
+    fhir:system @<Quantity.system>?;        # System that defines coded unit form
+    fhir:code @<Quantity.code>?;            # Coded form of the unit
+} AND (
+
+# Constraint: UniqueKey:qty-3
+# Human readable:If a code for the unit is present, the system SHALL also be present
+# XPath:not(exists(f:code)) or exists(f:system)
+# Constraint:code.empty() or system.exists()
+# ShEx:
+
+ NOT { fhir:code {fhir:v .} }  OR { fhir:system . }
+
+)
+ 
+
+# Content in a format defined elsewhere
+<Attachment> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Attachment];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:contentType @<Attachment.contentType>?;  # Mime type of the content, with 
+                                            # charset etc. 
+    fhir:language @<Attachment.language>?;  # Human language of the content 
+                                            # (BCP-47) 
+    fhir:data @<Attachment.data>?;          # Data inline, base64ed
+    fhir:url @<Attachment.url>?;            # Uri where the data can be found
+    fhir:size @<Attachment.size>?;          # Number of bytes of content (if url 
+                                            # provided) 
+    fhir:hash @<Attachment.hash>?;          # Hash of the data (sha-1, base64ed)
+    fhir:title @<Attachment.title>?;        # Label to display in place of the 
+                                            # data 
+    fhir:creation @<Attachment.creation>?;  # Date attachment was first created
+    fhir:height @<Attachment.height>?;      # Height of the image in pixels 
+                                            # (photo/video) 
+    fhir:width @<Attachment.width>?;        # Width of the image in pixels 
+                                            # (photo/video) 
+    fhir:frames @<Attachment.frames>?;      # Number of frames if > 1 (photo)
+    fhir:duration @<Attachment.duration>?;  # Length in seconds (audio / video)
+    fhir:pages @<Attachment.pages>?;        # Number of printed pages
+} AND (
+
+# Constraint: UniqueKey:att-1
+# Human readable:If the Attachment has data, it SHALL have a contentType
+# XPath:not(exists(f:data)) or exists(f:contentType)
+# Constraint:data.empty() or contentType.exists()
+# ShEx:
+
+ NOT { fhir:data {fhir:v .} }  OR { fhir:contentType . }
+
+)
+ 
+
+# Primitive Type canonical
+<canonical> EXTENDS @<uri> CLOSED {   
+
+    a [fhir:canonical];
+    fhir:nodeRole [fhir:treeRoot]?;
+}  
+
+# Primitive Type integer
+<integer> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:integer];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v @<integer.value>?;               # Primitive value for integer
+}  
+
+# Set of values bounded by low and high
+<Range> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Range];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:low @<Range.low>?;                 # Low limit
+    fhir:high @<Range.high>?;               # High limit
+} AND (
+
+# Constraint: UniqueKey:rng-2
+# Human readable:If present, low SHALL have a lower value than high
+# XPath:not(exists(f:low/f:value/@value)) or not(exists(f:high/f:value/@value)) or (number(f:low/f:value/@value) <= number(f:high/f:value/@value))
+# Constraint:low.value.empty() or high.value.empty() or (low <= high)
+# ShEx:
+
+ NOT { fhir:low fhir:value {fhir:v .} }  OR  NOT { fhir:high fhir:value {fhir:v .} }  OR ({ fhir:low { fhir:v MaxInclusive { fhir:high } }  })
+
+)
+ 
+
+# Primitive Type instant
+<instant> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:instant];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v @<instant.value>?;               # Primitive value for instant
+}  
+
+# Primitive Type boolean
+<boolean> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:boolean];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v @<boolean.value>?;               # Primitive value for boolean
+}  
+
+# A series of measurements taken by a device
+<SampledData> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:SampledData];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:origin @<SampledData.origin>;      # Zero value and units
+    fhir:period @<SampledData.period>;      # Number of milliseconds between 
+                                            # samples 
+    fhir:factor @<SampledData.factor>?;     # Multiply data by this before 
+                                            # adding to origin 
+    fhir:lowerLimit @<SampledData.lowerLimit>?;  # Lower limit of detection
+    fhir:upperLimit @<SampledData.upperLimit>?;  # Upper limit of detection
+    fhir:dimensions @<SampledData.dimensions>;  # Number of sample points at each 
+                                            # time point 
+    fhir:data @<SampledData.data>?;         # Decimal values with spaces, or "E" 
+                                            # | "U" | "L" 
+}  
+
+# A ratio of two Quantity values - a numerator and a denominator
+<Ratio> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Ratio];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:numerator @<Ratio.numerator>?;     # Numerator value
+    fhir:denominator @<Ratio.denominator>?;  # Denominator value
+} AND (
+
+# Constraint: UniqueKey:rat-1
+# Human readable:Numerator and denominator SHALL both be present, or both are absent. If both are absent, there SHALL be some extension present
+# XPath:(count(f:numerator) = count(f:denominator)) and ((count(f:numerator) > 0) or (count(f:extension) > 0))
+# Constraint:(numerator.empty() xor denominator.exists()) and (numerator.exists() or extension.exists())
+# ShEx:
+
+(( NOT { fhir:numerator {fhir:v .} }  AND NOT  { fhir:denominator . }) OR ( NOT  NOT { fhir:numerator {fhir:v .} }  AND  { fhir:denominator . })) AND ({ fhir:numerator . } OR { fhir:extension . })
+
+)
+ 
+
+# A timing schedule that specifies an event that may occur multiple times
+<Timing> EXTENDS @<BackboneType> CLOSED {   
+
+    a [fhir:Timing];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:event @<OneOrMore_Timing.event>?;  # When the event occurs
+    fhir:repeat @<Timing.repeat>?;          # When the event is to occur
+    fhir:code @<Timing.code>?;              # C | BID | TID | QID | AM | PM | QD 
+                                            # | QOD | + 
+} AND (
+
+# Constraint: UniqueKey:tim-9
+# Human readable:If there's an offset, there must be a when (and not C, CM, CD, CV)
+# XPath:not(exists(f:offset)) or exists(f:when)
+# Constraint:offset.empty() or (when.exists() and ((when in ('C' | 'CM' | 'CD' | 'CV')).not()))
+# ShEx:
+
+ NOT { fhir:offset {fhir:v .} }  OR ({ fhir:when . } AND ( NOT { { fhir:when { fhir:v [('C' | 'CM' | 'CD' | 'CV')] }  } }))
+
+) AND (
+
+# Constraint: UniqueKey:tim-5
+# Human readable:period SHALL be a non-negative value
+# XPath:f:period/@value >= 0 or not(f:period/@value)
+# Constraint:period.exists() implies period >= 0
+# ShEx:
+
+{ fhir:period . } AND ({ fhir:period { fhir:v MinInclusive 0 }  })
+
+) AND (
+
+# Constraint: UniqueKey:tim-6
+# Human readable:If there's a periodMax, there must be a period
+# XPath:not(exists(f:periodMax)) or exists(f:period)
+# Constraint:periodMax.empty() or period.exists()
+# ShEx:
+
+ NOT { fhir:periodMax {fhir:v .} }  OR { fhir:period . }
+
+) AND (
+
+# Constraint: UniqueKey:tim-7
+# Human readable:If there's a durationMax, there must be a duration
+# XPath:not(exists(f:durationMax)) or exists(f:duration)
+# Constraint:durationMax.empty() or duration.exists()
+# ShEx:
+
+ NOT { fhir:durationMax {fhir:v .} }  OR { fhir:duration . }
+
+) AND (
+
+# Constraint: UniqueKey:tim-8
+# Human readable:If there's a countMax, there must be a count
+# XPath:not(exists(f:countMax)) or exists(f:count)
+# Constraint:countMax.empty() or count.exists()
+# ShEx:
+
+ NOT { fhir:countMax {fhir:v .} }  OR { fhir:count . }
+
+) AND (
+
+# Constraint: UniqueKey:tim-1
+# Human readable:if there's a duration, there needs to be duration units
+# XPath:not(exists(f:duration)) or exists(f:durationUnit)
+# Constraint:duration.empty() or durationUnit.exists()
+# ShEx:
+
+ NOT { fhir:duration {fhir:v .} }  OR { fhir:durationUnit . }
+
+) AND (
+
+# Constraint: UniqueKey:tim-10
+# Human readable:If there's a timeOfDay, there cannot be a when, or vice versa
+# XPath:not(exists(f:timeOfDay)) or not(exists(f:when))
+# Constraint:timeOfDay.empty() or when.empty()
+# ShEx:
+
+ NOT { fhir:timeOfDay {fhir:v .} }  OR  NOT { fhir:when {fhir:v .} } 
+
+) AND (
+
+# Constraint: UniqueKey:tim-2
+# Human readable:if there's a period, there needs to be period units
+# XPath:not(exists(f:period)) or exists(f:periodUnit)
+# Constraint:period.empty() or periodUnit.exists()
+# ShEx:
+
+ NOT { fhir:period {fhir:v .} }  OR { fhir:periodUnit . }
+
+) AND (
+
+# Constraint: UniqueKey:tim-4
+# Human readable:duration SHALL be a non-negative value
+# XPath:f:duration/@value >= 0 or not(f:duration/@value)
+# Constraint:duration.exists() implies duration >= 0
+# ShEx:
+
+{ fhir:duration . } AND ({ fhir:duration { fhir:v MinInclusive 0 }  })
+
+)
+ 
+
+# Primitive Type time
+<time> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:time];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v @<time.value>?;                  # Primitive value for time
+}  
+
+# Concept - reference to a terminology or just  text
+<CodeableConcept> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:CodeableConcept];
+    fhir:nodeRole [fhir:treeRoot]?;
+    a NONLITERAL*;
+    fhir:coding @<OneOrMore_CodeableConcept.coding>?;  # Code defined by a terminology 
+                                            # system 
+    fhir:text @<CodeableConcept.text>?;     # Plain text representation of the 
+                                            # concept 
+}  
+
+# When the event is to occur
+<Timing.repeat> EXTENDS @<Element> CLOSED {   
+    fhir:bounds (@<Duration>  OR 
+    			@<Range>  OR 
+    			@<Period> )  AND { rdf:type IRI } ?;  # Length/Range of lengths, or (Start 
+                                            # and/or end) limits 
+    fhir:count @<Timing.repeat.count>?;     # Number of times to repeat
+    fhir:countMax @<Timing.repeat.countMax>?;  # Maximum number of times to repeat
+    fhir:duration @<Timing.repeat.duration>?;  # How long when it happens
+    fhir:durationMax @<Timing.repeat.durationMax>?;  # How long when it happens (Max)
+    fhir:durationUnit @<Timing.repeat.durationUnit>?;  # s | min | h | d | wk | mo | a - 
+                                            # unit of time (UCUM) 
+    fhir:frequency @<Timing.repeat.frequency>?;  # Indicates the number of 
+                                            # repetitions that should occur 
+                                            # within a period. I.e. Event occurs 
+                                            # frequency times per period 
+    fhir:frequencyMax @<Timing.repeat.frequencyMax>?;  # Event occurs up to frequencyMax 
+                                            # times per period 
+    fhir:period @<Timing.repeat.period>?;   # The duration to which the 
+                                            # frequency applies. I.e. Event 
+                                            # occurs frequency times per period 
+    fhir:periodMax @<Timing.repeat.periodMax>?;  # Upper limit of period (3-4 hours)
+    fhir:periodUnit @<Timing.repeat.periodUnit>?;  # s | min | h | d | wk | mo | a - 
+                                            # unit of time (UCUM) 
+    fhir:dayOfWeek @<OneOrMore_Timing.repeat.dayOfWeek>?;  # mon | tue | wed | thu | fri | sat 
+                                            # | sun 
+    fhir:timeOfDay @<OneOrMore_Timing.repeat.timeOfDay>?;  # Time of day for action
+    fhir:when @<OneOrMore_Timing.repeat.when>?;  # Code for time period of occurrence
+    fhir:offset @<Timing.repeat.offset>?;   # Minutes from event (before or 
+                                            # after) 
+} AND (
+
+
+
+)
+ 
+
+# A length of time
+<Duration> EXTENDS @<Quantity> CLOSED {   
+
+    a [fhir:Duration];
+    fhir:nodeRole [fhir:treeRoot]?;
+} AND (
+
+# Constraint: UniqueKey:drt-1
+# Human readable:There SHALL be a code if there is a value and it SHALL be an expression of time.  If system is present, it SHALL be UCUM.
+# XPath:(f:code or not(f:value)) and (not(exists(f:system)) or f:system/@value='http://unitsofmeasure.org')
+# Constraint:code.exists() implies ((system = %ucum) and value.exists())
+# ShEx:
+
+{ fhir:code . } AND (({ fhir:system { fhir:v ['http://unitsofmeasure.org'] }  }) AND { fhir:value . })
+
+)
+ 
+
+#---------------------- Cardinality Types (OneOrMore) -------------------
+
+<OneOrMore_Observation.identifier> CLOSED {
+    rdf:first @<Observation.identifier>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Observation.identifier> 
+}
+
+<OneOrMore_Observation.basedOn_CarePlan_OR_DeviceRequest_OR_ImmunizationRecommendation_OR_MedicationRequest_OR_NutritionOrder_OR_ServiceRequest> CLOSED {
+    rdf:first @<Observation.basedOn> AND {fhir:link 
+			@<CarePlan> OR 
+			@<DeviceRequest> OR 
+			@<ImmunizationRecommendation> OR 
+			@<MedicationRequest> OR 
+			@<NutritionOrder> OR 
+			@<ServiceRequest> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Observation.basedOn_CarePlan_OR_DeviceRequest_OR_ImmunizationRecommendation_OR_MedicationRequest_OR_NutritionOrder_OR_ServiceRequest> 
+}
+
+<OneOrMore_Observation.triggeredBy> CLOSED {
+    rdf:first @<Observation.triggeredBy>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Observation.triggeredBy> 
+}
+
+<OneOrMore_Observation.partOf_ImagingStudy_OR_Immunization_OR_MedicationAdministration_OR_MedicationDispense_OR_MedicationUsage_OR_Procedure> CLOSED {
+    rdf:first @<Observation.partOf> AND {fhir:link 
+			@<ImagingStudy> OR 
+			@<Immunization> OR 
+			@<MedicationAdministration> OR 
+			@<MedicationDispense> OR 
+			@<MedicationUsage> OR 
+			@<Procedure> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Observation.partOf_ImagingStudy_OR_Immunization_OR_MedicationAdministration_OR_MedicationDispense_OR_MedicationUsage_OR_Procedure> 
+}
+
+<OneOrMore_Observation.category> CLOSED {
+    rdf:first @<Observation.category>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Observation.category> 
+}
+
+<OneOrMore_Observation.focus_Resource> CLOSED {
+    rdf:first @<Observation.focus> AND {fhir:link 
+			@<Resource> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Observation.focus_Resource> 
+}
+
+<OneOrMore_Observation.performer_CareTeam_OR_Organization_OR_Patient_OR_Practitioner_OR_PractitionerRole_OR_RelatedPerson> CLOSED {
+    rdf:first @<Observation.performer> AND {fhir:link 
+			@<CareTeam> OR 
+			@<Organization> OR 
+			@<Patient> OR 
+			@<Practitioner> OR 
+			@<PractitionerRole> OR 
+			@<RelatedPerson> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Observation.performer_CareTeam_OR_Organization_OR_Patient_OR_Practitioner_OR_PractitionerRole_OR_RelatedPerson> 
+}
+
+<OneOrMore_Observation.interpretation> CLOSED {
+    rdf:first @<Observation.interpretation>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Observation.interpretation> 
+}
+
+<OneOrMore_Observation.note> CLOSED {
+    rdf:first @<Observation.note>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Observation.note> 
+}
+
+<OneOrMore_Observation.referenceRange> CLOSED {
+    rdf:first @<Observation.referenceRange>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Observation.referenceRange> 
+}
+
+<OneOrMore_Observation.hasMember_MolecularSequence_OR_Observation_OR_QuestionnaireResponse> CLOSED {
+    rdf:first @<Observation.hasMember> AND {fhir:link 
+			@<MolecularSequence> OR 
+			@<Observation> OR 
+			@<QuestionnaireResponse> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Observation.hasMember_MolecularSequence_OR_Observation_OR_QuestionnaireResponse> 
+}
+
+<OneOrMore_Observation.derivedFrom_DocumentReference_OR_ImagingSelection_OR_ImagingStudy_OR_MolecularSequence_OR_Observation_OR_QuestionnaireResponse> CLOSED {
+    rdf:first @<Observation.derivedFrom> AND {fhir:link 
+			@<DocumentReference> OR 
+			@<ImagingSelection> OR 
+			@<ImagingStudy> OR 
+			@<MolecularSequence> OR 
+			@<Observation> OR 
+			@<QuestionnaireResponse> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Observation.derivedFrom_DocumentReference_OR_ImagingSelection_OR_ImagingStudy_OR_MolecularSequence_OR_Observation_OR_QuestionnaireResponse> 
+}
+
+<OneOrMore_Observation.component> CLOSED {
+    rdf:first @<Observation.component>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Observation.component> 
+}
+
+<OneOrMore_Observation.component.interpretation> CLOSED {
+    rdf:first @<Observation.component.interpretation>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Observation.component.interpretation> 
+}
+
+<OneOrMore_Observation.referenceRange.appliesTo> CLOSED {
+    rdf:first @<Observation.referenceRange.appliesTo>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Observation.referenceRange.appliesTo> 
+}
+
+<OneOrMore_Timing.event> CLOSED {
+    rdf:first @<Timing.event>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Timing.event> 
+}
+
+<OneOrMore_CodeableConcept.coding> CLOSED {
+    rdf:first @<CodeableConcept.coding>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_CodeableConcept.coding> 
+}
+
+<OneOrMore_Timing.repeat.dayOfWeek> CLOSED {
+    rdf:first @<Timing.repeat.dayOfWeek>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Timing.repeat.dayOfWeek> 
+}
+
+<OneOrMore_Timing.repeat.timeOfDay> CLOSED {
+    rdf:first @<Timing.repeat.timeOfDay>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Timing.repeat.timeOfDay> 
+}
+
+<OneOrMore_Timing.repeat.when> CLOSED {
+    rdf:first @<Timing.repeat.when>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Timing.repeat.when> 
+}
+
+#---------------------- Reference Types -------------------
+
+#---------------------- Value Sets ------------------------

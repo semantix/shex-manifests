@@ -1,0 +1,34 @@
+﻿PREFIX fhir: <http://hl7.org/fhir/> 
+PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+BASE <http://hl7.org/fhir/shape/>
+
+
+start=@<FormularyItem> AND {fhir:nodeRole [fhir:treeRoot]}
+
+
+# Definition of a FormularyItem
+<FormularyItem> EXTENDS @<DomainResource> CLOSED {   
+
+    a [fhir:FormularyItem];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:identifier @<OneOrMore_FormularyItem.identifier>?;  # Business identifier for this 
+                                            # formulary item 
+    fhir:code @<FormularyItem.code>?;       # Codes that identify this formulary 
+                                            # item 
+    fhir:status @<FormularyItem.status>?;   # active | entered-in-error | 
+                                            # inactive 
+}  
+
+#---------------------- Data Types -------------------
+
+#---------------------- Cardinality Types (OneOrMore) -------------------
+
+<OneOrMore_FormularyItem.identifier> CLOSED {
+    rdf:first @<FormularyItem.identifier>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_FormularyItem.identifier> 
+}
+
+#---------------------- Reference Types -------------------
+
+#---------------------- Value Sets ------------------------

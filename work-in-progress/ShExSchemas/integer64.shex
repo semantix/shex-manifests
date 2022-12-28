@@ -1,0 +1,21 @@
+﻿PREFIX fhir: <http://hl7.org/fhir/> 
+PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+BASE <http://hl7.org/fhir/shape/>
+
+
+# Primitive Type integer64
+<integer64> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:integer64];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v @<integer64.value>?;             # Primitive value for integer64
+}  
+
+#---------------------- Data Types -------------------
+
+#---------------------- Cardinality Types (OneOrMore) -------------------
+
+#---------------------- Reference Types -------------------
+
+#---------------------- Value Sets ------------------------

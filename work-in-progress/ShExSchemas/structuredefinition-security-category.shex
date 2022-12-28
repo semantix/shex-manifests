@@ -1,0 +1,36 @@
+﻿PREFIX fhir: <http://hl7.org/fhir/> 
+PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+BASE <http://hl7.org/fhir/shape/>
+
+
+# Security Categorization for Resource
+<structuredefinition-security-category> EXTENDS @<Extension> CLOSED {   
+
+    a [fhir:structuredefinition-security-category];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v @<Extension.url> AND
+    	{fhir:value ["http://hl7.org/fhir/StructureDefinition/structuredefinition-security-category"]}; 
+    fhir:value (@<code> AND
+    	{fhir:value @fhirvs:resource-security-category} )  AND { rdf:type IRI } ; 
+    ^fhir:extension { a [fhir:StructureDefinition]
+    		}
+}  
+
+#---------------------- Data Types -------------------
+
+# Primitive Type code
+<code> EXTENDS @<string> CLOSED {   
+
+    a [fhir:code];
+    fhir:nodeRole [fhir:treeRoot]?;
+}  
+
+#---------------------- Cardinality Types (OneOrMore) -------------------
+
+#---------------------- Reference Types -------------------
+
+#---------------------- Value Sets ------------------------
+
+# Description Needed Here
+fhirvs:resource-security-category ["anonymous" "business" "individual" "patient" "not-classified"]

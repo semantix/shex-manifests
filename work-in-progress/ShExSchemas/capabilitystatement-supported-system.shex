@@ -1,0 +1,33 @@
+﻿PREFIX fhir: <http://hl7.org/fhir/> 
+PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+BASE <http://hl7.org/fhir/shape/>
+
+
+# Code system not defined in a value set
+<capabilitystatement-supported-system> EXTENDS @<Extension> CLOSED {   
+
+    a [fhir:capabilitystatement-supported-system];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v @<Extension.url> AND
+    	{fhir:value ["http://hl7.org/fhir/StructureDefinition/capabilitystatement-supported-system"]}; 
+    fhir:value (@<uri> )  AND { rdf:type IRI } ; 
+    ^fhir:extension { a [fhir:CapabilityStatement]
+    		}
+}  
+
+#---------------------- Data Types -------------------
+
+# Primitive Type uri
+<uri> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:uri];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v @<uri.value>?;                   # Primitive value for uri
+}  
+
+#---------------------- Cardinality Types (OneOrMore) -------------------
+
+#---------------------- Reference Types -------------------
+
+#---------------------- Value Sets ------------------------

@@ -1,0 +1,115 @@
+﻿PREFIX fhir: <http://hl7.org/fhir/> 
+PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+BASE <http://hl7.org/fhir/shape/>
+
+
+start=@<MessageHeader> AND {fhir:nodeRole [fhir:treeRoot]}
+
+
+# A resource that describes a message that is exchanged between systems
+<MessageHeader> EXTENDS @<DomainResource> CLOSED {   
+
+    a [fhir:MessageHeader];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:event (@<Coding>  OR 
+    			@<uri> )  AND { rdf:type IRI } ;  # Code for the event this message 
+                                            # represents or link to event 
+                                            # definition 
+    fhir:destination @<OneOrMore_MessageHeader.destination>?;  # Message destination application(s)
+    fhir:sender @<MessageHeader.sender> AND {fhir:link 
+    			@<Organization> OR 
+    			@<Practitioner> OR 
+    			@<PractitionerRole> }?;  # Real world sender of the message
+    fhir:enterer @<MessageHeader.enterer> AND {fhir:link 
+    			@<Practitioner> OR 
+    			@<PractitionerRole> }?;  # The source of the data entry
+    fhir:author @<MessageHeader.author> AND {fhir:link 
+    			@<Practitioner> OR 
+    			@<PractitionerRole> }?;  # The source of the decision
+    fhir:source @<MessageHeader.source>;    # Message source application
+    fhir:responsible @<MessageHeader.responsible> AND {fhir:link 
+    			@<Organization> OR 
+    			@<Practitioner> OR 
+    			@<PractitionerRole> }?;  # Final responsibility for event
+    fhir:reason @<MessageHeader.reason>?;   # Cause of event
+    fhir:response @<MessageHeader.response>?;  # If this is a reply to prior message
+    fhir:focus @<OneOrMore_MessageHeader.focus_Resource>?;  # The actual content of the message
+    fhir:definition @<MessageHeader.definition>?;  # Link to the definition for this 
+                                            # message 
+}  
+
+# Message destination application(s)
+<MessageHeader.destination> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:name @<MessageHeader.destination.name>?;  # Name of system
+    fhir:target @<MessageHeader.destination.target> AND {fhir:link 
+    			@<Device> }?;  # Particular delivery destination 
+                                            # within the destination 
+    fhir:endpoint @<MessageHeader.destination.endpoint>?;  # Actual destination address or id
+    fhir:receiver @<MessageHeader.destination.receiver> AND {fhir:link 
+    			@<Organization> OR 
+    			@<Practitioner> OR 
+    			@<PractitionerRole> }?;  # Intended "real-world" recipient 
+                                            # for the data 
+}  
+
+# If this is a reply to prior message
+<MessageHeader.response> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:identifier @<MessageHeader.response.identifier>;  # Id of original message
+    fhir:code @<MessageHeader.response.code>;  # ok | transient-error | fatal-error
+    fhir:details @<MessageHeader.response.details> AND {fhir:link 
+    			@<OperationOutcome> }?;  # Specific list of 
+                                            # hints/warnings/errors 
+}  
+
+# Message source application
+<MessageHeader.source> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:name @<MessageHeader.source.name>?;  # Name of system
+    fhir:software @<MessageHeader.source.software>?;  # Name of software running the system
+    fhir:version @<MessageHeader.source.version>?;  # Version of software running
+    fhir:contact @<MessageHeader.source.contact>?;  # Human contact for problems
+    fhir:endpoint @<MessageHeader.source.endpoint>?;  # Actual message source address or id
+}  
+
+#---------------------- Data Types -------------------
+
+# A reference to a code defined by a terminology system
+<Coding> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Coding];
+    fhir:nodeRole [fhir:treeRoot]?;
+    a NONLITERAL?;
+    fhir:system @<Coding.system>?;          # Identity of the terminology system
+    fhir:version @<Coding.version>?;        # Version of the system - if relevant
+    fhir:code @<Coding.code>?;              # Symbol in syntax defined by the 
+                                            # system 
+    fhir:display @<Coding.display>?;        # Representation defined by the 
+                                            # system 
+    fhir:userSelected @<Coding.userSelected>?;  # If this coding was chosen directly 
+                                            # by the user 
+}  
+
+# Primitive Type uri
+<uri> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:uri];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v @<uri.value>?;                   # Primitive value for uri
+}  
+
+#---------------------- Cardinality Types (OneOrMore) -------------------
+
+<OneOrMore_MessageHeader.destination> CLOSED {
+    rdf:first @<MessageHeader.destination>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_MessageHeader.destination> 
+}
+
+<OneOrMore_MessageHeader.focus_Resource> CLOSED {
+    rdf:first @<MessageHeader.focus> AND {fhir:link 
+			@<Resource> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_MessageHeader.focus_Resource> 
+}
+
+#---------------------- Reference Types -------------------
+
+#---------------------- Value Sets ------------------------

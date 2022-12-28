@@ -1,0 +1,55 @@
+﻿PREFIX fhir: <http://hl7.org/fhir/> 
+PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+BASE <http://hl7.org/fhir/shape/>
+
+
+start=@<ImmunizationEvaluation> AND {fhir:nodeRole [fhir:treeRoot]}
+
+
+# Immunization evaluation information
+<ImmunizationEvaluation> EXTENDS @<DomainResource> CLOSED {   
+
+    a [fhir:ImmunizationEvaluation];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:identifier @<OneOrMore_ImmunizationEvaluation.identifier>?;  # Business identifier
+    fhir:status @<ImmunizationEvaluation.status>;  # completed | entered-in-error
+    fhir:patient @<ImmunizationEvaluation.patient> AND {fhir:link 
+    			@<Patient> };  # Who this evaluation is for
+    fhir:date @<ImmunizationEvaluation.date>?;  # Date evaluation was performed
+    fhir:authority @<ImmunizationEvaluation.authority> AND {fhir:link 
+    			@<Organization> }?;  # Who is responsible for publishing 
+                                            # the recommendations 
+    fhir:targetDisease @<ImmunizationEvaluation.targetDisease>;  # The vaccine preventable disease 
+                                            # schedule being evaluated 
+    fhir:immunizationEvent @<ImmunizationEvaluation.immunizationEvent> AND {fhir:link 
+    			@<Immunization> };  # Immunization being evaluated
+    fhir:doseStatus @<ImmunizationEvaluation.doseStatus>;  # Status of the dose relative to 
+                                            # published recommendations 
+    fhir:doseStatusReason @<OneOrMore_ImmunizationEvaluation.doseStatusReason>?;  # Reason why the doese is considered 
+                                            # valid, invalid or some other 
+                                            # status 
+    fhir:description @<ImmunizationEvaluation.description>?;  # Evaluation notes
+    fhir:series @<ImmunizationEvaluation.series>?;  # Name of vaccine series
+    fhir:doseNumber @<ImmunizationEvaluation.doseNumber>?;  # Dose number within series
+    fhir:seriesDoses @<ImmunizationEvaluation.seriesDoses>?;  # Recommended number of doses for 
+                                            # immunity 
+}  
+
+#---------------------- Data Types -------------------
+
+#---------------------- Cardinality Types (OneOrMore) -------------------
+
+<OneOrMore_ImmunizationEvaluation.identifier> CLOSED {
+    rdf:first @<ImmunizationEvaluation.identifier>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ImmunizationEvaluation.identifier> 
+}
+
+<OneOrMore_ImmunizationEvaluation.doseStatusReason> CLOSED {
+    rdf:first @<ImmunizationEvaluation.doseStatusReason>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ImmunizationEvaluation.doseStatusReason> 
+}
+
+#---------------------- Reference Types -------------------
+
+#---------------------- Value Sets ------------------------

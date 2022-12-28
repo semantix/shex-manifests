@@ -1,0 +1,36 @@
+﻿PREFIX fhir: <http://hl7.org/fhir/> 
+PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+BASE <http://hl7.org/fhir/shape/>
+
+
+# unknown | asked | temp | notasked | masked | unsupported | astext | error
+<data-absent-reason> EXTENDS @<Extension> CLOSED {   
+
+    a [fhir:data-absent-reason];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v @<Extension.url> AND
+    	{fhir:value ["http://hl7.org/fhir/StructureDefinition/data-absent-reason"]}; 
+    fhir:value (@<code> AND
+    	{fhir:value @fhirvs:data-absent-reason} )  AND { rdf:type IRI } ; 
+    ^fhir:extension { a [fhir:Element]
+    		}
+}  
+
+#---------------------- Data Types -------------------
+
+# Primitive Type code
+<code> EXTENDS @<string> CLOSED {   
+
+    a [fhir:code];
+    fhir:nodeRole [fhir:treeRoot]?;
+}  
+
+#---------------------- Cardinality Types (OneOrMore) -------------------
+
+#---------------------- Reference Types -------------------
+
+#---------------------- Value Sets ------------------------
+
+# Used to specify why the normally expected content of the data element is missing.
+fhirvs:data-absent-reason ["unknown" "asked-unknown" "temp-unknown" "not-asked" "asked-declined" "masked" "not-applicable" "unsupported" "as-text" "error" "not-a-number" "negative-infinity" "positive-infinity" "not-performed" "not-permitted"]

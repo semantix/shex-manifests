@@ -1,0 +1,141 @@
+﻿PREFIX fhir: <http://hl7.org/fhir/> 
+PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+BASE <http://hl7.org/fhir/shape/>
+
+
+start=@<SubstanceReferenceInformation> AND {fhir:nodeRole [fhir:treeRoot]}
+
+
+# Todo
+<SubstanceReferenceInformation> EXTENDS @<DomainResource> CLOSED {   
+
+    a [fhir:SubstanceReferenceInformation];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:comment @<SubstanceReferenceInformation.comment>?;  # Todo
+    fhir:gene @<OneOrMore_SubstanceReferenceInformation.gene>?;  # Todo
+    fhir:geneElement @<OneOrMore_SubstanceReferenceInformation.geneElement>?;  # Todo
+    fhir:target @<OneOrMore_SubstanceReferenceInformation.target>?;  # Todo
+}  
+
+# Todo
+<SubstanceReferenceInformation.gene> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:geneSequenceOrigin @<SubstanceReferenceInformation.gene.geneSequenceOrigin>?;  # Todo
+    fhir:gene @<SubstanceReferenceInformation.gene.gene>?;  # Todo
+    fhir:source @<OneOrMore_SubstanceReferenceInformation.gene.source_DocumentReference>?;  # Todo
+}  
+
+# Todo
+<SubstanceReferenceInformation.geneElement> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:type @<SubstanceReferenceInformation.geneElement.type>?;  # Todo
+    fhir:element @<SubstanceReferenceInformation.geneElement.element>?;  # Todo
+    fhir:source @<OneOrMore_SubstanceReferenceInformation.geneElement.source_DocumentReference>?;  # Todo
+}  
+
+# Todo
+<SubstanceReferenceInformation.target> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:target @<SubstanceReferenceInformation.target.target>?;  # Todo
+    fhir:type @<SubstanceReferenceInformation.target.type>?;  # Todo
+    fhir:interaction @<SubstanceReferenceInformation.target.interaction>?;  # Todo
+    fhir:organism @<SubstanceReferenceInformation.target.organism>?;  # Todo
+    fhir:organismType @<SubstanceReferenceInformation.target.organismType>?;  # Todo
+    fhir:amount (@<Quantity>  OR 
+    			@<Range>  OR 
+    			@<string> )  AND { rdf:type IRI } ?;  # Todo
+    fhir:amountType @<SubstanceReferenceInformation.target.amountType>?;  # Todo
+    fhir:source @<OneOrMore_SubstanceReferenceInformation.target.source_DocumentReference>?;  # Todo
+}  
+
+#---------------------- Data Types -------------------
+
+# Primitive Type string
+<string> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:string];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v @<string.value>?;                # Primitive value for string
+}  
+
+# A measured or measurable amount
+<Quantity> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Quantity];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:value @<Quantity.value>?;          # Numerical value (with implicit 
+                                            # precision) 
+    fhir:comparator @<Quantity.comparator>?;  # < | <= | >= | > | ad - how to 
+                                            # understand the value 
+    fhir:unit @<Quantity.unit>?;            # Unit representation
+    fhir:system @<Quantity.system>?;        # System that defines coded unit form
+    fhir:code @<Quantity.code>?;            # Coded form of the unit
+} AND (
+
+# Constraint: UniqueKey:qty-3
+# Human readable:If a code for the unit is present, the system SHALL also be present
+# XPath:not(exists(f:code)) or exists(f:system)
+# Constraint:code.empty() or system.exists()
+# ShEx:
+
+ NOT { fhir:code {fhir:v .} }  OR { fhir:system . }
+
+)
+ 
+
+# Set of values bounded by low and high
+<Range> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Range];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:low @<Range.low>?;                 # Low limit
+    fhir:high @<Range.high>?;               # High limit
+} AND (
+
+# Constraint: UniqueKey:rng-2
+# Human readable:If present, low SHALL have a lower value than high
+# XPath:not(exists(f:low/f:value/@value)) or not(exists(f:high/f:value/@value)) or (number(f:low/f:value/@value) <= number(f:high/f:value/@value))
+# Constraint:low.value.empty() or high.value.empty() or (low <= high)
+# ShEx:
+
+ NOT { fhir:low fhir:value {fhir:v .} }  OR  NOT { fhir:high fhir:value {fhir:v .} }  OR ({ fhir:low { fhir:v MaxInclusive { fhir:high } }  })
+
+)
+ 
+
+#---------------------- Cardinality Types (OneOrMore) -------------------
+
+<OneOrMore_SubstanceReferenceInformation.gene> CLOSED {
+    rdf:first @<SubstanceReferenceInformation.gene>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_SubstanceReferenceInformation.gene> 
+}
+
+<OneOrMore_SubstanceReferenceInformation.geneElement> CLOSED {
+    rdf:first @<SubstanceReferenceInformation.geneElement>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_SubstanceReferenceInformation.geneElement> 
+}
+
+<OneOrMore_SubstanceReferenceInformation.target> CLOSED {
+    rdf:first @<SubstanceReferenceInformation.target>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_SubstanceReferenceInformation.target> 
+}
+
+<OneOrMore_SubstanceReferenceInformation.gene.source_DocumentReference> CLOSED {
+    rdf:first @<SubstanceReferenceInformation.gene.source> AND {fhir:link 
+			@<DocumentReference> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_SubstanceReferenceInformation.gene.source_DocumentReference> 
+}
+
+<OneOrMore_SubstanceReferenceInformation.geneElement.source_DocumentReference> CLOSED {
+    rdf:first @<SubstanceReferenceInformation.geneElement.source> AND {fhir:link 
+			@<DocumentReference> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_SubstanceReferenceInformation.geneElement.source_DocumentReference> 
+}
+
+<OneOrMore_SubstanceReferenceInformation.target.source_DocumentReference> CLOSED {
+    rdf:first @<SubstanceReferenceInformation.target.source> AND {fhir:link 
+			@<DocumentReference> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_SubstanceReferenceInformation.target.source_DocumentReference> 
+}
+
+#---------------------- Reference Types -------------------
+
+#---------------------- Value Sets ------------------------

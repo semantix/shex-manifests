@@ -1,0 +1,80 @@
+﻿PREFIX fhir: <http://hl7.org/fhir/> 
+PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+BASE <http://hl7.org/fhir/shape/>
+
+
+# The shelf-life and storage information for a medicinal product item or container can be described using this class
+<ProductShelfLife> EXTENDS @<BackboneType> CLOSED {   
+
+    a [fhir:ProductShelfLife];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:type @<ProductShelfLife.type>?;    # This describes the shelf life, 
+                                            # taking into account various 
+                                            # scenarios such as shelf life of 
+                                            # the packaged Medicinal Product 
+                                            # itself, shelf life after 
+                                            # transformation where necessary and 
+                                            # shelf life after the first opening 
+                                            # of a bottle, etc. The shelf life 
+                                            # type shall be specified using an 
+                                            # appropriate controlled vocabulary 
+                                            # The controlled term and the 
+                                            # controlled term identifier shall 
+                                            # be specified 
+    fhir:period (@<Duration>  OR 
+    			@<string> )  AND { rdf:type IRI } ?;  # The shelf life time period can be 
+                                            # specified using a numerical value 
+                                            # for the period of time and its 
+                                            # unit of time measurement The unit 
+                                            # of measurement shall be specified 
+                                            # in accordance with ISO 11240 and 
+                                            # the resulting terminology The 
+                                            # symbol and the symbol identifier 
+                                            # shall be used 
+    fhir:specialPrecautionsForStorage @<OneOrMore_ProductShelfLife.specialPrecautionsForStorage>?;  # Special precautions for storage, 
+                                            # if any, can be specified using an 
+                                            # appropriate controlled vocabulary 
+                                            # The controlled term and the 
+                                            # controlled term identifier shall 
+                                            # be specified 
+}  
+
+#---------------------- Data Types -------------------
+
+# Primitive Type string
+<string> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:string];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v @<string.value>?;                # Primitive value for string
+}  
+
+# A length of time
+<Duration> EXTENDS @<Quantity> CLOSED {   
+
+    a [fhir:Duration];
+    fhir:nodeRole [fhir:treeRoot]?;
+} AND (
+
+# Constraint: UniqueKey:drt-1
+# Human readable:There SHALL be a code if there is a value and it SHALL be an expression of time.  If system is present, it SHALL be UCUM.
+# XPath:(f:code or not(f:value)) and (not(exists(f:system)) or f:system/@value='http://unitsofmeasure.org')
+# Constraint:code.exists() implies ((system = %ucum) and value.exists())
+# ShEx:
+
+{ fhir:code . } AND (({ fhir:system { fhir:v ['http://unitsofmeasure.org'] }  }) AND { fhir:value . })
+
+)
+ 
+
+#---------------------- Cardinality Types (OneOrMore) -------------------
+
+<OneOrMore_ProductShelfLife.specialPrecautionsForStorage> CLOSED {
+    rdf:first @<ProductShelfLife.specialPrecautionsForStorage>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ProductShelfLife.specialPrecautionsForStorage> 
+}
+
+#---------------------- Reference Types -------------------
+
+#---------------------- Value Sets ------------------------

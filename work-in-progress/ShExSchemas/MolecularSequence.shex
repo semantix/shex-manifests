@@ -1,0 +1,169 @@
+﻿PREFIX fhir: <http://hl7.org/fhir/> 
+PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+BASE <http://hl7.org/fhir/shape/>
+
+
+start=@<MolecularSequence> AND {fhir:nodeRole [fhir:treeRoot]}
+
+
+# Representation of a molecular sequence
+<MolecularSequence> EXTENDS @<DomainResource> CLOSED {   
+
+    a [fhir:MolecularSequence];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:identifier @<OneOrMore_MolecularSequence.identifier>?;  # Unique ID for this particular 
+                                            # sequence 
+    fhir:type @<MolecularSequence.type>?;   # aa | dna | rna
+    fhir:patient @<MolecularSequence.patient> AND {fhir:link 
+    			@<Patient> }?;  # Patient this sequence is 
+                                            # associated too 
+    fhir:specimen @<MolecularSequence.specimen> AND {fhir:link 
+    			@<Specimen> }?;  # Specimen used for sequencing
+    fhir:device @<MolecularSequence.device> AND {fhir:link 
+    			@<Device> }?;  # The method for sequencing
+    fhir:performer @<MolecularSequence.performer> AND {fhir:link 
+    			@<Organization> }?;  # Who should be responsible for test 
+                                            # result 
+    fhir:literal @<MolecularSequence.literal>?;  # Sequence that was observed
+    fhir:formatted @<OneOrMore_MolecularSequence.formatted>?;  # Embedded file or a link (URL) 
+                                            # which contains content to 
+                                            # represent the sequence 
+    fhir:relative @<OneOrMore_MolecularSequence.relative>?;  # A sequence defined relative to 
+                                            # another sequence 
+} AND (
+
+# Constraint: UniqueKey:msq-6
+# Human readable:Have and only have one of the following elements in referenceSeq : 1. referenceSequenceAssembly ; 2 referenceSequence
+# XPath:count(f:referenceSequenceAssembly)+count(f:referenceSequenceCodeableConcept)+count(f:referenceSequenceReference)+count(f:referenceSequenceString)=1
+# Constraint:(referenceSequenceAssembly.count()+referenceSequenceCodeableConcept.count()+ referenceSequenceReference.count()+ referenceSequenceString.count()) = 1
+# ShEx:
+
+( count( fhir:referenceSequenceAssembly ) SHEX_Plus_SHEX  count( fhir:referenceSequenceCodeableConcept ) SHEX_Plus_SHEX  count( fhir:referenceSequenceReference ) SHEX_Plus_SHEX  count( fhir:referenceSequenceString )) { fhir:v [1] } 
+
+) AND (
+
+# Constraint: UniqueKey:msq-5
+# Human readable:Both referenceSequenceAssembly and chromosome must be both contained if either one of them is contained
+# XPath:(exists(f:chromosome) and exists(f:referenceSequenceAssembly)) or (not(exists(f:chromosome)) and not(exists(f:referenceSequenceAssembly)))
+# Constraint:(chromosome.empty() and referenceSequenceAssembly.empty()) or (chromosome.exists() and referenceSequenceAssembly.exists())
+# ShEx:
+
+( NOT { fhir:chromosome {fhir:v .} }  AND  NOT { fhir:referenceSequenceAssembly {fhir:v .} } ) OR ({ fhir:chromosome . } AND { fhir:referenceSequenceAssembly . })
+
+)
+ 
+
+# A sequence defined relative to another sequence
+<MolecularSequence.relative> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:coordinateSystem @<MolecularSequence.relative.coordinateSystem>;  # Ways of identifying nucleotides or 
+                                            # amino acids within a sequence 
+    fhir:reference @<MolecularSequence.relative.reference>?;  # A sequence used as reference
+    fhir:edit @<OneOrMore_MolecularSequence.relative.edit>?;  # Changes in sequence from the 
+                                            # reference 
+}  
+
+# A sequence used as reference
+<MolecularSequence.relative.reference> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:referenceSequenceAssembly @<MolecularSequence.relative.reference.referenceSequenceAssembly>?;  # The reference assembly used for 
+                                            # reference, e.g. GRCh38 
+    fhir:chromosome @<MolecularSequence.relative.reference.chromosome>?;  # Chromosome Identifier
+    fhir:referenceSequence (@<CodeableConcept>  OR 
+    			@<string>  OR 
+    			(@<Reference>  AND {fhir:link @<MolecularSequence> }) )  AND { rdf:type IRI } ?;  # The reference sequence that 
+                                            # represents the starting sequence 
+    fhir:windowStart @<MolecularSequence.relative.reference.windowStart>?;  # Start position of the window on 
+                                            # the  reference sequence 
+    fhir:windowEnd @<MolecularSequence.relative.reference.windowEnd>?;  # End position of the window on the 
+                                            # reference sequence 
+    fhir:orientation @<MolecularSequence.relative.reference.orientation>?;  # sense | antisense
+    fhir:strand @<MolecularSequence.relative.reference.strand>?;  # watson | crick
+}  
+
+# Changes in sequence from the reference
+<MolecularSequence.relative.edit> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:start @<MolecularSequence.relative.edit.start>?;  # Start position of the edit on the 
+                                            # reference sequence 
+    fhir:end @<MolecularSequence.relative.edit.end>?;  # End position of the edit on the 
+                                            # reference sequence 
+    fhir:observedAllele @<MolecularSequence.relative.edit.observedAllele>?;  # Allele that was observed
+    fhir:referenceAllele @<MolecularSequence.relative.edit.referenceAllele>?;  # Allele in the reference sequence
+}  
+
+#---------------------- Data Types -------------------
+
+# Primitive Type string
+<string> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:string];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v @<string.value>?;                # Primitive value for string
+}  
+
+# A reference from one resource to another
+<Reference> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Reference];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:link IRI?;
+    fhir:reference @<Reference.reference>?;  # Literal reference, Relative, 
+                                            # internal or absolute URL 
+    fhir:type @<Reference.type>?;           # Type the reference refers to (e.g. 
+                                            # "Patient") 
+    fhir:identifier @<Reference.identifier>?;  # Logical reference, when literal 
+                                            # reference is not known 
+    fhir:display @<Reference.display>?;     # Text alternative for the resource
+} AND (
+
+# Constraint: UniqueKey:ref-1
+# Human readable:SHALL have a contained resource if a local reference is provided
+# XPath:not(starts-with(f:reference/@value, '#')) or exists(ancestor::*[self::f:entry or self::f:parameter]/f:resource/f:*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')]|/*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')])
+# Constraint:reference.startsWith('#').not() or (reference.substring(1).trace('url') in %rootResource.contained.id.trace('ids')) or (reference='#' and %rootResource!=%resource)
+# ShEx:
+
+
+)
+ 
+
+# Concept - reference to a terminology or just  text
+<CodeableConcept> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:CodeableConcept];
+    fhir:nodeRole [fhir:treeRoot]?;
+    a NONLITERAL*;
+    fhir:coding @<OneOrMore_CodeableConcept.coding>?;  # Code defined by a terminology 
+                                            # system 
+    fhir:text @<CodeableConcept.text>?;     # Plain text representation of the 
+                                            # concept 
+}  
+
+#---------------------- Cardinality Types (OneOrMore) -------------------
+
+<OneOrMore_MolecularSequence.identifier> CLOSED {
+    rdf:first @<MolecularSequence.identifier>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_MolecularSequence.identifier> 
+}
+
+<OneOrMore_MolecularSequence.formatted> CLOSED {
+    rdf:first @<MolecularSequence.formatted>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_MolecularSequence.formatted> 
+}
+
+<OneOrMore_MolecularSequence.relative> CLOSED {
+    rdf:first @<MolecularSequence.relative>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_MolecularSequence.relative> 
+}
+
+<OneOrMore_MolecularSequence.relative.edit> CLOSED {
+    rdf:first @<MolecularSequence.relative.edit>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_MolecularSequence.relative.edit> 
+}
+
+<OneOrMore_CodeableConcept.coding> CLOSED {
+    rdf:first @<CodeableConcept.coding>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_CodeableConcept.coding> 
+}
+
+#---------------------- Reference Types -------------------
+
+#---------------------- Value Sets ------------------------

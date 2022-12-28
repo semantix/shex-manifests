@@ -1,0 +1,191 @@
+﻿PREFIX fhir: <http://hl7.org/fhir/> 
+PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+BASE <http://hl7.org/fhir/shape/>
+
+
+start=@<Group> AND {fhir:nodeRole [fhir:treeRoot]}
+
+
+# Group of multiple entities
+<Group> EXTENDS @<DomainResource> CLOSED {   
+
+    a [fhir:Group];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:identifier @<OneOrMore_Group.identifier>?;  # Unique id
+    fhir:active @<Group.active>?;           # Whether this group's record is in 
+                                            # active use 
+    fhir:type @<Group.type>;                # person | animal | practitioner | 
+                                            # device | medication | substance 
+    fhir:actual @<Group.actual>;            # Descriptive or actual
+    fhir:code @<Group.code>?;               # Kind of Group members
+    fhir:name @<Group.name>?;               # Label for Group
+    fhir:description @<Group.description>?;  # Natural language description of 
+                                            # the group 
+    fhir:quantity @<Group.quantity>?;       # Number of members
+    fhir:managingEntity @<Group.managingEntity> AND {fhir:link 
+    			@<Organization> OR 
+    			@<Practitioner> OR 
+    			@<PractitionerRole> OR 
+    			@<RelatedPerson> }?;  # Entity that is the custodian of 
+                                            # the Group's definition 
+    fhir:characteristic @<OneOrMore_Group.characteristic>?;  # Include / Exclude group members by 
+                                            # Trait 
+    fhir:member @<OneOrMore_Group.member>?;  # Who or what is in group
+} AND (
+
+# Constraint: UniqueKey:grp-1
+# Human readable:Can only have members if group is "actual"
+# XPath:f:actual/@value=true() or not(exists(f:member))
+# Constraint:member.empty() or (actual = true)
+# ShEx:
+
+ NOT { fhir:member {fhir:v .} }  OR ({ fhir:actual { fhir:v [true] }  })
+
+)
+ 
+
+# Who or what is in group
+<Group.member> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:entity @<Group.member.entity> AND {fhir:link 
+    			@<Device> OR 
+    			@<Group> OR 
+    			@<Patient> OR 
+    			@<Practitioner> OR 
+    			@<PractitionerRole> OR 
+    			@<RelatedPerson> OR 
+    			@<Specimen> };  # Reference to the group member
+    fhir:period @<Group.member.period>?;    # Period member belonged to the group
+    fhir:inactive @<Group.member.inactive>?;  # If member is no longer in group
+}  
+
+# Include / Exclude group members by Trait
+<Group.characteristic> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:code @<Group.characteristic.code>;  # Kind of characteristic
+    fhir:value (@<CodeableConcept>  OR 
+    			@<boolean>  OR 
+    			@<Quantity>  OR 
+    			@<Range>  OR 
+    			@<Reference> )  AND { rdf:type IRI } ;  # Value held by characteristic
+    fhir:exclude @<Group.characteristic.exclude>;  # Group includes or excludes
+    fhir:period @<Group.characteristic.period>?;  # Period over which characteristic 
+                                            # is tested 
+}  
+
+#---------------------- Data Types -------------------
+
+# Primitive Type boolean
+<boolean> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:boolean];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v @<boolean.value>?;               # Primitive value for boolean
+}  
+
+# A reference from one resource to another
+<Reference> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Reference];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:link IRI?;
+    fhir:reference @<Reference.reference>?;  # Literal reference, Relative, 
+                                            # internal or absolute URL 
+    fhir:type @<Reference.type>?;           # Type the reference refers to (e.g. 
+                                            # "Patient") 
+    fhir:identifier @<Reference.identifier>?;  # Logical reference, when literal 
+                                            # reference is not known 
+    fhir:display @<Reference.display>?;     # Text alternative for the resource
+} AND (
+
+# Constraint: UniqueKey:ref-1
+# Human readable:SHALL have a contained resource if a local reference is provided
+# XPath:not(starts-with(f:reference/@value, '#')) or exists(ancestor::*[self::f:entry or self::f:parameter]/f:resource/f:*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')]|/*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')])
+# Constraint:reference.startsWith('#').not() or (reference.substring(1).trace('url') in %rootResource.contained.id.trace('ids')) or (reference='#' and %rootResource!=%resource)
+# ShEx:
+
+
+)
+ 
+
+# A measured or measurable amount
+<Quantity> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Quantity];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:value @<Quantity.value>?;          # Numerical value (with implicit 
+                                            # precision) 
+    fhir:comparator @<Quantity.comparator>?;  # < | <= | >= | > | ad - how to 
+                                            # understand the value 
+    fhir:unit @<Quantity.unit>?;            # Unit representation
+    fhir:system @<Quantity.system>?;        # System that defines coded unit form
+    fhir:code @<Quantity.code>?;            # Coded form of the unit
+} AND (
+
+# Constraint: UniqueKey:qty-3
+# Human readable:If a code for the unit is present, the system SHALL also be present
+# XPath:not(exists(f:code)) or exists(f:system)
+# Constraint:code.empty() or system.exists()
+# ShEx:
+
+ NOT { fhir:code {fhir:v .} }  OR { fhir:system . }
+
+)
+ 
+
+# Set of values bounded by low and high
+<Range> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Range];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:low @<Range.low>?;                 # Low limit
+    fhir:high @<Range.high>?;               # High limit
+} AND (
+
+# Constraint: UniqueKey:rng-2
+# Human readable:If present, low SHALL have a lower value than high
+# XPath:not(exists(f:low/f:value/@value)) or not(exists(f:high/f:value/@value)) or (number(f:low/f:value/@value) <= number(f:high/f:value/@value))
+# Constraint:low.value.empty() or high.value.empty() or (low <= high)
+# ShEx:
+
+ NOT { fhir:low fhir:value {fhir:v .} }  OR  NOT { fhir:high fhir:value {fhir:v .} }  OR ({ fhir:low { fhir:v MaxInclusive { fhir:high } }  })
+
+)
+ 
+
+# Concept - reference to a terminology or just  text
+<CodeableConcept> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:CodeableConcept];
+    fhir:nodeRole [fhir:treeRoot]?;
+    a NONLITERAL*;
+    fhir:coding @<OneOrMore_CodeableConcept.coding>?;  # Code defined by a terminology 
+                                            # system 
+    fhir:text @<CodeableConcept.text>?;     # Plain text representation of the 
+                                            # concept 
+}  
+
+#---------------------- Cardinality Types (OneOrMore) -------------------
+
+<OneOrMore_Group.identifier> CLOSED {
+    rdf:first @<Group.identifier>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Group.identifier> 
+}
+
+<OneOrMore_Group.characteristic> CLOSED {
+    rdf:first @<Group.characteristic>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Group.characteristic> 
+}
+
+<OneOrMore_Group.member> CLOSED {
+    rdf:first @<Group.member>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Group.member> 
+}
+
+<OneOrMore_CodeableConcept.coding> CLOSED {
+    rdf:first @<CodeableConcept.coding>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_CodeableConcept.coding> 
+}
+
+#---------------------- Reference Types -------------------
+
+#---------------------- Value Sets ------------------------

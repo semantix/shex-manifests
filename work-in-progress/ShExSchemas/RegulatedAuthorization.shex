@@ -1,0 +1,168 @@
+﻿PREFIX fhir: <http://hl7.org/fhir/> 
+PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+BASE <http://hl7.org/fhir/shape/>
+
+
+start=@<RegulatedAuthorization> AND {fhir:nodeRole [fhir:treeRoot]}
+
+
+# Regulatory approval, clearance or licencing related to a regulated product, treatment, facility or activity e.g. Market Authorization for a Medicinal Product
+<RegulatedAuthorization> EXTENDS @<DomainResource> CLOSED {   
+
+    a [fhir:RegulatedAuthorization];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:identifier @<OneOrMore_RegulatedAuthorization.identifier>?;  # Business identifier for the 
+                                            # authorization, typically assigned 
+                                            # by the authorizing body 
+    fhir:subject @<OneOrMore_RegulatedAuthorization.subject_ActivityDefinition_OR_BiologicallyDerivedProduct_OR_DeviceDefinition_OR_Ingredient_OR_Location_OR_MedicinalProductDefinition_OR_NutritionProduct_OR_ObservationDefinition_OR_Organization_OR_PackagedProductDefinition_OR_PlanDefinition_OR_Practitioner_OR_ResearchStudy_OR_SubstanceDefinition>?;  # The product type, treatment, 
+                                            # facility or activity that is being 
+                                            # authorized 
+    fhir:type @<RegulatedAuthorization.type>?;  # Overall type of this 
+                                            # authorization, for example drug 
+                                            # marketing approval, orphan drug 
+                                            # designation 
+    fhir:description @<RegulatedAuthorization.description>?;  # General textual supporting 
+                                            # information 
+    fhir:region @<OneOrMore_RegulatedAuthorization.region>?;  # The territory in which the 
+                                            # authorization has been granted 
+    fhir:status @<RegulatedAuthorization.status>?;  # The status that is authorised e.g. 
+                                            # approved. Intermediate states can 
+                                            # be tracked with cases and 
+                                            # applications 
+    fhir:statusDate @<RegulatedAuthorization.statusDate>?;  # The date at which the current 
+                                            # status was assigned 
+    fhir:validityPeriod @<RegulatedAuthorization.validityPeriod>?;  # The time period in which the 
+                                            # regulatory approval etc. is in 
+                                            # effect, e.g. a Marketing 
+                                            # Authorization includes the date of 
+                                            # authorization and/or expiration 
+                                            # date 
+    fhir:indication @<RegulatedAuthorization.indication>?;  # Condition for which the use of the 
+                                            # regulated product applies 
+    fhir:intendedUse @<RegulatedAuthorization.intendedUse>?;  # The intended use of the product, 
+                                            # e.g. prevention, treatment 
+    fhir:basis @<OneOrMore_RegulatedAuthorization.basis>?;  # The legal/regulatory framework or 
+                                            # reasons under which this 
+                                            # authorization is granted 
+    fhir:holder @<RegulatedAuthorization.holder> AND {fhir:link 
+    			@<Organization> }?;  # The organization that has been 
+                                            # granted this authorization, by the 
+                                            # regulator 
+    fhir:regulator @<RegulatedAuthorization.regulator> AND {fhir:link 
+    			@<Organization> }?;  # The regulatory authority or 
+                                            # authorizing body granting the 
+                                            # authorization 
+    fhir:attachedDocument @<OneOrMore_RegulatedAuthorization.attachedDocument_DocumentReference>?;  # Additional information or 
+                                            # supporting documentation about the 
+                                            # authorization 
+    fhir:case @<RegulatedAuthorization.case>?;  # The case or regulatory procedure 
+                                            # for granting or amending a 
+                                            # regulated authorization. Note: 
+                                            # This area is subject to ongoing 
+                                            # review and the workgroup is 
+                                            # seeking implementer feedback on 
+                                            # its use (see link at bottom of 
+                                            # page) 
+}  
+
+# Applications submitted to obtain a regulated authorization. Steps within the longer running case or procedure
+<RegulatedAuthorization.case.application> CLOSED {   
+}  
+
+# The case or regulatory procedure for granting or amending a regulated authorization. Note: This area is subject to ongoing review and the workgroup is seeking implementer feedback on its use (see link at bottom of page)
+<RegulatedAuthorization.case> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:identifier @<RegulatedAuthorization.case.identifier>?;  # Identifier by which this case can 
+                                            # be referenced 
+    fhir:type @<RegulatedAuthorization.case.type>?;  # The defining type of case
+    fhir:status @<RegulatedAuthorization.case.status>?;  # The status associated with the case
+    fhir:date (@<Period>  OR 
+    			@<dateTime> )  AND { rdf:type IRI } ?;  # Relevant date for this case
+    fhir:application @<OneOrMore_RegulatedAuthorization.case>?;  # Applications submitted to obtain a 
+                                            # regulated authorization. Steps 
+                                            # within the longer running case or 
+                                            # procedure 
+}  
+
+#---------------------- Data Types -------------------
+
+# Primitive Type dateTime
+<dateTime> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:dateTime];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v @<dateTime.value>?;              # Primitive value for dateTime
+}  
+
+# Time range defined by start and end date/time
+<Period> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Period];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:start @<Period.start>?;            # Starting time with inclusive 
+                                            # boundary 
+    fhir:end @<Period.end>?;                # End time with inclusive boundary, 
+                                            # if not ongoing 
+} AND (
+
+# Constraint: UniqueKey:per-1
+# Human readable:If present, start SHALL have a lower or equal value than end
+# XPath:not(exists(f:start/@value)) or not(exists(f:end/@value)) or (xs:dateTime(f:start/@value) <= xs:dateTime(f:end/@value))
+# Constraint:start.hasValue().not() or end.hasValue().not() or (start <= end)
+# ShEx:
+
+ NOT { fhir:start  . } OR  NOT { fhir:end  . } OR ({ fhir:start { fhir:v MaxInclusive { fhir:end } }  })
+
+)
+ 
+
+#---------------------- Cardinality Types (OneOrMore) -------------------
+
+<OneOrMore_RegulatedAuthorization.identifier> CLOSED {
+    rdf:first @<RegulatedAuthorization.identifier>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_RegulatedAuthorization.identifier> 
+}
+
+<OneOrMore_RegulatedAuthorization.subject_ActivityDefinition_OR_BiologicallyDerivedProduct_OR_DeviceDefinition_OR_Ingredient_OR_Location_OR_MedicinalProductDefinition_OR_NutritionProduct_OR_ObservationDefinition_OR_Organization_OR_PackagedProductDefinition_OR_PlanDefinition_OR_Practitioner_OR_ResearchStudy_OR_SubstanceDefinition> CLOSED {
+    rdf:first @<RegulatedAuthorization.subject> AND {fhir:link 
+			@<ActivityDefinition> OR 
+			@<BiologicallyDerivedProduct> OR 
+			@<DeviceDefinition> OR 
+			@<Ingredient> OR 
+			@<Location> OR 
+			@<MedicinalProductDefinition> OR 
+			@<NutritionProduct> OR 
+			@<ObservationDefinition> OR 
+			@<Organization> OR 
+			@<PackagedProductDefinition> OR 
+			@<PlanDefinition> OR 
+			@<Practitioner> OR 
+			@<ResearchStudy> OR 
+			@<SubstanceDefinition> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_RegulatedAuthorization.subject_ActivityDefinition_OR_BiologicallyDerivedProduct_OR_DeviceDefinition_OR_Ingredient_OR_Location_OR_MedicinalProductDefinition_OR_NutritionProduct_OR_ObservationDefinition_OR_Organization_OR_PackagedProductDefinition_OR_PlanDefinition_OR_Practitioner_OR_ResearchStudy_OR_SubstanceDefinition> 
+}
+
+<OneOrMore_RegulatedAuthorization.region> CLOSED {
+    rdf:first @<RegulatedAuthorization.region>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_RegulatedAuthorization.region> 
+}
+
+<OneOrMore_RegulatedAuthorization.basis> CLOSED {
+    rdf:first @<RegulatedAuthorization.basis>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_RegulatedAuthorization.basis> 
+}
+
+<OneOrMore_RegulatedAuthorization.attachedDocument_DocumentReference> CLOSED {
+    rdf:first @<RegulatedAuthorization.attachedDocument> AND {fhir:link 
+			@<DocumentReference> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_RegulatedAuthorization.attachedDocument_DocumentReference> 
+}
+
+<OneOrMore_RegulatedAuthorization.case> CLOSED {
+    rdf:first @<RegulatedAuthorization.case>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_RegulatedAuthorization.case> 
+}
+
+#---------------------- Reference Types -------------------
+
+#---------------------- Value Sets ------------------------

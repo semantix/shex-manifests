@@ -1,0 +1,33 @@
+﻿PREFIX fhir: <http://hl7.org/fhir/> 
+PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+BASE <http://hl7.org/fhir/shape/>
+
+
+# FMM Level
+<structuredefinition-conformance-derivedFrom> EXTENDS @<Extension> CLOSED {   
+
+    a [fhir:structuredefinition-conformance-derivedFrom];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v @<Extension.url> AND
+    	{fhir:value ["http://hl7.org/fhir/StructureDefinition/structuredefinition-conformance-derivedFrom"]}; 
+    fhir:value (@<canonical> )  AND { rdf:type IRI } ; 
+    ^fhir:extension { ^fhir:value {^fhir:org/fhir/StructureDefinition/structuredefinition-fmm') {a [fhir:extension('http://hl7]}} OR 
+    				^fhir:value {^fhir:org/fhir/StructureDefinition/structuredefinition-standards-status') {a [fhir:extension('http://hl7]}}
+    		}
+}  
+
+#---------------------- Data Types -------------------
+
+# Primitive Type canonical
+<canonical> EXTENDS @<uri> CLOSED {   
+
+    a [fhir:canonical];
+    fhir:nodeRole [fhir:treeRoot]?;
+}  
+
+#---------------------- Cardinality Types (OneOrMore) -------------------
+
+#---------------------- Reference Types -------------------
+
+#---------------------- Value Sets ------------------------

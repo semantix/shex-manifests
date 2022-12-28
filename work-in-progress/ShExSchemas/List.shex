@@ -1,0 +1,108 @@
+﻿PREFIX fhir: <http://hl7.org/fhir/> 
+PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+BASE <http://hl7.org/fhir/shape/>
+
+
+start=@<List> AND {fhir:nodeRole [fhir:treeRoot]}
+
+
+# A list is a curated collection of resources
+<List> EXTENDS @<DomainResource> CLOSED {   
+
+    a [fhir:List];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:identifier @<OneOrMore_List.identifier>?;  # Business identifier
+    fhir:status @<List.status>;             # current | retired | 
+                                            # entered-in-error 
+    fhir:mode @<List.mode>;                 # working | snapshot | changes
+    fhir:title @<List.title>?;              # Descriptive name for the list
+    fhir:code @<List.code>?;                # What the purpose of this list is
+    fhir:subject @<List.subject> AND {fhir:link 
+    			@<Device> OR 
+    			@<Group> OR 
+    			@<Location> OR 
+    			@<Patient> }?;  # If all resources have the same 
+                                            # subject 
+    fhir:encounter @<List.encounter> AND {fhir:link 
+    			@<Encounter> }?;  # Context in which list created
+    fhir:date @<List.date>?;                # When the list was prepared
+    fhir:source @<List.source> AND {fhir:link 
+    			@<CareTeam> OR 
+    			@<Device> OR 
+    			@<Organization> OR 
+    			@<Patient> OR 
+    			@<Practitioner> OR 
+    			@<PractitionerRole> OR 
+    			@<RelatedPerson> }?;  # Who and/or what defined the list 
+                                            # contents (aka Author) 
+    fhir:orderedBy @<List.orderedBy>?;      # What order the list has
+    fhir:note @<OneOrMore_List.note>?;      # Comments about the list
+    fhir:entry @<OneOrMore_List.entry>?;    # Entries in the list
+    fhir:emptyReason @<List.emptyReason>?;  # Why list is empty
+} AND (
+
+# Constraint: UniqueKey:lst-3
+# Human readable:An entry date can only be used if the mode of the list is "working"
+# XPath:(f:mode/@value = 'working') or not(exists(f:entry/f:date))
+# Constraint:mode = 'working' or entry.date.empty()
+# ShEx:
+
+({ fhir:mode { fhir:v ['working'] }  }) OR  NOT { fhir:entry fhir:date {fhir:v .} } 
+
+) AND (
+
+# Constraint: UniqueKey:lst-2
+# Human readable:The deleted flag can only be used if the mode of the list is "changes"
+# XPath:(f:mode/@value = 'changes') or not(exists(f:entry/f:deleted))
+# Constraint:mode = 'changes' or entry.deleted.empty()
+# ShEx:
+
+({ fhir:mode { fhir:v ['changes'] }  }) OR  NOT { fhir:entry fhir:deleted {fhir:v .} } 
+
+) AND (
+
+# Constraint: UniqueKey:lst-1
+# Human readable:A list can only have an emptyReason if it is empty
+# XPath:not(exists(f:emptyReason) and exists(f:entry))
+# Constraint:emptyReason.empty() or entry.empty()
+# ShEx:
+
+ NOT { fhir:emptyReason {fhir:v .} }  OR  NOT { fhir:entry {fhir:v .} } 
+
+)
+ 
+
+# Entries in the list
+<List.entry> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:flag @<List.entry.flag>?;          # Status/Workflow information about 
+                                            # this item 
+    fhir:deleted @<List.entry.deleted>?;    # If this item is actually marked as 
+                                            # deleted 
+    fhir:date @<List.entry.date>?;          # When item added to list
+    fhir:item @<List.entry.item> AND {fhir:link 
+    			@<Resource> };  # Actual entry
+}  
+
+#---------------------- Data Types -------------------
+
+#---------------------- Cardinality Types (OneOrMore) -------------------
+
+<OneOrMore_List.identifier> CLOSED {
+    rdf:first @<List.identifier>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_List.identifier> 
+}
+
+<OneOrMore_List.note> CLOSED {
+    rdf:first @<List.note>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_List.note> 
+}
+
+<OneOrMore_List.entry> CLOSED {
+    rdf:first @<List.entry>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_List.entry> 
+}
+
+#---------------------- Reference Types -------------------
+
+#---------------------- Value Sets ------------------------

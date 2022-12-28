@@ -1,0 +1,134 @@
+﻿PREFIX fhir: <http://hl7.org/fhir/> 
+PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+BASE <http://hl7.org/fhir/shape/>
+
+
+start=@<Organization> AND {fhir:nodeRole [fhir:treeRoot]}
+
+
+# A grouping of people or organizations with a common purpose
+<Organization> EXTENDS @<DomainResource> CLOSED {   
+
+    a [fhir:Organization];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:identifier @<OneOrMore_Organization.identifier>?;  # Identifies this organization  
+                                            # across multiple systems 
+    fhir:active @<Organization.active>?;    # Whether the organization's record 
+                                            # is still in active use 
+    fhir:type @<OneOrMore_Organization.type>?;  # Kind of organization
+    fhir:name @<Organization.name>?;        # Name used for the organization
+    fhir:alias @<OneOrMore_Organization.alias>?;  # A list of alternate names that the 
+                                            # organization is known as, or was 
+                                            # known as in the past 
+    fhir:description @<Organization.description>?;  # Additional details about the 
+                                            # Organization that could be 
+                                            # displayed as further information 
+                                            # to identify the Organization 
+                                            # beyond its name 
+    fhir:contact @<OneOrMore_Organization.contact>?;  # Official contact details for the 
+                                            # Organization 
+    fhir:telecom @<OneOrMore_Organization.telecom>?;  # Deprecated - use contact.telecom
+    fhir:address @<OneOrMore_Organization.address>?;  # Deprecated - use contact.address
+    fhir:partOf @<Organization.partOf> AND {fhir:link 
+    			@<Organization> }?;  # The organization of which this 
+                                            # organization forms a part 
+    fhir:endpoint @<OneOrMore_Organization.endpoint_Endpoint>?;  # Technical endpoints providing 
+                                            # access to services operated for 
+                                            # the organization 
+} AND (
+
+# Constraint: UniqueKey:org-3
+# Human readable:The telecom of an organization can never be of use 'home'
+# XPath:f:telecom.count(f:use[@value='home']) = 0
+# Constraint:telecom.where(use = 'home').empty()
+# ShEx:
+
+ NOT { fhir:telecom  SHEX_where_SHEX (fhir:use { fhir:v ['home'] } ) {fhir:v .} } 
+
+) AND (
+
+# Constraint: UniqueKey:org-4
+# Human readable:The address of an organization can never be of use 'home'
+# XPath:f:address.count(f:use[@value='home']) = 0
+# Constraint:address.where(use = 'home').empty()
+# ShEx:
+
+ NOT { fhir:address  SHEX_where_SHEX (fhir:use { fhir:v ['home'] } ) {fhir:v .} } 
+
+) AND (
+
+# Constraint: UniqueKey:org-3
+# Human readable:The telecom of an organization can never be of use 'home'
+# XPath:count(f:use[@value='home']) = 0
+# Constraint:where(use = 'home').empty()
+# ShEx:
+
+ NOT {  SHEX_where_SHEX ({ fhir:use { fhir:v ['home'] }  }) {fhir:v .} } 
+
+) AND (
+
+# Constraint: UniqueKey:org-2
+# Human readable:An address of an organization can never be of use 'home'
+# XPath:count(f:use[@value='home']) = 0
+# Constraint:where(use = 'home').empty()
+# ShEx:
+
+ NOT {  SHEX_where_SHEX ({ fhir:use { fhir:v ['home'] }  }) {fhir:v .} } 
+
+) AND (
+
+# Constraint: UniqueKey:org-1
+# Human readable:The organization SHALL at least have a name or an identifier, and possibly more than one
+# XPath:count(f:identifier | f:name) > 0
+# Constraint:(identifier.count() + name.count()) > 0
+# ShEx:
+
+( count( fhir:identifier ) SHEX_Plus_SHEX  count( fhir:name )) { fhir:v MinExclusive 0 } 
+
+)
+ 
+
+#---------------------- Data Types -------------------
+
+#---------------------- Cardinality Types (OneOrMore) -------------------
+
+<OneOrMore_Organization.identifier> CLOSED {
+    rdf:first @<Organization.identifier>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Organization.identifier> 
+}
+
+<OneOrMore_Organization.type> CLOSED {
+    rdf:first @<Organization.type>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Organization.type> 
+}
+
+<OneOrMore_Organization.alias> CLOSED {
+    rdf:first @<Organization.alias>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Organization.alias> 
+}
+
+<OneOrMore_Organization.contact> CLOSED {
+    rdf:first @<Organization.contact>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Organization.contact> 
+}
+
+<OneOrMore_Organization.telecom> CLOSED {
+    rdf:first @<Organization.telecom>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Organization.telecom> 
+}
+
+<OneOrMore_Organization.address> CLOSED {
+    rdf:first @<Organization.address>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Organization.address> 
+}
+
+<OneOrMore_Organization.endpoint_Endpoint> CLOSED {
+    rdf:first @<Organization.endpoint> AND {fhir:link 
+			@<Endpoint> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Organization.endpoint_Endpoint> 
+}
+
+#---------------------- Reference Types -------------------
+
+#---------------------- Value Sets ------------------------

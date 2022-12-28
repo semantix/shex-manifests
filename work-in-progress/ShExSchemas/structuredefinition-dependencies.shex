@@ -1,0 +1,32 @@
+﻿PREFIX fhir: <http://hl7.org/fhir/> 
+PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+BASE <http://hl7.org/fhir/shape/>
+
+
+# Dependent Profiles - must be valid against these too
+<structuredefinition-dependencies> EXTENDS @<Extension> CLOSED {   
+
+    a [fhir:structuredefinition-dependencies];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v @<Extension.url> AND
+    	{fhir:value ["http://hl7.org/fhir/StructureDefinition/structuredefinition-dependencies"]}; 
+    fhir:value ((@<canonical>  AND {fhir:link @<StructureDefinition> }) )  AND { rdf:type IRI } ; 
+    ^fhir:extension { a [fhir:StructureDefinition]
+    		}
+}  
+
+#---------------------- Data Types -------------------
+
+# Primitive Type canonical
+<canonical> EXTENDS @<uri> CLOSED {   
+
+    a [fhir:canonical];
+    fhir:nodeRole [fhir:treeRoot]?;
+}  
+
+#---------------------- Cardinality Types (OneOrMore) -------------------
+
+#---------------------- Reference Types -------------------
+
+#---------------------- Value Sets ------------------------

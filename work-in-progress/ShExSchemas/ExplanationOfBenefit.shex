@@ -1,0 +1,834 @@
+﻿PREFIX fhir: <http://hl7.org/fhir/> 
+PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+BASE <http://hl7.org/fhir/shape/>
+
+
+start=@<ExplanationOfBenefit> AND {fhir:nodeRole [fhir:treeRoot]}
+
+
+# Explanation of Benefit resource
+<ExplanationOfBenefit> EXTENDS @<DomainResource> CLOSED {   
+
+    a [fhir:ExplanationOfBenefit];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:identifier @<OneOrMore_ExplanationOfBenefit.identifier>?;  # Business Identifier for the 
+                                            # resource 
+    fhir:status @<ExplanationOfBenefit.status>;  # active | cancelled | draft | 
+                                            # entered-in-error 
+    fhir:type @<ExplanationOfBenefit.type>;  # Category or discipline
+    fhir:subType @<ExplanationOfBenefit.subType>?;  # More granular claim type
+    fhir:use @<ExplanationOfBenefit.use>;   # claim | preauthorization | 
+                                            # predetermination 
+    fhir:patient @<ExplanationOfBenefit.patient> AND {fhir:link 
+    			@<Patient> };  # The recipient of the products and 
+                                            # services 
+    fhir:billablePeriod @<ExplanationOfBenefit.billablePeriod>?;  # Relevant time frame for the claim
+    fhir:created @<ExplanationOfBenefit.created>;  # Response creation date
+    fhir:enterer @<ExplanationOfBenefit.enterer> AND {fhir:link 
+    			@<Practitioner> OR 
+    			@<PractitionerRole> }?;  # Author of the claim
+    fhir:insurer @<ExplanationOfBenefit.insurer> AND {fhir:link 
+    			@<Organization> };  # Party responsible for reimbursement
+    fhir:provider @<ExplanationOfBenefit.provider> AND {fhir:link 
+    			@<Organization> OR 
+    			@<Practitioner> OR 
+    			@<PractitionerRole> };  # Party responsible for the claim
+    fhir:priority @<ExplanationOfBenefit.priority>?;  # Desired processing urgency
+    fhir:fundsReserveRequested @<ExplanationOfBenefit.fundsReserveRequested>?;  # For whom to reserve funds
+    fhir:fundsReserve @<ExplanationOfBenefit.fundsReserve>?;  # Funds reserved status
+    fhir:related @<OneOrMore_ExplanationOfBenefit.related>?;  # Prior or corollary claims
+    fhir:prescription @<ExplanationOfBenefit.prescription> AND {fhir:link 
+    			@<MedicationRequest> OR 
+    			@<VisionPrescription> }?;  # Prescription authorizing services 
+                                            # or products 
+    fhir:originalPrescription @<ExplanationOfBenefit.originalPrescription> AND {fhir:link 
+    			@<MedicationRequest> }?;  # Original prescription if 
+                                            # superceded by fulfiller 
+    fhir:payee @<ExplanationOfBenefit.payee>?;  # Recipient of benefits payable
+    fhir:referral @<ExplanationOfBenefit.referral> AND {fhir:link 
+    			@<ServiceRequest> }?;  # Treatment Referral
+    fhir:facility @<ExplanationOfBenefit.facility> AND {fhir:link 
+    			@<Location> }?;  # Servicing Facility
+    fhir:claim @<ExplanationOfBenefit.claim> AND {fhir:link 
+    			@<Claim> }?;  # Claim reference
+    fhir:claimResponse @<ExplanationOfBenefit.claimResponse> AND {fhir:link 
+    			@<ClaimResponse> }?;  # Claim response reference
+    fhir:outcome @<ExplanationOfBenefit.outcome>;  # queued | complete | error | partial
+    fhir:disposition @<ExplanationOfBenefit.disposition>?;  # Disposition Message
+    fhir:preAuthRef @<OneOrMore_ExplanationOfBenefit.preAuthRef>?;  # Preauthorization reference
+    fhir:preAuthRefPeriod @<OneOrMore_ExplanationOfBenefit.preAuthRefPeriod>?;  # Preauthorization in-effect period
+    fhir:careTeam @<OneOrMore_ExplanationOfBenefit.careTeam>?;  # Care Team members
+    fhir:supportingInfo @<OneOrMore_ExplanationOfBenefit.supportingInfo>?;  # Supporting information
+    fhir:diagnosis @<OneOrMore_ExplanationOfBenefit.diagnosis>?;  # Pertinent diagnosis information
+    fhir:procedure @<OneOrMore_ExplanationOfBenefit.procedure>?;  # Clinical procedures performed
+    fhir:precedence @<ExplanationOfBenefit.precedence>?;  # Precedence (primary, secondary, 
+                                            # etc.) 
+    fhir:insurance @<OneOrMore_ExplanationOfBenefit.insurance>;  # Patient insurance information
+    fhir:accident @<ExplanationOfBenefit.accident>?;  # Details of the event
+    fhir:item @<OneOrMore_ExplanationOfBenefit.item>?;  # Product or service provided
+    fhir:addItem @<OneOrMore_ExplanationOfBenefit.addItem>?;  # Insurer added line items
+    fhir:adjudication @<OneOrMore_ExplanationOfBenefit.item.adjudication>?;  # Header-level adjudication
+    fhir:total @<OneOrMore_ExplanationOfBenefit.total>?;  # Adjudication totals
+    fhir:payment @<ExplanationOfBenefit.payment>?;  # Payment Details
+    fhir:formCode @<ExplanationOfBenefit.formCode>?;  # Printed form identifier
+    fhir:form @<ExplanationOfBenefit.form>?;  # Printed reference or actual form
+    fhir:processNote @<OneOrMore_ExplanationOfBenefit.processNote>?;  # Note concerning adjudication
+    fhir:benefitPeriod @<ExplanationOfBenefit.benefitPeriod>?;  # When the benefits are applicable
+    fhir:benefitBalance @<OneOrMore_ExplanationOfBenefit.benefitBalance>?;  # Balance by Benefit Category
+}  
+
+# Benefit Summary
+<ExplanationOfBenefit.benefitBalance.financial> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:type @<ExplanationOfBenefit.benefitBalance.financial.type>;  # Benefit classification
+    fhir:allowed (@<unsignedInt>  OR 
+    			@<string>  OR 
+    			@<Money> )  AND { rdf:type IRI } ?;  # Benefits allowed
+    fhir:used (@<unsignedInt>  OR 
+    			@<Money> )  AND { rdf:type IRI } ?;  # Benefits used
+}  
+
+# Insurer added line items
+<ExplanationOfBenefit.addItem> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:itemSequence @<OneOrMore_ExplanationOfBenefit.addItem.itemSequence>?;  # Item sequence number
+    fhir:detailSequence @<OneOrMore_ExplanationOfBenefit.addItem.detailSequence>?;  # Detail sequence number
+    fhir:subDetailSequence @<OneOrMore_ExplanationOfBenefit.addItem.subDetailSequence>?;  # Subdetail sequence number
+    fhir:provider @<OneOrMore_ExplanationOfBenefit.addItem.provider_Organization_OR_Practitioner_OR_PractitionerRole>?;  # Authorized providers
+    fhir:productOrService @<ExplanationOfBenefit.addItem.productOrService>;  # Billing, service, product, or drug 
+                                            # code 
+    fhir:modifier @<OneOrMore_ExplanationOfBenefit.addItem.modifier>?;  # Service/Product billing modifiers
+    fhir:programCode @<OneOrMore_ExplanationOfBenefit.addItem.programCode>?;  # Program the product or service is 
+                                            # provided under 
+    fhir:serviced (@<date>  OR 
+    			@<Period> )  AND { rdf:type IRI } ?;  # Date or dates of service or 
+                                            # product delivery 
+    fhir:location (@<CodeableConcept>  OR 
+    			@<Address>  OR 
+    			(@<Reference>  AND {fhir:link @<Location> }) )  AND { rdf:type IRI } ?;  # Place of service or where product 
+                                            # was supplied 
+    fhir:quantity @<ExplanationOfBenefit.addItem.quantity>?;  # Count of products or services
+    fhir:unitPrice @<ExplanationOfBenefit.addItem.unitPrice>?;  # Fee, charge or cost per item
+    fhir:factor @<ExplanationOfBenefit.addItem.factor>?;  # Price scaling factor
+    fhir:net @<ExplanationOfBenefit.addItem.net>?;  # Total item cost
+    fhir:bodySite @<ExplanationOfBenefit.addItem.bodySite>?;  # Anatomical location
+    fhir:subSite @<OneOrMore_ExplanationOfBenefit.addItem.subSite>?;  # Anatomical sub-location
+    fhir:noteNumber @<OneOrMore_ExplanationOfBenefit.addItem.noteNumber>?;  # Applicable note numbers
+    fhir:adjudication @<OneOrMore_ExplanationOfBenefit.item.adjudication>?;  # Added items adjudication
+    fhir:detail @<OneOrMore_ExplanationOfBenefit.addItem.detail>?;  # Insurer added line items
+}  
+
+# Prior or corollary claims
+<ExplanationOfBenefit.related> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:claim @<ExplanationOfBenefit.related.claim> AND {fhir:link 
+    			@<Claim> }?;  # Reference to the related claim
+    fhir:relationship @<ExplanationOfBenefit.related.relationship>?;  # How the reference claim is related
+    fhir:reference @<ExplanationOfBenefit.related.reference>?;  # File or case reference
+}  
+
+# Product or service provided
+<ExplanationOfBenefit.item> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:sequence @<ExplanationOfBenefit.item.sequence>;  # Item instance identifier
+    fhir:careTeamSequence @<OneOrMore_ExplanationOfBenefit.item.careTeamSequence>?;  # Applicable care team members
+    fhir:diagnosisSequence @<OneOrMore_ExplanationOfBenefit.item.diagnosisSequence>?;  # Applicable diagnoses
+    fhir:procedureSequence @<OneOrMore_ExplanationOfBenefit.item.procedureSequence>?;  # Applicable procedures
+    fhir:informationSequence @<OneOrMore_ExplanationOfBenefit.item.informationSequence>?;  # Applicable exception and 
+                                            # supporting information 
+    fhir:revenue @<ExplanationOfBenefit.item.revenue>?;  # Revenue or cost center code
+    fhir:category @<ExplanationOfBenefit.item.category>?;  # Benefit classification
+    fhir:productOrService @<ExplanationOfBenefit.item.productOrService>;  # Billing, service, product, or drug 
+                                            # code 
+    fhir:modifier @<OneOrMore_ExplanationOfBenefit.item.modifier>?;  # Product or service billing 
+                                            # modifiers 
+    fhir:programCode @<OneOrMore_ExplanationOfBenefit.item.programCode>?;  # Program the product or service is 
+                                            # provided under 
+    fhir:serviced (@<date>  OR 
+    			@<Period> )  AND { rdf:type IRI } ?;  # Date or dates of service or 
+                                            # product delivery 
+    fhir:location (@<CodeableConcept>  OR 
+    			@<Address>  OR 
+    			(@<Reference>  AND {fhir:link @<Location> }) )  AND { rdf:type IRI } ?;  # Place of service or where product 
+                                            # was supplied 
+    fhir:quantity @<ExplanationOfBenefit.item.quantity>?;  # Count of products or services
+    fhir:unitPrice @<ExplanationOfBenefit.item.unitPrice>?;  # Fee, charge or cost per item
+    fhir:factor @<ExplanationOfBenefit.item.factor>?;  # Price scaling factor
+    fhir:net @<ExplanationOfBenefit.item.net>?;  # Total item cost
+    fhir:udi @<OneOrMore_ExplanationOfBenefit.item.udi_Device>?;  # Unique device identifier
+    fhir:bodySite @<ExplanationOfBenefit.item.bodySite>?;  # Anatomical location
+    fhir:subSite @<OneOrMore_ExplanationOfBenefit.item.subSite>?;  # Anatomical sub-location
+    fhir:encounter @<OneOrMore_ExplanationOfBenefit.item.encounter_Encounter>?;  # Encounters related to this billed 
+                                            # item 
+    fhir:noteNumber @<OneOrMore_ExplanationOfBenefit.item.noteNumber>?;  # Applicable note numbers
+    fhir:adjudication @<OneOrMore_ExplanationOfBenefit.item.adjudication>?;  # Adjudication details
+    fhir:detail @<OneOrMore_ExplanationOfBenefit.item.detail>?;  # Additional items
+}  
+
+# Adjudication totals
+<ExplanationOfBenefit.total> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:category @<ExplanationOfBenefit.total.category>;  # Type of adjudication information
+    fhir:amount @<ExplanationOfBenefit.total.amount>;  # Financial total for the category
+}  
+
+# Note concerning adjudication
+<ExplanationOfBenefit.processNote> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:number @<ExplanationOfBenefit.processNote.number>?;  # Note instance identifier
+    fhir:type @<ExplanationOfBenefit.processNote.type>?;  # display | print | printoper
+    fhir:text @<ExplanationOfBenefit.processNote.text>?;  # Note explanatory text
+    fhir:language @<ExplanationOfBenefit.processNote.language>?;  # Language of the text
+}  
+
+# Patient insurance information
+<ExplanationOfBenefit.insurance> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:focal @<ExplanationOfBenefit.insurance.focal>;  # Coverage to be used for 
+                                            # adjudication 
+    fhir:coverage @<ExplanationOfBenefit.insurance.coverage> AND {fhir:link 
+    			@<Coverage> };  # Insurance information
+    fhir:preAuthRef @<OneOrMore_ExplanationOfBenefit.insurance.preAuthRef>?;  # Prior authorization reference 
+                                            # number 
+}  
+
+# Supporting information
+<ExplanationOfBenefit.supportingInfo> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:sequence @<ExplanationOfBenefit.supportingInfo.sequence>;  # Information instance identifier
+    fhir:category @<ExplanationOfBenefit.supportingInfo.category>;  # Classification of the supplied 
+                                            # information 
+    fhir:code @<ExplanationOfBenefit.supportingInfo.code>?;  # Type of information
+    fhir:timing (@<date>  OR 
+    			@<Period> )  AND { rdf:type IRI } ?;  # When it occurred
+    fhir:value (@<boolean>  OR 
+    			@<string>  OR 
+    			@<Quantity>  OR 
+    			@<Attachment>  OR 
+    			(@<Reference>  AND {fhir:link @<Resource> }) )  AND { rdf:type IRI } ?;  # Data to be provided
+    fhir:reason @<ExplanationOfBenefit.supportingInfo.reason>?;  # Explanation for the information
+}  
+
+# Recipient of benefits payable
+<ExplanationOfBenefit.payee> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:type @<ExplanationOfBenefit.payee.type>?;  # Category of recipient
+    fhir:party @<ExplanationOfBenefit.payee.party> AND {fhir:link 
+    			@<Organization> OR 
+    			@<Patient> OR 
+    			@<Practitioner> OR 
+    			@<PractitionerRole> OR 
+    			@<RelatedPerson> }?;  # Recipient reference
+}  
+
+# Pertinent diagnosis information
+<ExplanationOfBenefit.diagnosis> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:sequence @<ExplanationOfBenefit.diagnosis.sequence>;  # Diagnosis instance identifier
+    fhir:diagnosis (@<CodeableConcept>  OR 
+    			(@<Reference>  AND {fhir:link @<Condition> }) )  AND { rdf:type IRI } ;  # Nature of illness or problem
+    fhir:type @<OneOrMore_ExplanationOfBenefit.diagnosis.type>?;  # Timing or nature of the diagnosis
+    fhir:onAdmission @<ExplanationOfBenefit.diagnosis.onAdmission>?;  # Present on admission
+    fhir:packageCode @<ExplanationOfBenefit.diagnosis.packageCode>?;  # Package billing code
+}  
+
+# Insurer added line items
+<ExplanationOfBenefit.addItem.detail> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:productOrService @<ExplanationOfBenefit.addItem.detail.productOrService>;  # Billing, service, product, or drug 
+                                            # code 
+    fhir:modifier @<OneOrMore_ExplanationOfBenefit.addItem.detail.modifier>?;  # Service/Product billing modifiers
+    fhir:quantity @<ExplanationOfBenefit.addItem.detail.quantity>?;  # Count of products or services
+    fhir:unitPrice @<ExplanationOfBenefit.addItem.detail.unitPrice>?;  # Fee, charge or cost per item
+    fhir:factor @<ExplanationOfBenefit.addItem.detail.factor>?;  # Price scaling factor
+    fhir:net @<ExplanationOfBenefit.addItem.detail.net>?;  # Total item cost
+    fhir:noteNumber @<OneOrMore_ExplanationOfBenefit.addItem.detail.noteNumber>?;  # Applicable note numbers
+    fhir:adjudication @<OneOrMore_ExplanationOfBenefit.item.adjudication>?;  # Added items adjudication
+    fhir:subDetail @<OneOrMore_ExplanationOfBenefit.addItem.detail.subDetail>?;  # Insurer added line items
+}  
+
+# Payment Details
+<ExplanationOfBenefit.payment> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:type @<ExplanationOfBenefit.payment.type>?;  # Partial or complete payment
+    fhir:adjustment @<ExplanationOfBenefit.payment.adjustment>?;  # Payment adjustment for non-claim 
+                                            # issues 
+    fhir:adjustmentReason @<ExplanationOfBenefit.payment.adjustmentReason>?;  # Explanation for the variance
+    fhir:date @<ExplanationOfBenefit.payment.date>?;  # Expected date of payment
+    fhir:amount @<ExplanationOfBenefit.payment.amount>?;  # Payable amount after adjustment
+    fhir:identifier @<ExplanationOfBenefit.payment.identifier>?;  # Business identifier for the payment
+}  
+
+# Adjudication details
+<ExplanationOfBenefit.item.adjudication> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:category @<ExplanationOfBenefit.item.adjudication.category>;  # Type of adjudication information
+    fhir:reason @<ExplanationOfBenefit.item.adjudication.reason>?;  # Explanation of adjudication outcome
+    fhir:amount @<ExplanationOfBenefit.item.adjudication.amount>?;  # Monetary amount
+    fhir:value @<ExplanationOfBenefit.item.adjudication.value>?;  # Non-monitary value
+}  
+
+# Balance by Benefit Category
+<ExplanationOfBenefit.benefitBalance> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:category @<ExplanationOfBenefit.benefitBalance.category>;  # Benefit classification
+    fhir:excluded @<ExplanationOfBenefit.benefitBalance.excluded>?;  # Excluded from the plan
+    fhir:name @<ExplanationOfBenefit.benefitBalance.name>?;  # Short name for the benefit
+    fhir:description @<ExplanationOfBenefit.benefitBalance.description>?;  # Description of the benefit or 
+                                            # services covered 
+    fhir:network @<ExplanationOfBenefit.benefitBalance.network>?;  # In or out of network
+    fhir:unit @<ExplanationOfBenefit.benefitBalance.unit>?;  # Individual or family
+    fhir:term @<ExplanationOfBenefit.benefitBalance.term>?;  # Annual or lifetime
+    fhir:financial @<OneOrMore_ExplanationOfBenefit.benefitBalance.financial>?;  # Benefit Summary
+}  
+
+# Details of the event
+<ExplanationOfBenefit.accident> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:date @<ExplanationOfBenefit.accident.date>?;  # When the incident occurred
+    fhir:type @<ExplanationOfBenefit.accident.type>?;  # The nature of the accident
+    fhir:location (@<Address>  OR 
+    			(@<Reference>  AND {fhir:link @<Location> }) )  AND { rdf:type IRI } ?;  # Where the event occurred
+}  
+
+# Insurer added line items
+<ExplanationOfBenefit.addItem.detail.subDetail> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:productOrService @<ExplanationOfBenefit.addItem.detail.subDetail.productOrService>;  # Billing, service, product, or drug 
+                                            # code 
+    fhir:modifier @<OneOrMore_ExplanationOfBenefit.addItem.detail.subDetail.modifier>?;  # Service/Product billing modifiers
+    fhir:quantity @<ExplanationOfBenefit.addItem.detail.subDetail.quantity>?;  # Count of products or services
+    fhir:unitPrice @<ExplanationOfBenefit.addItem.detail.subDetail.unitPrice>?;  # Fee, charge or cost per item
+    fhir:factor @<ExplanationOfBenefit.addItem.detail.subDetail.factor>?;  # Price scaling factor
+    fhir:net @<ExplanationOfBenefit.addItem.detail.subDetail.net>?;  # Total item cost
+    fhir:noteNumber @<OneOrMore_ExplanationOfBenefit.addItem.detail.subDetail.noteNumber>?;  # Applicable note numbers
+    fhir:adjudication @<OneOrMore_ExplanationOfBenefit.item.adjudication>?;  # Added items adjudication
+}  
+
+# Additional items
+<ExplanationOfBenefit.item.detail> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:sequence @<ExplanationOfBenefit.item.detail.sequence>;  # Product or service provided
+    fhir:revenue @<ExplanationOfBenefit.item.detail.revenue>?;  # Revenue or cost center code
+    fhir:category @<ExplanationOfBenefit.item.detail.category>?;  # Benefit classification
+    fhir:productOrService @<ExplanationOfBenefit.item.detail.productOrService>;  # Billing, service, product, or drug 
+                                            # code 
+    fhir:modifier @<OneOrMore_ExplanationOfBenefit.item.detail.modifier>?;  # Service/Product billing modifiers
+    fhir:programCode @<OneOrMore_ExplanationOfBenefit.item.detail.programCode>?;  # Program the product or service is 
+                                            # provided under 
+    fhir:quantity @<ExplanationOfBenefit.item.detail.quantity>?;  # Count of products or services
+    fhir:unitPrice @<ExplanationOfBenefit.item.detail.unitPrice>?;  # Fee, charge or cost per item
+    fhir:factor @<ExplanationOfBenefit.item.detail.factor>?;  # Price scaling factor
+    fhir:net @<ExplanationOfBenefit.item.detail.net>?;  # Total item cost
+    fhir:udi @<OneOrMore_ExplanationOfBenefit.item.detail.udi_Device>?;  # Unique device identifier
+    fhir:noteNumber @<OneOrMore_ExplanationOfBenefit.item.detail.noteNumber>?;  # Applicable note numbers
+    fhir:adjudication @<OneOrMore_ExplanationOfBenefit.item.adjudication>?;  # Detail level adjudication details
+    fhir:subDetail @<OneOrMore_ExplanationOfBenefit.item.detail.subDetail>?;  # Additional items
+}  
+
+# Additional items
+<ExplanationOfBenefit.item.detail.subDetail> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:sequence @<ExplanationOfBenefit.item.detail.subDetail.sequence>;  # Product or service provided
+    fhir:revenue @<ExplanationOfBenefit.item.detail.subDetail.revenue>?;  # Revenue or cost center code
+    fhir:category @<ExplanationOfBenefit.item.detail.subDetail.category>?;  # Benefit classification
+    fhir:productOrService @<ExplanationOfBenefit.item.detail.subDetail.productOrService>;  # Billing, service, product, or drug 
+                                            # code 
+    fhir:modifier @<OneOrMore_ExplanationOfBenefit.item.detail.subDetail.modifier>?;  # Service/Product billing modifiers
+    fhir:programCode @<OneOrMore_ExplanationOfBenefit.item.detail.subDetail.programCode>?;  # Program the product or service is 
+                                            # provided under 
+    fhir:quantity @<ExplanationOfBenefit.item.detail.subDetail.quantity>?;  # Count of products or services
+    fhir:unitPrice @<ExplanationOfBenefit.item.detail.subDetail.unitPrice>?;  # Fee, charge or cost per item
+    fhir:factor @<ExplanationOfBenefit.item.detail.subDetail.factor>?;  # Price scaling factor
+    fhir:net @<ExplanationOfBenefit.item.detail.subDetail.net>?;  # Total item cost
+    fhir:udi @<OneOrMore_ExplanationOfBenefit.item.detail.subDetail.udi_Device>?;  # Unique device identifier
+    fhir:noteNumber @<OneOrMore_ExplanationOfBenefit.item.detail.subDetail.noteNumber>?;  # Applicable note numbers
+    fhir:adjudication @<OneOrMore_ExplanationOfBenefit.item.adjudication>?;  # Subdetail level adjudication 
+                                            # details 
+}  
+
+# Care Team members
+<ExplanationOfBenefit.careTeam> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:sequence @<ExplanationOfBenefit.careTeam.sequence>;  # Order of care team
+    fhir:provider @<ExplanationOfBenefit.careTeam.provider> AND {fhir:link 
+    			@<Organization> OR 
+    			@<Practitioner> OR 
+    			@<PractitionerRole> };  # Practitioner or organization
+    fhir:responsible @<ExplanationOfBenefit.careTeam.responsible>?;  # Indicator of the lead practitioner
+    fhir:role @<ExplanationOfBenefit.careTeam.role>?;  # Function within the team
+    fhir:qualification @<ExplanationOfBenefit.careTeam.qualification>?;  # Practitioner credential or 
+                                            # specialization 
+}  
+
+# Clinical procedures performed
+<ExplanationOfBenefit.procedure> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:sequence @<ExplanationOfBenefit.procedure.sequence>;  # Procedure instance identifier
+    fhir:type @<OneOrMore_ExplanationOfBenefit.procedure.type>?;  # Category of Procedure
+    fhir:date @<ExplanationOfBenefit.procedure.date>?;  # When the procedure was performed
+    fhir:procedure (@<CodeableConcept>  OR 
+    			(@<Reference>  AND {fhir:link @<Procedure> }) )  AND { rdf:type IRI } ;  # Specific clinical procedure
+    fhir:udi @<OneOrMore_ExplanationOfBenefit.procedure.udi_Device>?;  # Unique device identifier
+}  
+
+#---------------------- Data Types -------------------
+
+# Primitive Type date
+<date> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:date];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v @<date.value>?;                  # Primitive value for date
+}  
+
+# An amount of economic utility in some recognized currency
+<Money> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Money];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:value @<Money.value>?;             # Numerical value (with implicit 
+                                            # precision) 
+    fhir:currency @<Money.currency>?;       # ISO 4217 Currency Code
+}  
+
+# Primitive Type boolean
+<boolean> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:boolean];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v @<boolean.value>?;               # Primitive value for boolean
+}  
+
+# Primitive Type string
+<string> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:string];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v @<string.value>?;                # Primitive value for string
+}  
+
+# An address expressed using postal conventions (as opposed to GPS or other location definition formats)
+<Address> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Address];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:use @<Address.use>?;               # home | work | temp | old | billing 
+                                            # - purpose of this address 
+    fhir:type @<Address.type>?;             # postal | physical | both
+    fhir:text @<Address.text>?;             # Text representation of the address
+    fhir:line @<OneOrMore_Address.line>?;   # Street name, number, direction & 
+                                            # P.O. Box etc. 
+    fhir:city @<Address.city>?;             # Name of city, town etc.
+    fhir:district @<Address.district>?;     # District name (aka county)
+    fhir:state @<Address.state>?;           # Sub-unit of country (abbreviations 
+                                            # ok) 
+    fhir:postalCode @<Address.postalCode>?;  # Postal code for area
+    fhir:country @<Address.country>?;       # Country (e.g. may be ISO 3166 2 or 
+                                            # 3 letter code) 
+    fhir:period @<Address.period>?;         # Time period when address was/is in 
+                                            # use 
+}  
+
+# A reference from one resource to another
+<Reference> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Reference];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:link IRI?;
+    fhir:reference @<Reference.reference>?;  # Literal reference, Relative, 
+                                            # internal or absolute URL 
+    fhir:type @<Reference.type>?;           # Type the reference refers to (e.g. 
+                                            # "Patient") 
+    fhir:identifier @<Reference.identifier>?;  # Logical reference, when literal 
+                                            # reference is not known 
+    fhir:display @<Reference.display>?;     # Text alternative for the resource
+} AND (
+
+# Constraint: UniqueKey:ref-1
+# Human readable:SHALL have a contained resource if a local reference is provided
+# XPath:not(starts-with(f:reference/@value, '#')) or exists(ancestor::*[self::f:entry or self::f:parameter]/f:resource/f:*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')]|/*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')])
+# Constraint:reference.startsWith('#').not() or (reference.substring(1).trace('url') in %rootResource.contained.id.trace('ids')) or (reference='#' and %rootResource!=%resource)
+# ShEx:
+
+
+)
+ 
+
+# Primitive Type unsignedInt
+<unsignedInt> EXTENDS @<integer> CLOSED {   
+
+    a [fhir:unsignedInt];
+    fhir:nodeRole [fhir:treeRoot]?;
+}  
+
+# Time range defined by start and end date/time
+<Period> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Period];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:start @<Period.start>?;            # Starting time with inclusive 
+                                            # boundary 
+    fhir:end @<Period.end>?;                # End time with inclusive boundary, 
+                                            # if not ongoing 
+} AND (
+
+# Constraint: UniqueKey:per-1
+# Human readable:If present, start SHALL have a lower or equal value than end
+# XPath:not(exists(f:start/@value)) or not(exists(f:end/@value)) or (xs:dateTime(f:start/@value) <= xs:dateTime(f:end/@value))
+# Constraint:start.hasValue().not() or end.hasValue().not() or (start <= end)
+# ShEx:
+
+ NOT { fhir:start  . } OR  NOT { fhir:end  . } OR ({ fhir:start { fhir:v MaxInclusive { fhir:end } }  })
+
+)
+ 
+
+# A measured or measurable amount
+<Quantity> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Quantity];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:value @<Quantity.value>?;          # Numerical value (with implicit 
+                                            # precision) 
+    fhir:comparator @<Quantity.comparator>?;  # < | <= | >= | > | ad - how to 
+                                            # understand the value 
+    fhir:unit @<Quantity.unit>?;            # Unit representation
+    fhir:system @<Quantity.system>?;        # System that defines coded unit form
+    fhir:code @<Quantity.code>?;            # Coded form of the unit
+} AND (
+
+# Constraint: UniqueKey:qty-3
+# Human readable:If a code for the unit is present, the system SHALL also be present
+# XPath:not(exists(f:code)) or exists(f:system)
+# Constraint:code.empty() or system.exists()
+# ShEx:
+
+ NOT { fhir:code {fhir:v .} }  OR { fhir:system . }
+
+)
+ 
+
+# Content in a format defined elsewhere
+<Attachment> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Attachment];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:contentType @<Attachment.contentType>?;  # Mime type of the content, with 
+                                            # charset etc. 
+    fhir:language @<Attachment.language>?;  # Human language of the content 
+                                            # (BCP-47) 
+    fhir:data @<Attachment.data>?;          # Data inline, base64ed
+    fhir:url @<Attachment.url>?;            # Uri where the data can be found
+    fhir:size @<Attachment.size>?;          # Number of bytes of content (if url 
+                                            # provided) 
+    fhir:hash @<Attachment.hash>?;          # Hash of the data (sha-1, base64ed)
+    fhir:title @<Attachment.title>?;        # Label to display in place of the 
+                                            # data 
+    fhir:creation @<Attachment.creation>?;  # Date attachment was first created
+    fhir:height @<Attachment.height>?;      # Height of the image in pixels 
+                                            # (photo/video) 
+    fhir:width @<Attachment.width>?;        # Width of the image in pixels 
+                                            # (photo/video) 
+    fhir:frames @<Attachment.frames>?;      # Number of frames if > 1 (photo)
+    fhir:duration @<Attachment.duration>?;  # Length in seconds (audio / video)
+    fhir:pages @<Attachment.pages>?;        # Number of printed pages
+} AND (
+
+# Constraint: UniqueKey:att-1
+# Human readable:If the Attachment has data, it SHALL have a contentType
+# XPath:not(exists(f:data)) or exists(f:contentType)
+# Constraint:data.empty() or contentType.exists()
+# ShEx:
+
+ NOT { fhir:data {fhir:v .} }  OR { fhir:contentType . }
+
+)
+ 
+
+# Concept - reference to a terminology or just  text
+<CodeableConcept> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:CodeableConcept];
+    fhir:nodeRole [fhir:treeRoot]?;
+    a NONLITERAL*;
+    fhir:coding @<OneOrMore_CodeableConcept.coding>?;  # Code defined by a terminology 
+                                            # system 
+    fhir:text @<CodeableConcept.text>?;     # Plain text representation of the 
+                                            # concept 
+}  
+
+#---------------------- Cardinality Types (OneOrMore) -------------------
+
+<OneOrMore_ExplanationOfBenefit.identifier> CLOSED {
+    rdf:first @<ExplanationOfBenefit.identifier>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ExplanationOfBenefit.identifier> 
+}
+
+<OneOrMore_ExplanationOfBenefit.related> CLOSED {
+    rdf:first @<ExplanationOfBenefit.related>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ExplanationOfBenefit.related> 
+}
+
+<OneOrMore_ExplanationOfBenefit.preAuthRef> CLOSED {
+    rdf:first @<ExplanationOfBenefit.preAuthRef>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ExplanationOfBenefit.preAuthRef> 
+}
+
+<OneOrMore_ExplanationOfBenefit.preAuthRefPeriod> CLOSED {
+    rdf:first @<ExplanationOfBenefit.preAuthRefPeriod>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ExplanationOfBenefit.preAuthRefPeriod> 
+}
+
+<OneOrMore_ExplanationOfBenefit.careTeam> CLOSED {
+    rdf:first @<ExplanationOfBenefit.careTeam>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ExplanationOfBenefit.careTeam> 
+}
+
+<OneOrMore_ExplanationOfBenefit.supportingInfo> CLOSED {
+    rdf:first @<ExplanationOfBenefit.supportingInfo>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ExplanationOfBenefit.supportingInfo> 
+}
+
+<OneOrMore_ExplanationOfBenefit.diagnosis> CLOSED {
+    rdf:first @<ExplanationOfBenefit.diagnosis>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ExplanationOfBenefit.diagnosis> 
+}
+
+<OneOrMore_ExplanationOfBenefit.procedure> CLOSED {
+    rdf:first @<ExplanationOfBenefit.procedure>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ExplanationOfBenefit.procedure> 
+}
+
+<OneOrMore_ExplanationOfBenefit.insurance> CLOSED {
+    rdf:first @<ExplanationOfBenefit.insurance>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ExplanationOfBenefit.insurance> 
+}
+
+<OneOrMore_ExplanationOfBenefit.item> CLOSED {
+    rdf:first @<ExplanationOfBenefit.item>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ExplanationOfBenefit.item> 
+}
+
+<OneOrMore_ExplanationOfBenefit.addItem> CLOSED {
+    rdf:first @<ExplanationOfBenefit.addItem>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ExplanationOfBenefit.addItem> 
+}
+
+<OneOrMore_ExplanationOfBenefit.item.adjudication> CLOSED {
+    rdf:first @<ExplanationOfBenefit.item.adjudication>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ExplanationOfBenefit.item.adjudication> 
+}
+
+<OneOrMore_ExplanationOfBenefit.total> CLOSED {
+    rdf:first @<ExplanationOfBenefit.total>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ExplanationOfBenefit.total> 
+}
+
+<OneOrMore_ExplanationOfBenefit.processNote> CLOSED {
+    rdf:first @<ExplanationOfBenefit.processNote>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ExplanationOfBenefit.processNote> 
+}
+
+<OneOrMore_ExplanationOfBenefit.benefitBalance> CLOSED {
+    rdf:first @<ExplanationOfBenefit.benefitBalance>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ExplanationOfBenefit.benefitBalance> 
+}
+
+<OneOrMore_ExplanationOfBenefit.addItem.itemSequence> CLOSED {
+    rdf:first @<ExplanationOfBenefit.addItem.itemSequence>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ExplanationOfBenefit.addItem.itemSequence> 
+}
+
+<OneOrMore_ExplanationOfBenefit.addItem.detailSequence> CLOSED {
+    rdf:first @<ExplanationOfBenefit.addItem.detailSequence>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ExplanationOfBenefit.addItem.detailSequence> 
+}
+
+<OneOrMore_ExplanationOfBenefit.addItem.subDetailSequence> CLOSED {
+    rdf:first @<ExplanationOfBenefit.addItem.subDetailSequence>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ExplanationOfBenefit.addItem.subDetailSequence> 
+}
+
+<OneOrMore_ExplanationOfBenefit.addItem.provider_Organization_OR_Practitioner_OR_PractitionerRole> CLOSED {
+    rdf:first @<ExplanationOfBenefit.addItem.provider> AND {fhir:link 
+			@<Organization> OR 
+			@<Practitioner> OR 
+			@<PractitionerRole> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ExplanationOfBenefit.addItem.provider_Organization_OR_Practitioner_OR_PractitionerRole> 
+}
+
+<OneOrMore_ExplanationOfBenefit.addItem.modifier> CLOSED {
+    rdf:first @<ExplanationOfBenefit.addItem.modifier>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ExplanationOfBenefit.addItem.modifier> 
+}
+
+<OneOrMore_ExplanationOfBenefit.addItem.programCode> CLOSED {
+    rdf:first @<ExplanationOfBenefit.addItem.programCode>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ExplanationOfBenefit.addItem.programCode> 
+}
+
+<OneOrMore_ExplanationOfBenefit.addItem.subSite> CLOSED {
+    rdf:first @<ExplanationOfBenefit.addItem.subSite>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ExplanationOfBenefit.addItem.subSite> 
+}
+
+<OneOrMore_ExplanationOfBenefit.addItem.noteNumber> CLOSED {
+    rdf:first @<ExplanationOfBenefit.addItem.noteNumber>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ExplanationOfBenefit.addItem.noteNumber> 
+}
+
+<OneOrMore_ExplanationOfBenefit.addItem.detail> CLOSED {
+    rdf:first @<ExplanationOfBenefit.addItem.detail>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ExplanationOfBenefit.addItem.detail> 
+}
+
+<OneOrMore_ExplanationOfBenefit.item.careTeamSequence> CLOSED {
+    rdf:first @<ExplanationOfBenefit.item.careTeamSequence>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ExplanationOfBenefit.item.careTeamSequence> 
+}
+
+<OneOrMore_ExplanationOfBenefit.item.diagnosisSequence> CLOSED {
+    rdf:first @<ExplanationOfBenefit.item.diagnosisSequence>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ExplanationOfBenefit.item.diagnosisSequence> 
+}
+
+<OneOrMore_ExplanationOfBenefit.item.procedureSequence> CLOSED {
+    rdf:first @<ExplanationOfBenefit.item.procedureSequence>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ExplanationOfBenefit.item.procedureSequence> 
+}
+
+<OneOrMore_ExplanationOfBenefit.item.informationSequence> CLOSED {
+    rdf:first @<ExplanationOfBenefit.item.informationSequence>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ExplanationOfBenefit.item.informationSequence> 
+}
+
+<OneOrMore_ExplanationOfBenefit.item.modifier> CLOSED {
+    rdf:first @<ExplanationOfBenefit.item.modifier>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ExplanationOfBenefit.item.modifier> 
+}
+
+<OneOrMore_ExplanationOfBenefit.item.programCode> CLOSED {
+    rdf:first @<ExplanationOfBenefit.item.programCode>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ExplanationOfBenefit.item.programCode> 
+}
+
+<OneOrMore_ExplanationOfBenefit.item.udi_Device> CLOSED {
+    rdf:first @<ExplanationOfBenefit.item.udi> AND {fhir:link 
+			@<Device> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ExplanationOfBenefit.item.udi_Device> 
+}
+
+<OneOrMore_ExplanationOfBenefit.item.subSite> CLOSED {
+    rdf:first @<ExplanationOfBenefit.item.subSite>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ExplanationOfBenefit.item.subSite> 
+}
+
+<OneOrMore_ExplanationOfBenefit.item.encounter_Encounter> CLOSED {
+    rdf:first @<ExplanationOfBenefit.item.encounter> AND {fhir:link 
+			@<Encounter> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ExplanationOfBenefit.item.encounter_Encounter> 
+}
+
+<OneOrMore_ExplanationOfBenefit.item.noteNumber> CLOSED {
+    rdf:first @<ExplanationOfBenefit.item.noteNumber>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ExplanationOfBenefit.item.noteNumber> 
+}
+
+<OneOrMore_ExplanationOfBenefit.item.detail> CLOSED {
+    rdf:first @<ExplanationOfBenefit.item.detail>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ExplanationOfBenefit.item.detail> 
+}
+
+<OneOrMore_ExplanationOfBenefit.insurance.preAuthRef> CLOSED {
+    rdf:first @<ExplanationOfBenefit.insurance.preAuthRef>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ExplanationOfBenefit.insurance.preAuthRef> 
+}
+
+<OneOrMore_ExplanationOfBenefit.diagnosis.type> CLOSED {
+    rdf:first @<ExplanationOfBenefit.diagnosis.type>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ExplanationOfBenefit.diagnosis.type> 
+}
+
+<OneOrMore_ExplanationOfBenefit.addItem.detail.modifier> CLOSED {
+    rdf:first @<ExplanationOfBenefit.addItem.detail.modifier>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ExplanationOfBenefit.addItem.detail.modifier> 
+}
+
+<OneOrMore_ExplanationOfBenefit.addItem.detail.noteNumber> CLOSED {
+    rdf:first @<ExplanationOfBenefit.addItem.detail.noteNumber>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ExplanationOfBenefit.addItem.detail.noteNumber> 
+}
+
+<OneOrMore_ExplanationOfBenefit.addItem.detail.subDetail> CLOSED {
+    rdf:first @<ExplanationOfBenefit.addItem.detail.subDetail>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ExplanationOfBenefit.addItem.detail.subDetail> 
+}
+
+<OneOrMore_ExplanationOfBenefit.benefitBalance.financial> CLOSED {
+    rdf:first @<ExplanationOfBenefit.benefitBalance.financial>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ExplanationOfBenefit.benefitBalance.financial> 
+}
+
+<OneOrMore_ExplanationOfBenefit.addItem.detail.subDetail.modifier> CLOSED {
+    rdf:first @<ExplanationOfBenefit.addItem.detail.subDetail.modifier>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ExplanationOfBenefit.addItem.detail.subDetail.modifier> 
+}
+
+<OneOrMore_ExplanationOfBenefit.addItem.detail.subDetail.noteNumber> CLOSED {
+    rdf:first @<ExplanationOfBenefit.addItem.detail.subDetail.noteNumber>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ExplanationOfBenefit.addItem.detail.subDetail.noteNumber> 
+}
+
+<OneOrMore_ExplanationOfBenefit.item.detail.modifier> CLOSED {
+    rdf:first @<ExplanationOfBenefit.item.detail.modifier>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ExplanationOfBenefit.item.detail.modifier> 
+}
+
+<OneOrMore_ExplanationOfBenefit.item.detail.programCode> CLOSED {
+    rdf:first @<ExplanationOfBenefit.item.detail.programCode>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ExplanationOfBenefit.item.detail.programCode> 
+}
+
+<OneOrMore_ExplanationOfBenefit.item.detail.udi_Device> CLOSED {
+    rdf:first @<ExplanationOfBenefit.item.detail.udi> AND {fhir:link 
+			@<Device> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ExplanationOfBenefit.item.detail.udi_Device> 
+}
+
+<OneOrMore_ExplanationOfBenefit.item.detail.noteNumber> CLOSED {
+    rdf:first @<ExplanationOfBenefit.item.detail.noteNumber>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ExplanationOfBenefit.item.detail.noteNumber> 
+}
+
+<OneOrMore_ExplanationOfBenefit.item.detail.subDetail> CLOSED {
+    rdf:first @<ExplanationOfBenefit.item.detail.subDetail>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ExplanationOfBenefit.item.detail.subDetail> 
+}
+
+<OneOrMore_ExplanationOfBenefit.item.detail.subDetail.modifier> CLOSED {
+    rdf:first @<ExplanationOfBenefit.item.detail.subDetail.modifier>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ExplanationOfBenefit.item.detail.subDetail.modifier> 
+}
+
+<OneOrMore_ExplanationOfBenefit.item.detail.subDetail.programCode> CLOSED {
+    rdf:first @<ExplanationOfBenefit.item.detail.subDetail.programCode>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ExplanationOfBenefit.item.detail.subDetail.programCode> 
+}
+
+<OneOrMore_ExplanationOfBenefit.item.detail.subDetail.udi_Device> CLOSED {
+    rdf:first @<ExplanationOfBenefit.item.detail.subDetail.udi> AND {fhir:link 
+			@<Device> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ExplanationOfBenefit.item.detail.subDetail.udi_Device> 
+}
+
+<OneOrMore_ExplanationOfBenefit.item.detail.subDetail.noteNumber> CLOSED {
+    rdf:first @<ExplanationOfBenefit.item.detail.subDetail.noteNumber>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ExplanationOfBenefit.item.detail.subDetail.noteNumber> 
+}
+
+<OneOrMore_ExplanationOfBenefit.procedure.type> CLOSED {
+    rdf:first @<ExplanationOfBenefit.procedure.type>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ExplanationOfBenefit.procedure.type> 
+}
+
+<OneOrMore_ExplanationOfBenefit.procedure.udi_Device> CLOSED {
+    rdf:first @<ExplanationOfBenefit.procedure.udi> AND {fhir:link 
+			@<Device> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ExplanationOfBenefit.procedure.udi_Device> 
+}
+
+<OneOrMore_Address.line> CLOSED {
+    rdf:first @<Address.line>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Address.line> 
+}
+
+<OneOrMore_CodeableConcept.coding> CLOSED {
+    rdf:first @<CodeableConcept.coding>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_CodeableConcept.coding> 
+}
+
+#---------------------- Reference Types -------------------
+
+#---------------------- Value Sets ------------------------

@@ -1,0 +1,46 @@
+﻿PREFIX fhir: <http://hl7.org/fhir/> 
+PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+BASE <http://hl7.org/fhir/shape/>
+
+
+# Name of a human - parts and usage
+<HumanName> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:HumanName];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:use @<HumanName.use>?;             # usual | official | temp | nickname 
+                                            # | anonymous | old | maiden 
+    fhir:text @<HumanName.text>?;           # Text representation of the full 
+                                            # name 
+    fhir:family @<HumanName.family>?;       # Family name (often called 
+                                            # 'Surname') 
+    fhir:given @<OneOrMore_HumanName.given>?;  # Given names (not always 'first'). 
+                                            # Includes middle names 
+    fhir:prefix @<OneOrMore_HumanName.prefix>?;  # Parts that come before the name
+    fhir:suffix @<OneOrMore_HumanName.suffix>?;  # Parts that come after the name
+    fhir:period @<HumanName.period>?;       # Time period when name was/is in use
+}  
+
+#---------------------- Data Types -------------------
+
+#---------------------- Cardinality Types (OneOrMore) -------------------
+
+<OneOrMore_HumanName.given> CLOSED {
+    rdf:first @<HumanName.given>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_HumanName.given> 
+}
+
+<OneOrMore_HumanName.prefix> CLOSED {
+    rdf:first @<HumanName.prefix>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_HumanName.prefix> 
+}
+
+<OneOrMore_HumanName.suffix> CLOSED {
+    rdf:first @<HumanName.suffix>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_HumanName.suffix> 
+}
+
+#---------------------- Reference Types -------------------
+
+#---------------------- Value Sets ------------------------

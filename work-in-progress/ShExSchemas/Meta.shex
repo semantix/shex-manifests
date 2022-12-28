@@ -1,0 +1,45 @@
+﻿PREFIX fhir: <http://hl7.org/fhir/> 
+PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+BASE <http://hl7.org/fhir/shape/>
+
+
+# Metadata about a resource
+<Meta> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Meta];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:versionId @<Meta.versionId>?;      # Version specific identifier
+    fhir:lastUpdated @<Meta.lastUpdated>?;  # When the resource version last 
+                                            # changed 
+    fhir:source @<Meta.source>?;            # Identifies where the resource 
+                                            # comes from 
+    fhir:profile @<OneOrMore_Meta.profile>?;  # Profiles this resource claims to 
+                                            # conform to 
+    fhir:security @<OneOrMore_Meta.security>?;  # Security Labels applied to this 
+                                            # resource 
+    fhir:tag @<OneOrMore_Meta.tag>?;        # Tags applied to this resource
+}  
+
+#---------------------- Data Types -------------------
+
+#---------------------- Cardinality Types (OneOrMore) -------------------
+
+<OneOrMore_Meta.profile> CLOSED {
+    rdf:first @<Meta.profile>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Meta.profile> 
+}
+
+<OneOrMore_Meta.security> CLOSED {
+    rdf:first @<Meta.security>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Meta.security> 
+}
+
+<OneOrMore_Meta.tag> CLOSED {
+    rdf:first @<Meta.tag>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Meta.tag> 
+}
+
+#---------------------- Reference Types -------------------
+
+#---------------------- Value Sets ------------------------

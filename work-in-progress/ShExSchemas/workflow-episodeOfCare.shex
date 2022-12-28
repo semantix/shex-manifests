@@ -1,0 +1,94 @@
+﻿PREFIX fhir: <http://hl7.org/fhir/> 
+PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+BASE <http://hl7.org/fhir/shape/>
+
+
+# Associated Encounter episode of care
+<workflow-episodeOfCare> EXTENDS @<Extension> CLOSED {   
+
+    a [fhir:workflow-episodeOfCare];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v @<Extension.url> AND
+    	{fhir:value ["http://hl7.org/fhir/StructureDefinition/workflow-episodeOfCare"]}; 
+    fhir:value ((@<Reference>  AND {fhir:link @<EpisodeOfCare> }) )  AND { rdf:type IRI } ; 
+    ^fhir:extension { a [fhir:AdverseEvent] OR 
+    				a [fhir:Appointment] OR 
+    				a [fhir:Basic] OR 
+    				a [fhir:CarePlan] OR 
+    				a [fhir:ClinicalImpression] OR 
+    				a [fhir:Communication] OR 
+    				a [fhir:CommunicationRequest] OR 
+    				a [fhir:Composition] OR 
+    				a [fhir:Condition] OR 
+    				a [fhir:Consent] OR 
+    				a [fhir:DetectedIssue] OR 
+    				a [fhir:DeviceRequest] OR 
+    				a [fhir:DeviceUsage] OR 
+    				a [fhir:DiagnosticReport] OR 
+    				a [fhir:DocumentReference] OR 
+    				a [fhir:Encounter] OR 
+    				a [fhir:EnrollmentRequest] OR 
+    				a [fhir:EnrollmentResponse] OR 
+    				a [fhir:FamilyMemberHistory] OR 
+    				a [fhir:Flag] OR 
+    				a [fhir:Goal] OR 
+    				a [fhir:ImagingStudy] OR 
+    				a [fhir:Immunization] OR 
+    				a [fhir:ImmunizationEvaluation] OR 
+    				a [fhir:ImmunizationRecommendation] OR 
+    				a [fhir:Invoice] OR 
+    				a [fhir:List] OR 
+    				a [fhir:MeasureReport] OR 
+    				a [fhir:MedicationAdministration] OR 
+    				a [fhir:MedicationDispense] OR 
+    				a [fhir:MedicationRequest] OR 
+    				a [fhir:MedicationUsage] OR 
+    				a [fhir:MolecularSequence] OR 
+    				a [fhir:NutritionIntake] OR 
+    				a [fhir:NutritionOrder] OR 
+    				a [fhir:Observation] OR 
+    				a [fhir:Procedure] OR 
+    				a [fhir:QuestionnaireResponse] OR 
+    				a [fhir:RequestGroup] OR 
+    				a [fhir:ResearchSubject] OR 
+    				a [fhir:RiskAssessment] OR 
+    				a [fhir:SupplyDelivery] OR 
+    				a [fhir:SupplyRequest] OR 
+    				a [fhir:VisionPrescription] OR 
+    				a [fhir:ServiceRequest]
+    		}
+}  
+
+#---------------------- Data Types -------------------
+
+# A reference from one resource to another
+<Reference> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Reference];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:link IRI?;
+    fhir:reference @<Reference.reference>?;  # Literal reference, Relative, 
+                                            # internal or absolute URL 
+    fhir:type @<Reference.type>?;           # Type the reference refers to (e.g. 
+                                            # "Patient") 
+    fhir:identifier @<Reference.identifier>?;  # Logical reference, when literal 
+                                            # reference is not known 
+    fhir:display @<Reference.display>?;     # Text alternative for the resource
+} AND (
+
+# Constraint: UniqueKey:ref-1
+# Human readable:SHALL have a contained resource if a local reference is provided
+# XPath:not(starts-with(f:reference/@value, '#')) or exists(ancestor::*[self::f:entry or self::f:parameter]/f:resource/f:*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')]|/*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')])
+# Constraint:reference.startsWith('#').not() or (reference.substring(1).trace('url') in %rootResource.contained.id.trace('ids')) or (reference='#' and %rootResource!=%resource)
+# ShEx:
+
+
+)
+ 
+
+#---------------------- Cardinality Types (OneOrMore) -------------------
+
+#---------------------- Reference Types -------------------
+
+#---------------------- Value Sets ------------------------

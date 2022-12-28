@@ -1,0 +1,405 @@
+﻿PREFIX fhir: <http://hl7.org/fhir/> 
+PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+BASE <http://hl7.org/fhir/shape/>
+
+
+start=@<ClinicalUseDefinition> AND {fhir:nodeRole [fhir:treeRoot]}
+
+
+# A single issue - either an indication, contraindication, interaction or an undesirable effect for a medicinal product, medication, device or procedure
+<ClinicalUseDefinition> EXTENDS @<DomainResource> CLOSED {   
+
+    a [fhir:ClinicalUseDefinition];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:identifier @<OneOrMore_Identifier>?;  # Business identifier for this issue
+    fhir:type @<code> AND
+    	{fhir:value @fhirvs:clinical-use-definition-type};  # indication | contraindication | 
+                                            # interaction | undesirable-effect | 
+                                            # warning 
+    fhir:category @<OneOrMore_CodeableConcept>?;  # A categorisation of the issue, 
+                                            # primarily for dividing warnings 
+                                            # into subject heading areas such as 
+                                            # "Pregnancy", "Overdose" 
+    fhir:subject @<OneOrMore_Reference_ActivityDefinition_OR_Device_OR_DeviceDefinition_OR_Medication_OR_MedicinalProductDefinition_OR_PlanDefinition_OR_Substance>?;  # The medication or procedure for 
+                                            # which this is an indication 
+    fhir:status @<CodeableConcept>?;        # Whether this is a current issue or 
+                                            # one that has been retired etc 
+    fhir:contraindication @<ClinicalUseDefinition.contraindication>?;  # Specifics for when this is a 
+                                            # contraindication 
+    fhir:indication @<ClinicalUseDefinition.indication>?;  # Specifics for when this is an 
+                                            # indication 
+    fhir:interaction @<ClinicalUseDefinition.interaction>?;  # Specifics for when this is an 
+                                            # interaction 
+    fhir:population @<OneOrMore_Reference_Group>?;  # The population group to which this 
+                                            # applies 
+    fhir:undesirableEffect @<ClinicalUseDefinition.undesirableEffect>?;  # A possible negative outcome from 
+                                            # the use of this treatment 
+    fhir:warning @<ClinicalUseDefinition.warning>?;  # Critical environmental, health or 
+                                            # physical risks or hazards. For 
+                                            # example 'Do not operate heavy 
+                                            # machinery', 'May cause drowsiness' 
+} AND (
+
+# Constraint: UniqueKey:cud-1
+# Human readable:Indication, Contraindication, Interaction, UndesirableEffect and Warning cannot be used in the same instance
+# XPath:count(f:ClinicalUseDefinition/f:indication|f:ClinicalUseDefinition/f:contraindication|f:ClinicalUseDefinition/f:interaction|f:ClinicalUseDefinition/f:undesirableEffect|f:ClinicalUseDefinition/f:warning) < 2
+# Constraint:(ClinicalUseDefinition.indication.count() + ClinicalUseDefinition.contraindication.count() + ClinicalUseDefinition.interaction.count() + ClinicalUseDefinition.undesirableEffect.count() + ClinicalUseDefinition.warning.count())  < 2
+# ShEx:
+
+( count( fhir:ClinicalUseDefinition fhir:indication ) SHEX_Plus_SHEX  count( fhir:ClinicalUseDefinition fhir:contraindication ) SHEX_Plus_SHEX  count( fhir:ClinicalUseDefinition fhir:interaction ) SHEX_Plus_SHEX  count( fhir:ClinicalUseDefinition fhir:undesirableEffect ) SHEX_Plus_SHEX  count( fhir:ClinicalUseDefinition fhir:warning )) SHEX_LessThan_SHEX 2
+
+)
+ 
+
+# Critical environmental, health or physical risks or hazards. For example 'Do not operate heavy machinery', 'May cause drowsiness'
+<ClinicalUseDefinition.warning> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:description @<markdown>?;          # A textual definition of this 
+                                            # warning, with formatting 
+    fhir:code @<CodeableConcept>?;          # A coded or unformatted textual 
+                                            # definition of this warning 
+}  
+
+# Specifics for when this is an interaction
+<ClinicalUseDefinition.interaction> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:interactant @<OneOrMore_ClinicalUseDefinition.interaction.interactant>?;  # The specific medication, food, 
+                                            # substance or laboratory test that 
+                                            # interacts 
+    fhir:type @<CodeableConcept>?;          # The type of the interaction e.g. 
+                                            # drug-drug interaction, drug-lab 
+                                            # test interaction 
+    fhir:effect @<CodeableReference>?;      # The effect of the interaction, for 
+                                            # example "reduced gastric 
+                                            # absorption of primary medication" 
+    fhir:incidence @<CodeableConcept>?;     # The incidence of the interaction, 
+                                            # e.g. theoretical, observed 
+    fhir:management @<OneOrMore_CodeableConcept>?;  # Actions for managing the 
+                                            # interaction 
+}  
+
+# Information about use of the product in relation to other therapies described as part of the contraindication
+<ClinicalUseDefinition.contraindication.otherTherapy> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:relationshipType @<CodeableConcept>;  # The type of relationship between 
+                                            # the product 
+                                            # indication/contraindication and 
+                                            # another therapy 
+    fhir:therapy @<CodeableReference>;      # Reference to a specific medication 
+                                            # as part of an indication or 
+                                            # contraindication 
+}  
+
+# The specific medication, food, substance or laboratory test that interacts
+<ClinicalUseDefinition.interaction.interactant> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:item ((@<Reference>  AND {fhir:link @<MedicinalProductDefinition> OR 
+    			 @<Medication> OR 
+    			 @<Substance> OR 
+    			 @<ObservationDefinition> })  OR 
+    			@<CodeableConcept> )  AND { rdf:type IRI } ;  # The specific medication, food or 
+                                            # laboratory test that interacts 
+}  
+
+# Specifics for when this is an indication
+<ClinicalUseDefinition.indication> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:diseaseSymptomProcedure @<CodeableReference>?;  # The situation that is being 
+                                            # documented as an indicaton for 
+                                            # this item 
+    fhir:diseaseStatus @<CodeableReference>?;  # The status of the disease or 
+                                            # symptom for the indication 
+    fhir:comorbidity @<OneOrMore_CodeableReference>?;  # A comorbidity or coinfection as 
+                                            # part of the indication 
+    fhir:intendedEffect @<CodeableReference>?;  # The intended effect, aim or 
+                                            # strategy to be achieved 
+    fhir:duration (@<Range>  OR 
+    			@<string> )  AND { rdf:type IRI } ?;  # Timing or duration information
+    fhir:undesirableEffect @<OneOrMore_Reference_ClinicalUseDefinition>?;  # An unwanted side effect or 
+                                            # negative outcome of the subject of 
+                                            # this resource when being used for 
+                                            # this indication 
+    fhir:otherTherapy @<OneOrMore_ClinicalUseDefinition.contraindication.otherTherapy>?;  # The use of the medicinal product 
+                                            # in relation to other therapies 
+                                            # described as part of the 
+                                            # indication 
+}  
+
+# Specifics for when this is a contraindication
+<ClinicalUseDefinition.contraindication> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:diseaseSymptomProcedure @<CodeableReference>?;  # The situation that is being 
+                                            # documented as contraindicating 
+                                            # against this item 
+    fhir:diseaseStatus @<CodeableReference>?;  # The status of the disease or 
+                                            # symptom for the contraindication 
+    fhir:comorbidity @<OneOrMore_CodeableReference>?;  # A comorbidity (concurrent 
+                                            # condition) or coinfection 
+    fhir:indication @<OneOrMore_Reference_ClinicalUseDefinition>?;  # The indication which this is a 
+                                            # contraidication for 
+    fhir:otherTherapy @<OneOrMore_ClinicalUseDefinition.contraindication.otherTherapy>?;  # Information about use of the 
+                                            # product in relation to other 
+                                            # therapies described as part of the 
+                                            # contraindication 
+}  
+
+# A possible negative outcome from the use of this treatment
+<ClinicalUseDefinition.undesirableEffect> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:symptomConditionEffect @<CodeableReference>?;  # The situation in which the 
+                                            # undesirable effect may manifest 
+    fhir:classification @<CodeableConcept>?;  # High level classification of the 
+                                            # effect 
+    fhir:frequencyOfOccurrence @<CodeableConcept>?;  # How often the effect is seen
+}  
+
+#---------------------- Data Types -------------------
+
+# An identifier intended for computation
+<Identifier> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Identifier];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:use @<code> AND
+    	{fhir:value @fhirvs:identifier-use}?;  # usual | official | temp | 
+                                            # secondary | old (If known) 
+    fhir:type @<CodeableConcept>?;          # Description of identifier
+    fhir:system @<uri>?;                    # The namespace for the identifier 
+                                            # value 
+    fhir:value @<string>?;                  # The value that is unique
+    fhir:period @<Period>?;                 # Time period when id is/was valid 
+                                            # for use 
+    fhir:assigner @<Reference> AND {fhir:link 
+    			@<Organization> }?;  # Organization that issued id (may 
+                                            # be just text) 
+}  
+
+# Primitive Type code
+<code> EXTENDS @<string> CLOSED {   
+
+    a [fhir:code];
+    fhir:nodeRole [fhir:treeRoot]?;
+}  
+
+# Primitive Type string
+<string> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:string];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v xsd:string MAXLENGTH 1048576?;   # Primitive value for string
+}  
+
+# A reference from one resource to another
+<Reference> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Reference];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:link IRI?;
+    fhir:reference @<string>?;              # Literal reference, Relative, 
+                                            # internal or absolute URL 
+    fhir:type @<uri>?;                      # Type the reference refers to (e.g. 
+                                            # "Patient") 
+    fhir:identifier @<Identifier>?;         # Logical reference, when literal 
+                                            # reference is not known 
+    fhir:display @<string>?;                # Text alternative for the resource
+} AND (
+
+# Constraint: UniqueKey:ref-1
+# Human readable:SHALL have a contained resource if a local reference is provided
+# XPath:not(starts-with(f:reference/@value, '#')) or exists(ancestor::*[self::f:entry or self::f:parameter]/f:resource/f:*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')]|/*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')])
+# Constraint:reference.startsWith('#').not() or (reference.substring(1).trace('url') in %rootResource.contained.id.trace('ids')) or (reference='#' and %rootResource!=%resource)
+# ShEx:
+
+ NOT { fhir:reference  SHEX_startsWith_SHEX ('#') } OR ({ fhir:reference SHEX_substring_SHEX (1) SHEX_trace_SHEX ('url') } { fhir:v ['%rootResource'.contained.id SHEX_trace_SHEX ('ids')] } ) OR (({ fhir:reference { fhir:v ['#'] }  }) AND ('%rootResource' { fhir:v [ . -'%resource'] }))
+
+)
+ 
+
+# Reference to a resource or a concept
+<CodeableReference> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:CodeableReference];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:concept @<CodeableConcept>?;       # Reference to a concept (by class)
+    fhir:reference @<Reference>?;           # Reference to a resource (by 
+                                            # instance) 
+}  
+
+# Primitive Type markdown
+<markdown> EXTENDS @<string> CLOSED {   
+
+    a [fhir:markdown];
+    fhir:nodeRole [fhir:treeRoot]?;
+}  
+
+# Set of values bounded by low and high
+<Range> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Range];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:low @<SimpleQuantity>?;            # Low limit
+    fhir:high @<SimpleQuantity>?;           # High limit
+} AND (
+
+# Constraint: UniqueKey:rng-2
+# Human readable:If present, low SHALL have a lower value than high
+# XPath:not(exists(f:low/f:value/@value)) or not(exists(f:high/f:value/@value)) or (number(f:low/f:value/@value) <= number(f:high/f:value/@value))
+# Constraint:low.value.empty() or high.value.empty() or (low <= high)
+# ShEx:
+
+ NOT { fhir:low fhir:value {fhir:v .} }  OR  NOT { fhir:high fhir:value {fhir:v .} }  OR ({ fhir:low { fhir:v MaxInclusive { fhir:high } }  })
+
+)
+ 
+
+# Concept - reference to a terminology or just  text
+<CodeableConcept> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:CodeableConcept];
+    fhir:nodeRole [fhir:treeRoot]?;
+    a NONLITERAL*;
+    fhir:coding @<OneOrMore_Coding>?;       # Code defined by a terminology 
+                                            # system 
+    fhir:text @<string>?;                   # Plain text representation of the 
+                                            # concept 
+}  
+
+# A fixed quantity (no comparator)
+<SimpleQuantity> EXTENDS @<Quantity> CLOSED {   
+
+    a [fhir:SimpleQuantity];
+    fhir:nodeRole [fhir:treeRoot]?;
+} AND (
+
+# Constraint: UniqueKey:sqty-1
+# Human readable:The comparator is not used on a SimpleQuantity
+# XPath:not(exists(f:comparator))
+# Constraint:comparator.empty()
+# ShEx:
+
+ NOT { fhir:comparator {fhir:v .} } 
+
+)
+ 
+
+# Time range defined by start and end date/time
+<Period> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Period];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:start @<dateTime>?;                # Starting time with inclusive 
+                                            # boundary 
+    fhir:end @<dateTime>?;                  # End time with inclusive boundary, 
+                                            # if not ongoing 
+} AND (
+
+# Constraint: UniqueKey:per-1
+# Human readable:If present, start SHALL have a lower or equal value than end
+# XPath:not(exists(f:start/@value)) or not(exists(f:end/@value)) or (xs:dateTime(f:start/@value) <= xs:dateTime(f:end/@value))
+# Constraint:start.hasValue().not() or end.hasValue().not() or (start <= end)
+# ShEx:
+
+ NOT { fhir:start  . } OR  NOT { fhir:end  . } OR ({ fhir:start { fhir:v MaxInclusive { fhir:end } }  })
+
+)
+ 
+
+# Primitive Type uri
+<uri> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:uri];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v xsd:anyURI?;                     # Primitive value for uri
+}  
+
+# A reference to a code defined by a terminology system
+<Coding> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Coding];
+    fhir:nodeRole [fhir:treeRoot]?;
+    a NONLITERAL?;
+    fhir:system @<uri>?;                    # Identity of the terminology system
+    fhir:version @<string>?;                # Version of the system - if relevant
+    fhir:code @<code>?;                     # Symbol in syntax defined by the 
+                                            # system 
+    fhir:display @<string>?;                # Representation defined by the 
+                                            # system 
+    fhir:userSelected @<boolean>?;          # If this coding was chosen directly 
+                                            # by the user 
+}  
+
+# Primitive Type dateTime
+<dateTime> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:dateTime];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v xsd:gYear OR xsd:gYearMonth OR xsd:date OR xsd:dateTime?;  # Primitive value for dateTime
+}  
+
+# Primitive Type boolean
+<boolean> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:boolean];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v xsd:boolean?;                    # Primitive value for boolean
+}  
+
+#---------------------- Cardinality Types (OneOrMore) -------------------
+
+<OneOrMore_Identifier> CLOSED {
+    rdf:first @<Identifier>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Identifier> 
+}
+
+<OneOrMore_CodeableConcept> CLOSED {
+    rdf:first @<CodeableConcept>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_CodeableConcept> 
+}
+
+<OneOrMore_Reference_ActivityDefinition_OR_Device_OR_DeviceDefinition_OR_Medication_OR_MedicinalProductDefinition_OR_PlanDefinition_OR_Substance> CLOSED {
+    rdf:first @<Reference> AND {fhir:link 
+			@<ActivityDefinition> OR 
+			@<Device> OR 
+			@<DeviceDefinition> OR 
+			@<Medication> OR 
+			@<MedicinalProductDefinition> OR 
+			@<PlanDefinition> OR 
+			@<Substance> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Reference_ActivityDefinition_OR_Device_OR_DeviceDefinition_OR_Medication_OR_MedicinalProductDefinition_OR_PlanDefinition_OR_Substance> 
+}
+
+<OneOrMore_Reference_Group> CLOSED {
+    rdf:first @<Reference> AND {fhir:link 
+			@<Group> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Reference_Group> 
+}
+
+<OneOrMore_ClinicalUseDefinition.interaction.interactant> CLOSED {
+    rdf:first @<ClinicalUseDefinition.interaction.interactant>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ClinicalUseDefinition.interaction.interactant> 
+}
+
+<OneOrMore_CodeableReference> CLOSED {
+    rdf:first @<CodeableReference>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_CodeableReference> 
+}
+
+<OneOrMore_Reference_ClinicalUseDefinition> CLOSED {
+    rdf:first @<Reference> AND {fhir:link 
+			@<ClinicalUseDefinition> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Reference_ClinicalUseDefinition> 
+}
+
+<OneOrMore_ClinicalUseDefinition.contraindication.otherTherapy> CLOSED {
+    rdf:first @<ClinicalUseDefinition.contraindication.otherTherapy>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ClinicalUseDefinition.contraindication.otherTherapy> 
+}
+
+<OneOrMore_Coding> CLOSED {
+    rdf:first @<Coding>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Coding> 
+}
+
+#---------------------- Reference Types -------------------
+
+#---------------------- Value Sets ------------------------
+
+# Identifies the purpose for this identifier, if known .
+fhirvs:identifier-use ["usual" "official" "temp" "secondary" "old"]
+
+# Overall defining type of this clinical use definition.
+fhirvs:clinical-use-definition-type ["indication" "contraindication" "interaction" "undesirable-effect" "warning"]

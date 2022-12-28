@@ -1,0 +1,26 @@
+﻿PREFIX fhir: <http://hl7.org/fhir/> 
+PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+BASE <http://hl7.org/fhir/shape/>
+
+
+# Who has used and how?
+<valueset-usage> EXTENDS @<Extension> CLOSED {   
+
+    a [fhir:valueset-usage];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:user @<Extension>; 
+    fhir:use @<Extension>; 
+    fhir:v @<Extension.url> AND
+    	{fhir:value ["http://hl7.org/fhir/StructureDefinition/valueset-usage"]}; 
+    ^fhir:extension { a [fhir:ValueSet]
+    		}
+}  
+
+#---------------------- Data Types -------------------
+
+#---------------------- Cardinality Types (OneOrMore) -------------------
+
+#---------------------- Reference Types -------------------
+
+#---------------------- Value Sets ------------------------

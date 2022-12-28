@@ -1,0 +1,153 @@
+﻿PREFIX fhir: <http://hl7.org/fhir/> 
+PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+BASE <http://hl7.org/fhir/shape/>
+
+
+start=@<SubstancePolymer> AND {fhir:nodeRole [fhir:treeRoot]}
+
+
+# Properties of a substance specific to it being a polymer
+<SubstancePolymer> EXTENDS @<DomainResource> CLOSED {   
+
+    a [fhir:SubstancePolymer];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:identifier @<SubstancePolymer.identifier>?;  # A business idenfier for this 
+                                            # polymer, but typically this is 
+                                            # handled by a SubstanceDefinition 
+                                            # identifier 
+    fhir:class @<SubstancePolymer.class>?;  # Overall type of the polymer
+    fhir:geometry @<SubstancePolymer.geometry>?;  # Polymer geometry, e.g. linear, 
+                                            # branched, cross-linked, network or 
+                                            # dendritic 
+    fhir:copolymerConnectivity @<OneOrMore_SubstancePolymer.copolymerConnectivity>?;  # Descrtibes the copolymer sequence 
+                                            # type (polymer connectivity) 
+    fhir:modification @<SubstancePolymer.modification>?;  # Todo - this is intended to connect 
+                                            # to a repeating full modification 
+                                            # structure, also used by Protein 
+                                            # and Nucleic Acid . String is just 
+                                            # a placeholder 
+    fhir:monomerSet @<OneOrMore_SubstancePolymer.monomerSet>?;  # Todo
+    fhir:repeat @<OneOrMore_SubstancePolymer.repeat>?;  # Specifies and quantifies the 
+                                            # repeated units and their 
+                                            # configuration 
+}  
+
+# A graphical structure for this SRU
+<SubstancePolymer.repeat.repeatUnit.structuralRepresentation> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:type @<SubstancePolymer.repeat.repeatUnit.structuralRepresentation.type>?;  # The type of structure (e.g. Full, 
+                                            # Partial, Representative) 
+    fhir:representation @<SubstancePolymer.repeat.repeatUnit.structuralRepresentation.representation>?;  # The structural representation as 
+                                            # text string in a standard format 
+                                            # e.g. InChI, SMILES, MOLFILE, CDX, 
+                                            # SDF, PDB, mmCIF 
+    fhir:format @<SubstancePolymer.repeat.repeatUnit.structuralRepresentation.format>?;  # The format of the representation 
+                                            # e.g. InChI, SMILES, MOLFILE, CDX, 
+                                            # SDF, PDB, mmCIF 
+    fhir:attachment @<SubstancePolymer.repeat.repeatUnit.structuralRepresentation.attachment>?;  # An attached file with the 
+                                            # structural representation 
+}  
+
+# The starting materials - monomer(s) used in the synthesis of the polymer
+<SubstancePolymer.monomerSet.startingMaterial> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:code @<SubstancePolymer.monomerSet.startingMaterial.code>?;  # The type of substance for this 
+                                            # starting material 
+    fhir:category @<SubstancePolymer.monomerSet.startingMaterial.category>?;  # Substance high level category, 
+                                            # e.g. chemical substance 
+    fhir:isDefining @<SubstancePolymer.monomerSet.startingMaterial.isDefining>?;  # Used to specify whether the 
+                                            # attribute described is a defining 
+                                            # element for the unique 
+                                            # identification of the polymer 
+    fhir:amount @<SubstancePolymer.monomerSet.startingMaterial.amount>?;  # A percentage
+}  
+
+# An SRU - Structural Repeat Unit
+<SubstancePolymer.repeat.repeatUnit> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:unit @<SubstancePolymer.repeat.repeatUnit.unit>?;  # Structural repeat units are 
+                                            # essential elements for defining 
+                                            # polymers 
+    fhir:orientation @<SubstancePolymer.repeat.repeatUnit.orientation>?;  # The orientation of the 
+                                            # polymerisation, e.g. head-tail, 
+                                            # head-head, random 
+    fhir:amount @<SubstancePolymer.repeat.repeatUnit.amount>?;  # Number of repeats of this unit
+    fhir:degreeOfPolymerisation @<OneOrMore_SubstancePolymer.repeat.repeatUnit.degreeOfPolymerisation>?;  # Applies to homopolymer and block 
+                                            # co-polymers where the degree of 
+                                            # polymerisation within a block can 
+                                            # be described 
+    fhir:structuralRepresentation @<OneOrMore_SubstancePolymer.repeat.repeatUnit.structuralRepresentation>?;  # A graphical structure for this SRU
+}  
+
+# Applies to homopolymer and block co-polymers where the degree of polymerisation within a block can be described
+<SubstancePolymer.repeat.repeatUnit.degreeOfPolymerisation> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:type @<SubstancePolymer.repeat.repeatUnit.degreeOfPolymerisation.type>?;  # The type of the degree of 
+                                            # polymerisation shall be described, 
+                                            # e.g. SRU/Polymer Ratio 
+    fhir:average @<SubstancePolymer.repeat.repeatUnit.degreeOfPolymerisation.average>?;  # An average amount of polymerisation
+    fhir:low @<SubstancePolymer.repeat.repeatUnit.degreeOfPolymerisation.low>?;  # A low expected limit of the amount
+    fhir:high @<SubstancePolymer.repeat.repeatUnit.degreeOfPolymerisation.high>?;  # A high expected limit of the amount
+}  
+
+# Todo
+<SubstancePolymer.monomerSet> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:ratioType @<SubstancePolymer.monomerSet.ratioType>?;  # Captures the type of ratio to the 
+                                            # entire polymer, e.g. 
+                                            # Monomer/Polymer ratio, SRU/Polymer 
+                                            # Ratio 
+    fhir:startingMaterial @<OneOrMore_SubstancePolymer.monomerSet.startingMaterial>?;  # The starting materials - 
+                                            # monomer(s) used in the synthesis 
+                                            # of the polymer 
+}  
+
+# Specifies and quantifies the repeated units and their configuration
+<SubstancePolymer.repeat> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:averageMolecularFormula @<SubstancePolymer.repeat.averageMolecularFormula>?;  # A representation of an (average) 
+                                            # molecular formula from a polymer 
+    fhir:repeatUnitAmountType @<SubstancePolymer.repeat.repeatUnitAmountType>?;  # How the quantitative amount of 
+                                            # Structural Repeat Units is 
+                                            # captured (e.g. Exact, Numeric, 
+                                            # Average) 
+    fhir:repeatUnit @<OneOrMore_SubstancePolymer.repeat.repeatUnit>?;  # An SRU - Structural Repeat Unit
+}  
+
+#---------------------- Data Types -------------------
+
+#---------------------- Cardinality Types (OneOrMore) -------------------
+
+<OneOrMore_SubstancePolymer.copolymerConnectivity> CLOSED {
+    rdf:first @<SubstancePolymer.copolymerConnectivity>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_SubstancePolymer.copolymerConnectivity> 
+}
+
+<OneOrMore_SubstancePolymer.monomerSet> CLOSED {
+    rdf:first @<SubstancePolymer.monomerSet>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_SubstancePolymer.monomerSet> 
+}
+
+<OneOrMore_SubstancePolymer.repeat> CLOSED {
+    rdf:first @<SubstancePolymer.repeat>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_SubstancePolymer.repeat> 
+}
+
+<OneOrMore_SubstancePolymer.repeat.repeatUnit.degreeOfPolymerisation> CLOSED {
+    rdf:first @<SubstancePolymer.repeat.repeatUnit.degreeOfPolymerisation>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_SubstancePolymer.repeat.repeatUnit.degreeOfPolymerisation> 
+}
+
+<OneOrMore_SubstancePolymer.repeat.repeatUnit.structuralRepresentation> CLOSED {
+    rdf:first @<SubstancePolymer.repeat.repeatUnit.structuralRepresentation>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_SubstancePolymer.repeat.repeatUnit.structuralRepresentation> 
+}
+
+<OneOrMore_SubstancePolymer.monomerSet.startingMaterial> CLOSED {
+    rdf:first @<SubstancePolymer.monomerSet.startingMaterial>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_SubstancePolymer.monomerSet.startingMaterial> 
+}
+
+<OneOrMore_SubstancePolymer.repeat.repeatUnit> CLOSED {
+    rdf:first @<SubstancePolymer.repeat.repeatUnit>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_SubstancePolymer.repeat.repeatUnit> 
+}
+
+#---------------------- Reference Types -------------------
+
+#---------------------- Value Sets ------------------------

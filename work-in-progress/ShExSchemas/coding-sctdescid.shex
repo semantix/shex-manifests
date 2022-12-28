@@ -1,0 +1,32 @@
+﻿PREFIX fhir: <http://hl7.org/fhir/> 
+PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+BASE <http://hl7.org/fhir/shape/>
+
+
+# SNOMED CT Description ID
+<coding-sctdescid> EXTENDS @<Extension> CLOSED {   
+
+    a [fhir:coding-sctdescid];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v @<Extension.url> AND
+    	{fhir:value ["http://hl7.org/fhir/StructureDefinition/coding-sctdescid"]}; 
+    fhir:value (@<id> )  AND { rdf:type IRI } ; 
+    ^fhir:extension { a [fhir:Coding]
+    		}
+}  
+
+#---------------------- Data Types -------------------
+
+# Primitive Type id
+<id> EXTENDS @<string> CLOSED {   
+
+    a [fhir:id];
+    fhir:nodeRole [fhir:treeRoot]?;
+}  
+
+#---------------------- Cardinality Types (OneOrMore) -------------------
+
+#---------------------- Reference Types -------------------
+
+#---------------------- Value Sets ------------------------

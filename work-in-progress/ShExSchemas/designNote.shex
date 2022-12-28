@@ -1,0 +1,35 @@
+﻿PREFIX fhir: <http://hl7.org/fhir/> 
+PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+BASE <http://hl7.org/fhir/shape/>
+
+
+# Design comments
+<designNote> EXTENDS @<Extension> CLOSED {   
+
+    a [fhir:designNote];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v @<Extension.url> AND
+    	{fhir:value ["http://hl7.org/fhir/StructureDefinition/designNote"]}; 
+    fhir:value (@<markdown> )  AND { rdf:type IRI } ; 
+    ^fhir:extension { a [fhir:Questionnaire] OR 
+    				^fhir:item {a [fhir:Questionnaire]} OR 
+    				^fhir:item {^fhir:item {a [fhir:Questionnaire]}} OR 
+    				a [fhir:ElementDefinition]
+    		}
+}  
+
+#---------------------- Data Types -------------------
+
+# Primitive Type markdown
+<markdown> EXTENDS @<string> CLOSED {   
+
+    a [fhir:markdown];
+    fhir:nodeRole [fhir:treeRoot]?;
+}  
+
+#---------------------- Cardinality Types (OneOrMore) -------------------
+
+#---------------------- Reference Types -------------------
+
+#---------------------- Value Sets ------------------------

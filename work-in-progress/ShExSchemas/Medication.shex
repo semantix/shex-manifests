@@ -1,0 +1,127 @@
+﻿PREFIX fhir: <http://hl7.org/fhir/> 
+PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+BASE <http://hl7.org/fhir/shape/>
+
+
+start=@<Medication> AND {fhir:nodeRole [fhir:treeRoot]}
+
+
+# Definition of a Medication
+<Medication> EXTENDS @<DomainResource> CLOSED {   
+
+    a [fhir:Medication];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:identifier @<OneOrMore_Medication.identifier>?;  # Business identifier for this 
+                                            # medication 
+    fhir:code @<Medication.code>?;          # Codes that identify this medication
+    fhir:status @<Medication.status>?;      # active | inactive | 
+                                            # entered-in-error 
+    fhir:marketingAuthorizationHolder @<Medication.marketingAuthorizationHolder> AND {fhir:link 
+    			@<Organization> }?;  # Organization that has 
+                                            # authorization to market medication 
+    fhir:doseForm @<Medication.doseForm>?;  # powder | tablets | capsule +
+    fhir:totalVolume @<Medication.totalVolume>?;  # When the specified product code 
+                                            # does not infer a package size, 
+                                            # this is the specific amount of 
+                                            # drug in the product 
+    fhir:ingredient @<OneOrMore_Medication.ingredient>?;  # Active or inactive ingredient
+    fhir:batch @<Medication.batch>?;        # Details about packaged medications
+}  
+
+# Details about packaged medications
+<Medication.batch> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:lotNumber @<Medication.batch.lotNumber>?;  # Identifier assigned to batch
+    fhir:expirationDate @<Medication.batch.expirationDate>?;  # When batch will expire
+}  
+
+# Active or inactive ingredient
+<Medication.ingredient> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:item @<Medication.ingredient.item>;  # The ingredient (substance or 
+                                            # medication) that the 
+                                            # ingredient.strength relates to 
+    fhir:isActive @<Medication.ingredient.isActive>?;  # Active ingredient indicator
+    fhir:strength (@<Ratio>  OR 
+    			@<CodeableConcept>  OR 
+    			@<Quantity> )  AND { rdf:type IRI } ?;  # Quantity of ingredient present
+}  
+
+#---------------------- Data Types -------------------
+
+# A measured or measurable amount
+<Quantity> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Quantity];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:value @<Quantity.value>?;          # Numerical value (with implicit 
+                                            # precision) 
+    fhir:comparator @<Quantity.comparator>?;  # < | <= | >= | > | ad - how to 
+                                            # understand the value 
+    fhir:unit @<Quantity.unit>?;            # Unit representation
+    fhir:system @<Quantity.system>?;        # System that defines coded unit form
+    fhir:code @<Quantity.code>?;            # Coded form of the unit
+} AND (
+
+# Constraint: UniqueKey:qty-3
+# Human readable:If a code for the unit is present, the system SHALL also be present
+# XPath:not(exists(f:code)) or exists(f:system)
+# Constraint:code.empty() or system.exists()
+# ShEx:
+
+ NOT { fhir:code {fhir:v .} }  OR { fhir:system . }
+
+)
+ 
+
+# A ratio of two Quantity values - a numerator and a denominator
+<Ratio> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Ratio];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:numerator @<Ratio.numerator>?;     # Numerator value
+    fhir:denominator @<Ratio.denominator>?;  # Denominator value
+} AND (
+
+# Constraint: UniqueKey:rat-1
+# Human readable:Numerator and denominator SHALL both be present, or both are absent. If both are absent, there SHALL be some extension present
+# XPath:(count(f:numerator) = count(f:denominator)) and ((count(f:numerator) > 0) or (count(f:extension) > 0))
+# Constraint:(numerator.empty() xor denominator.exists()) and (numerator.exists() or extension.exists())
+# ShEx:
+
+(( NOT { fhir:numerator {fhir:v .} }  AND NOT  { fhir:denominator . }) OR ( NOT  NOT { fhir:numerator {fhir:v .} }  AND  { fhir:denominator . })) AND ({ fhir:numerator . } OR { fhir:extension . })
+
+)
+ 
+
+# Concept - reference to a terminology or just  text
+<CodeableConcept> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:CodeableConcept];
+    fhir:nodeRole [fhir:treeRoot]?;
+    a NONLITERAL*;
+    fhir:coding @<OneOrMore_CodeableConcept.coding>?;  # Code defined by a terminology 
+                                            # system 
+    fhir:text @<CodeableConcept.text>?;     # Plain text representation of the 
+                                            # concept 
+}  
+
+#---------------------- Cardinality Types (OneOrMore) -------------------
+
+<OneOrMore_Medication.identifier> CLOSED {
+    rdf:first @<Medication.identifier>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Medication.identifier> 
+}
+
+<OneOrMore_Medication.ingredient> CLOSED {
+    rdf:first @<Medication.ingredient>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Medication.ingredient> 
+}
+
+<OneOrMore_CodeableConcept.coding> CLOSED {
+    rdf:first @<CodeableConcept.coding>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_CodeableConcept.coding> 
+}
+
+#---------------------- Reference Types -------------------
+
+#---------------------- Value Sets ------------------------

@@ -1,0 +1,83 @@
+﻿PREFIX fhir: <http://hl7.org/fhir/> 
+PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+BASE <http://hl7.org/fhir/shape/>
+
+
+start=@<BodyStructure> AND {fhir:nodeRole [fhir:treeRoot]}
+
+
+# Specific and identified anatomical structure
+<BodyStructure> EXTENDS @<DomainResource> CLOSED {   
+
+    a [fhir:BodyStructure];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:identifier @<OneOrMore_BodyStructure.identifier>?;  # Bodystructure identifier
+    fhir:active @<BodyStructure.active>?;   # Whether this record is in active 
+                                            # use 
+    fhir:morphology @<BodyStructure.morphology>?;  # Kind of Structure
+    fhir:includedStructure @<OneOrMore_BodyStructure.includedStructure>;  # Included anatomic location(s)
+    fhir:excludedStructure @<OneOrMore_BodyStructure.excludedStructure>?;  # Excluded anatomic locations(s)
+    fhir:description @<BodyStructure.description>?;  # Text description
+    fhir:image @<OneOrMore_BodyStructure.image>?;  # Attached images
+    fhir:patient @<BodyStructure.patient> AND {fhir:link 
+    			@<Patient> };  # Who this is about
+}  
+
+# Included anatomic location(s)
+<BodyStructure.includedStructure> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:structure @<BodyStructure.includedStructure.structure>;  # Code that represents the included 
+                                            # structure 
+    fhir:laterality @<BodyStructure.includedStructure.laterality>?;  # Code that represents the included 
+                                            # structure laterality 
+    fhir:qualifier @<OneOrMore_BodyStructure.includedStructure.qualifier>?;  # Code that represents the included 
+                                            # structure qualifier 
+}  
+
+# Excluded anatomic locations(s)
+<BodyStructure.excludedStructure> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:structure @<BodyStructure.excludedStructure.structure>;  # Code that represents the excluded 
+                                            # structure 
+    fhir:laterality @<BodyStructure.excludedStructure.laterality>?;  # Code that represents the excluded 
+                                            # structure laterality 
+    fhir:qualifier @<OneOrMore_BodyStructure.excludedStructure.qualifier>?;  # Code that represents the excluded 
+                                            # structure qualifier 
+}  
+
+#---------------------- Data Types -------------------
+
+#---------------------- Cardinality Types (OneOrMore) -------------------
+
+<OneOrMore_BodyStructure.identifier> CLOSED {
+    rdf:first @<BodyStructure.identifier>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_BodyStructure.identifier> 
+}
+
+<OneOrMore_BodyStructure.includedStructure> CLOSED {
+    rdf:first @<BodyStructure.includedStructure>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_BodyStructure.includedStructure> 
+}
+
+<OneOrMore_BodyStructure.excludedStructure> CLOSED {
+    rdf:first @<BodyStructure.excludedStructure>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_BodyStructure.excludedStructure> 
+}
+
+<OneOrMore_BodyStructure.image> CLOSED {
+    rdf:first @<BodyStructure.image>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_BodyStructure.image> 
+}
+
+<OneOrMore_BodyStructure.includedStructure.qualifier> CLOSED {
+    rdf:first @<BodyStructure.includedStructure.qualifier>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_BodyStructure.includedStructure.qualifier> 
+}
+
+<OneOrMore_BodyStructure.excludedStructure.qualifier> CLOSED {
+    rdf:first @<BodyStructure.excludedStructure.qualifier>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_BodyStructure.excludedStructure.qualifier> 
+}
+
+#---------------------- Reference Types -------------------
+
+#---------------------- Value Sets ------------------------

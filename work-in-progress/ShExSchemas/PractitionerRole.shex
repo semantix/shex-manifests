@@ -1,0 +1,135 @@
+﻿PREFIX fhir: <http://hl7.org/fhir/> 
+PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+BASE <http://hl7.org/fhir/shape/>
+
+
+start=@<PractitionerRole> AND {fhir:nodeRole [fhir:treeRoot]}
+
+
+# Roles/organizations the practitioner is associated with
+<PractitionerRole> EXTENDS @<DomainResource> CLOSED {   
+
+    a [fhir:PractitionerRole];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:identifier @<OneOrMore_PractitionerRole.identifier>?;  # Business Identifiers that are 
+                                            # specific to a role/location 
+    fhir:active @<PractitionerRole.active>?;  # Whether this practitioner role 
+                                            # record is in active use 
+    fhir:period @<PractitionerRole.period>?;  # The period during which the 
+                                            # practitioner is authorized to 
+                                            # perform in these role(s) 
+    fhir:practitioner @<PractitionerRole.practitioner> AND {fhir:link 
+    			@<Practitioner> }?;  # Practitioner that is able to 
+                                            # provide the defined services for 
+                                            # the organization 
+    fhir:organization @<PractitionerRole.organization> AND {fhir:link 
+    			@<Organization> }?;  # Organization where the roles are 
+                                            # available 
+    fhir:code @<OneOrMore_PractitionerRole.code>?;  # Roles which this practitioner may 
+                                            # perform 
+    fhir:specialty @<OneOrMore_PractitionerRole.specialty>?;  # Specific specialty of the 
+                                            # practitioner 
+    fhir:location @<OneOrMore_PractitionerRole.location_Location>?;  # The location(s) at which this 
+                                            # practitioner provides care 
+    fhir:healthcareService @<OneOrMore_PractitionerRole.healthcareService_HealthcareService>?;  # The list of healthcare services 
+                                            # that this worker provides for this 
+                                            # role's Organization/Location(s) 
+    fhir:contact @<OneOrMore_PractitionerRole.contact>?;  # Official contact details relating 
+                                            # to this PractitionerRole 
+    fhir:telecom @<OneOrMore_PractitionerRole.telecom>?;  # Deprecated - use contact.telecom
+    fhir:availableTime @<OneOrMore_PractitionerRole.availableTime>?;  # Times the Service Site is available
+    fhir:notAvailable @<OneOrMore_PractitionerRole.notAvailable>?;  # Not available during this time due 
+                                            # to provided reason 
+    fhir:availabilityExceptions @<PractitionerRole.availabilityExceptions>?;  # Description of availability 
+                                            # exceptions 
+    fhir:endpoint @<OneOrMore_PractitionerRole.endpoint_Endpoint>?;  # Technical endpoints providing 
+                                            # access to services operated for 
+                                            # the practitioner with this role 
+}  
+
+# Times the Service Site is available
+<PractitionerRole.availableTime> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:daysOfWeek @<OneOrMore_PractitionerRole.availableTime.daysOfWeek>?;  # mon | tue | wed | thu | fri | sat 
+                                            # | sun 
+    fhir:allDay @<PractitionerRole.availableTime.allDay>?;  # Always available? i.e. 24 hour 
+                                            # service 
+    fhir:availableStartTime @<PractitionerRole.availableTime.availableStartTime>?;  # Opening time of day (ignored if 
+                                            # allDay = true) 
+    fhir:availableEndTime @<PractitionerRole.availableTime.availableEndTime>?;  # Closing time of day (ignored if 
+                                            # allDay = true) 
+}  
+
+# Not available during this time due to provided reason
+<PractitionerRole.notAvailable> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:description @<PractitionerRole.notAvailable.description>;  # Reason presented to the user 
+                                            # explaining why time not available 
+    fhir:during @<PractitionerRole.notAvailable.during>?;  # Service not available from this 
+                                            # date 
+}  
+
+#---------------------- Data Types -------------------
+
+#---------------------- Cardinality Types (OneOrMore) -------------------
+
+<OneOrMore_PractitionerRole.identifier> CLOSED {
+    rdf:first @<PractitionerRole.identifier>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_PractitionerRole.identifier> 
+}
+
+<OneOrMore_PractitionerRole.code> CLOSED {
+    rdf:first @<PractitionerRole.code>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_PractitionerRole.code> 
+}
+
+<OneOrMore_PractitionerRole.specialty> CLOSED {
+    rdf:first @<PractitionerRole.specialty>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_PractitionerRole.specialty> 
+}
+
+<OneOrMore_PractitionerRole.location_Location> CLOSED {
+    rdf:first @<PractitionerRole.location> AND {fhir:link 
+			@<Location> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_PractitionerRole.location_Location> 
+}
+
+<OneOrMore_PractitionerRole.healthcareService_HealthcareService> CLOSED {
+    rdf:first @<PractitionerRole.healthcareService> AND {fhir:link 
+			@<HealthcareService> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_PractitionerRole.healthcareService_HealthcareService> 
+}
+
+<OneOrMore_PractitionerRole.contact> CLOSED {
+    rdf:first @<PractitionerRole.contact>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_PractitionerRole.contact> 
+}
+
+<OneOrMore_PractitionerRole.telecom> CLOSED {
+    rdf:first @<PractitionerRole.telecom>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_PractitionerRole.telecom> 
+}
+
+<OneOrMore_PractitionerRole.availableTime> CLOSED {
+    rdf:first @<PractitionerRole.availableTime>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_PractitionerRole.availableTime> 
+}
+
+<OneOrMore_PractitionerRole.notAvailable> CLOSED {
+    rdf:first @<PractitionerRole.notAvailable>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_PractitionerRole.notAvailable> 
+}
+
+<OneOrMore_PractitionerRole.endpoint_Endpoint> CLOSED {
+    rdf:first @<PractitionerRole.endpoint> AND {fhir:link 
+			@<Endpoint> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_PractitionerRole.endpoint_Endpoint> 
+}
+
+<OneOrMore_PractitionerRole.availableTime.daysOfWeek> CLOSED {
+    rdf:first @<PractitionerRole.availableTime.daysOfWeek>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_PractitionerRole.availableTime.daysOfWeek> 
+}
+
+#---------------------- Reference Types -------------------
+
+#---------------------- Value Sets ------------------------

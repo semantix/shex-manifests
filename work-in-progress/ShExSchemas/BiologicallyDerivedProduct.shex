@@ -1,0 +1,280 @@
+﻿PREFIX fhir: <http://hl7.org/fhir/> 
+PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+BASE <http://hl7.org/fhir/shape/>
+
+
+start=@<BiologicallyDerivedProduct> AND {fhir:nodeRole [fhir:treeRoot]}
+
+
+# This resource reflects an instance of a biologically derived product
+<BiologicallyDerivedProduct> EXTENDS @<DomainResource> CLOSED {   
+
+    a [fhir:BiologicallyDerivedProduct];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:productCategory @<BiologicallyDerivedProduct.productCategory>?;  # organ | tissue | fluid | cells | 
+                                            # biologicalAgent 
+    fhir:productCode @<BiologicallyDerivedProduct.productCode>?;  # A code that identifies the kind of 
+                                            # this biologically derived product 
+    fhir:parent @<OneOrMore_BiologicallyDerivedProduct.parent_BiologicallyDerivedProduct>?;  # The parent biologically-derived 
+                                            # product 
+    fhir:request @<OneOrMore_BiologicallyDerivedProduct.request_ServiceRequest>?;  # Request to obtain and/or infuse 
+                                            # this product 
+    fhir:identifier @<OneOrMore_BiologicallyDerivedProduct.identifier>?;  # Instance identifier
+    fhir:biologicalSourceEvent @<BiologicallyDerivedProduct.biologicalSourceEvent>?;  # An identifier that supports 
+                                            # traceability to the event during 
+                                            # which material in this product 
+                                            # from one or more biological 
+                                            # entities was obtained or pooled 
+    fhir:processingFacility @<OneOrMore_BiologicallyDerivedProduct.processingFacility_Organization>?;  # Processing facilities responsible 
+                                            # for the labeling and distribution 
+                                            # of this biologically derived 
+                                            # product 
+    fhir:division @<BiologicallyDerivedProduct.division>?;  # A unique identifier for an aliquot 
+                                            # of a product 
+    fhir:productStatus @<BiologicallyDerivedProduct.productStatus>?;  # available | unavailable
+    fhir:expirationDate @<BiologicallyDerivedProduct.expirationDate>?;  # Date, and where relevant time, of 
+                                            # expiration 
+    fhir:collection @<BiologicallyDerivedProduct.collection>?;  # How this product was collected
+    fhir:storageTempRequirements @<BiologicallyDerivedProduct.storageTempRequirements>?;  # Product storage temperature 
+                                            # requirements 
+    fhir:property @<OneOrMore_BiologicallyDerivedProduct.property>?;  # A property that is specific to 
+                                            # this BiologicallyDerviedProduct 
+                                            # instance 
+}  
+
+# A property that is specific to this BiologicallyDerviedProduct instance
+<BiologicallyDerivedProduct.property> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:type @<BiologicallyDerivedProduct.property.type>;  # Code that specifies the property
+    fhir:value (@<boolean>  OR 
+    			@<integer>  OR 
+    			@<CodeableConcept>  OR 
+    			@<Period>  OR 
+    			@<Quantity>  OR 
+    			@<Range>  OR 
+    			@<Ratio>  OR 
+    			@<string>  OR 
+    			@<Attachment> )  AND { rdf:type IRI } ;  # Property values
+}  
+
+# How this product was collected
+<BiologicallyDerivedProduct.collection> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:collector @<BiologicallyDerivedProduct.collection.collector> AND {fhir:link 
+    			@<Practitioner> OR 
+    			@<PractitionerRole> }?;  # Individual performing collection
+    fhir:source @<BiologicallyDerivedProduct.collection.source> AND {fhir:link 
+    			@<Organization> OR 
+    			@<Patient> }?;  # The patient or entity providing 
+                                            # the product 
+    fhir:collected (@<dateTime>  OR 
+    			@<Period> )  AND { rdf:type IRI } ?;  # Time of product collection
+}  
+
+#---------------------- Data Types -------------------
+
+# Primitive Type dateTime
+<dateTime> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:dateTime];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v @<dateTime.value>?;              # Primitive value for dateTime
+}  
+
+# Primitive Type boolean
+<boolean> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:boolean];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v @<boolean.value>?;               # Primitive value for boolean
+}  
+
+# Primitive Type string
+<string> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:string];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v @<string.value>?;                # Primitive value for string
+}  
+
+# Time range defined by start and end date/time
+<Period> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Period];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:start @<Period.start>?;            # Starting time with inclusive 
+                                            # boundary 
+    fhir:end @<Period.end>?;                # End time with inclusive boundary, 
+                                            # if not ongoing 
+} AND (
+
+# Constraint: UniqueKey:per-1
+# Human readable:If present, start SHALL have a lower or equal value than end
+# XPath:not(exists(f:start/@value)) or not(exists(f:end/@value)) or (xs:dateTime(f:start/@value) <= xs:dateTime(f:end/@value))
+# Constraint:start.hasValue().not() or end.hasValue().not() or (start <= end)
+# ShEx:
+
+ NOT { fhir:start  . } OR  NOT { fhir:end  . } OR ({ fhir:start { fhir:v MaxInclusive { fhir:end } }  })
+
+)
+ 
+
+# A measured or measurable amount
+<Quantity> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Quantity];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:value @<Quantity.value>?;          # Numerical value (with implicit 
+                                            # precision) 
+    fhir:comparator @<Quantity.comparator>?;  # < | <= | >= | > | ad - how to 
+                                            # understand the value 
+    fhir:unit @<Quantity.unit>?;            # Unit representation
+    fhir:system @<Quantity.system>?;        # System that defines coded unit form
+    fhir:code @<Quantity.code>?;            # Coded form of the unit
+} AND (
+
+# Constraint: UniqueKey:qty-3
+# Human readable:If a code for the unit is present, the system SHALL also be present
+# XPath:not(exists(f:code)) or exists(f:system)
+# Constraint:code.empty() or system.exists()
+# ShEx:
+
+ NOT { fhir:code {fhir:v .} }  OR { fhir:system . }
+
+)
+ 
+
+# A ratio of two Quantity values - a numerator and a denominator
+<Ratio> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Ratio];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:numerator @<Ratio.numerator>?;     # Numerator value
+    fhir:denominator @<Ratio.denominator>?;  # Denominator value
+} AND (
+
+# Constraint: UniqueKey:rat-1
+# Human readable:Numerator and denominator SHALL both be present, or both are absent. If both are absent, there SHALL be some extension present
+# XPath:(count(f:numerator) = count(f:denominator)) and ((count(f:numerator) > 0) or (count(f:extension) > 0))
+# Constraint:(numerator.empty() xor denominator.exists()) and (numerator.exists() or extension.exists())
+# ShEx:
+
+(( NOT { fhir:numerator {fhir:v .} }  AND NOT  { fhir:denominator . }) OR ( NOT  NOT { fhir:numerator {fhir:v .} }  AND  { fhir:denominator . })) AND ({ fhir:numerator . } OR { fhir:extension . })
+
+)
+ 
+
+# Content in a format defined elsewhere
+<Attachment> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Attachment];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:contentType @<Attachment.contentType>?;  # Mime type of the content, with 
+                                            # charset etc. 
+    fhir:language @<Attachment.language>?;  # Human language of the content 
+                                            # (BCP-47) 
+    fhir:data @<Attachment.data>?;          # Data inline, base64ed
+    fhir:url @<Attachment.url>?;            # Uri where the data can be found
+    fhir:size @<Attachment.size>?;          # Number of bytes of content (if url 
+                                            # provided) 
+    fhir:hash @<Attachment.hash>?;          # Hash of the data (sha-1, base64ed)
+    fhir:title @<Attachment.title>?;        # Label to display in place of the 
+                                            # data 
+    fhir:creation @<Attachment.creation>?;  # Date attachment was first created
+    fhir:height @<Attachment.height>?;      # Height of the image in pixels 
+                                            # (photo/video) 
+    fhir:width @<Attachment.width>?;        # Width of the image in pixels 
+                                            # (photo/video) 
+    fhir:frames @<Attachment.frames>?;      # Number of frames if > 1 (photo)
+    fhir:duration @<Attachment.duration>?;  # Length in seconds (audio / video)
+    fhir:pages @<Attachment.pages>?;        # Number of printed pages
+} AND (
+
+# Constraint: UniqueKey:att-1
+# Human readable:If the Attachment has data, it SHALL have a contentType
+# XPath:not(exists(f:data)) or exists(f:contentType)
+# Constraint:data.empty() or contentType.exists()
+# ShEx:
+
+ NOT { fhir:data {fhir:v .} }  OR { fhir:contentType . }
+
+)
+ 
+
+# Primitive Type integer
+<integer> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:integer];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v @<integer.value>?;               # Primitive value for integer
+}  
+
+# Set of values bounded by low and high
+<Range> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Range];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:low @<Range.low>?;                 # Low limit
+    fhir:high @<Range.high>?;               # High limit
+} AND (
+
+# Constraint: UniqueKey:rng-2
+# Human readable:If present, low SHALL have a lower value than high
+# XPath:not(exists(f:low/f:value/@value)) or not(exists(f:high/f:value/@value)) or (number(f:low/f:value/@value) <= number(f:high/f:value/@value))
+# Constraint:low.value.empty() or high.value.empty() or (low <= high)
+# ShEx:
+
+ NOT { fhir:low fhir:value {fhir:v .} }  OR  NOT { fhir:high fhir:value {fhir:v .} }  OR ({ fhir:low { fhir:v MaxInclusive { fhir:high } }  })
+
+)
+ 
+
+# Concept - reference to a terminology or just  text
+<CodeableConcept> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:CodeableConcept];
+    fhir:nodeRole [fhir:treeRoot]?;
+    a NONLITERAL*;
+    fhir:coding @<OneOrMore_CodeableConcept.coding>?;  # Code defined by a terminology 
+                                            # system 
+    fhir:text @<CodeableConcept.text>?;     # Plain text representation of the 
+                                            # concept 
+}  
+
+#---------------------- Cardinality Types (OneOrMore) -------------------
+
+<OneOrMore_BiologicallyDerivedProduct.parent_BiologicallyDerivedProduct> CLOSED {
+    rdf:first @<BiologicallyDerivedProduct.parent> AND {fhir:link 
+			@<BiologicallyDerivedProduct> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_BiologicallyDerivedProduct.parent_BiologicallyDerivedProduct> 
+}
+
+<OneOrMore_BiologicallyDerivedProduct.request_ServiceRequest> CLOSED {
+    rdf:first @<BiologicallyDerivedProduct.request> AND {fhir:link 
+			@<ServiceRequest> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_BiologicallyDerivedProduct.request_ServiceRequest> 
+}
+
+<OneOrMore_BiologicallyDerivedProduct.identifier> CLOSED {
+    rdf:first @<BiologicallyDerivedProduct.identifier>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_BiologicallyDerivedProduct.identifier> 
+}
+
+<OneOrMore_BiologicallyDerivedProduct.processingFacility_Organization> CLOSED {
+    rdf:first @<BiologicallyDerivedProduct.processingFacility> AND {fhir:link 
+			@<Organization> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_BiologicallyDerivedProduct.processingFacility_Organization> 
+}
+
+<OneOrMore_BiologicallyDerivedProduct.property> CLOSED {
+    rdf:first @<BiologicallyDerivedProduct.property>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_BiologicallyDerivedProduct.property> 
+}
+
+<OneOrMore_CodeableConcept.coding> CLOSED {
+    rdf:first @<CodeableConcept.coding>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_CodeableConcept.coding> 
+}
+
+#---------------------- Reference Types -------------------
+
+#---------------------- Value Sets ------------------------

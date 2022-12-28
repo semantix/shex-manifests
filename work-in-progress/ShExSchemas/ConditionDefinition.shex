@@ -1,0 +1,212 @@
+﻿PREFIX fhir: <http://hl7.org/fhir/> 
+PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+BASE <http://hl7.org/fhir/shape/>
+
+
+start=@<ConditionDefinition> AND {fhir:nodeRole [fhir:treeRoot]}
+
+
+# A definition of a condition
+<ConditionDefinition> EXTENDS @<MetadataResource> CLOSED {   
+
+    a [fhir:ConditionDefinition];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:url @<ConditionDefinition.url>?;   # Canonical identifier for this 
+                                            # condition definition, represented 
+                                            # as a URI (globally unique) 
+    fhir:identifier @<OneOrMore_ConditionDefinition.identifier>?;  # Additional identifier for the 
+                                            # condition definition 
+    fhir:version @<ConditionDefinition.version>?;  # Business version of the condition 
+                                            # definition 
+    fhir:name @<ConditionDefinition.name>?;  # Name for this condition definition 
+                                            # (computer friendly) 
+    fhir:title @<ConditionDefinition.title>?;  # Name for this condition definition 
+                                            # (human friendly) 
+    fhir:subtitle @<ConditionDefinition.subtitle>?;  # Subordinate title of the event 
+                                            # definition 
+    fhir:status @<ConditionDefinition.status>;  # draft | active | retired | unknown
+    fhir:experimental @<ConditionDefinition.experimental>?;  # For testing purposes, not real 
+                                            # usage 
+    fhir:date @<ConditionDefinition.date>?;  # Date last changed
+    fhir:publisher @<ConditionDefinition.publisher>?;  # Name of the publisher 
+                                            # (organization or individual) 
+    fhir:contact @<OneOrMore_ConditionDefinition.contact>?;  # Contact details for the publisher
+    fhir:description @<ConditionDefinition.description>?;  # Natural language description of 
+                                            # the condition definition 
+    fhir:useContext @<OneOrMore_ConditionDefinition.useContext>?;  # The context that the content is 
+                                            # intended to support 
+    fhir:jurisdiction @<OneOrMore_ConditionDefinition.jurisdiction>?;  # Intended jurisdiction for 
+                                            # condition definition (if 
+                                            # applicable) 
+    fhir:code @<ConditionDefinition.code>;  # Identification of the condition, 
+                                            # problem or diagnosis 
+    fhir:severity @<ConditionDefinition.severity>?;  # Subjective severity of condition
+    fhir:bodySite @<ConditionDefinition.bodySite>?;  # Anatomical location, if relevant
+    fhir:stage @<ConditionDefinition.stage>?;  # Stage/grade, usually assessed 
+                                            # formally 
+    fhir:hasSeverity @<ConditionDefinition.hasSeverity>?;  # Whether Severity is appropriate
+    fhir:hasBodySite @<ConditionDefinition.hasBodySite>?;  # Whether bodySite is appropriate
+    fhir:hasStage @<ConditionDefinition.hasStage>?;  # Whether stage is appropriate
+    fhir:definition @<OneOrMore_ConditionDefinition.definition>?;  # Formal Definition for the condition
+    fhir:observation @<OneOrMore_ConditionDefinition.observation>?;  # Observations particularly relevant 
+                                            # to this condition 
+    fhir:medication @<OneOrMore_ConditionDefinition.medication>?;  # Medications particularly relevant 
+                                            # for this condition 
+    fhir:precondition @<OneOrMore_ConditionDefinition.precondition>?;  # Observation that suggets this 
+                                            # condition 
+    fhir:team @<OneOrMore_ConditionDefinition.team_CareTeam>?;  # Appropriate team for this condition
+    fhir:questionnaire @<OneOrMore_ConditionDefinition.questionnaire>?;  # Questionnaire for this condition
+    fhir:plan @<OneOrMore_ConditionDefinition.plan>?;  # Plan that is appropriate
+} AND (
+
+# Constraint: UniqueKey:cnl-0
+# Human readable:Name should be usable as an identifier for the module by machine processing applications such as code generation
+# XPath:not(exists(f:name/@value)) or matches(f:name/@value, '[A-Z]([A-Za-z0-9_]){0,254}')
+# Constraint:name.exists() implies name.matches('[A-Z]([A-Za-z0-9_]){0,254}')
+# ShEx:
+
+{ fhir:name . } AND { fhir:name { fhir:v /'[A-Z]([A-Za-z0-9_]){0,254}'/ }  }
+
+)
+ 
+
+# Observation that suggets this condition
+<ConditionDefinition.precondition> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:type @<ConditionDefinition.precondition.type>;  # sensitive | specific
+    fhir:code @<ConditionDefinition.precondition.code>;  # Code for relevant Observation
+    fhir:value (@<CodeableConcept>  OR 
+    			@<Quantity> )  AND { rdf:type IRI } ?;  # Value of Observation
+}  
+
+# Plan that is appropriate
+<ConditionDefinition.plan> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:role @<ConditionDefinition.plan.role>?;  # Use for the plan
+    fhir:reference @<ConditionDefinition.plan.reference> AND {fhir:link 
+    			@<PlanDefinition> };  # The actual plan
+}  
+
+# Questionnaire for this condition
+<ConditionDefinition.questionnaire> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:purpose @<ConditionDefinition.questionnaire.purpose>;  # preadmit | diff-diagnosis | outcome
+    fhir:reference @<ConditionDefinition.questionnaire.reference> AND {fhir:link 
+    			@<Questionnaire> };  # Specific Questionnaire
+}  
+
+# Observations particularly relevant to this condition
+<ConditionDefinition.observation> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:category @<ConditionDefinition.observation.category>?;  # Category that is relevant
+    fhir:code @<ConditionDefinition.observation.code>?;  # Code for relevant Observation
+}  
+
+# Medications particularly relevant for this condition
+<ConditionDefinition.medication> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:category @<ConditionDefinition.medication.category>?;  # Category that is relevant
+    fhir:code @<ConditionDefinition.medication.code>?;  # Code for relevant Medication
+}  
+
+#---------------------- Data Types -------------------
+
+# A measured or measurable amount
+<Quantity> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Quantity];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:value @<Quantity.value>?;          # Numerical value (with implicit 
+                                            # precision) 
+    fhir:comparator @<Quantity.comparator>?;  # < | <= | >= | > | ad - how to 
+                                            # understand the value 
+    fhir:unit @<Quantity.unit>?;            # Unit representation
+    fhir:system @<Quantity.system>?;        # System that defines coded unit form
+    fhir:code @<Quantity.code>?;            # Coded form of the unit
+} AND (
+
+# Constraint: UniqueKey:qty-3
+# Human readable:If a code for the unit is present, the system SHALL also be present
+# XPath:not(exists(f:code)) or exists(f:system)
+# Constraint:code.empty() or system.exists()
+# ShEx:
+
+ NOT { fhir:code {fhir:v .} }  OR { fhir:system . }
+
+)
+ 
+
+# Concept - reference to a terminology or just  text
+<CodeableConcept> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:CodeableConcept];
+    fhir:nodeRole [fhir:treeRoot]?;
+    a NONLITERAL*;
+    fhir:coding @<OneOrMore_CodeableConcept.coding>?;  # Code defined by a terminology 
+                                            # system 
+    fhir:text @<CodeableConcept.text>?;     # Plain text representation of the 
+                                            # concept 
+}  
+
+#---------------------- Cardinality Types (OneOrMore) -------------------
+
+<OneOrMore_ConditionDefinition.identifier> CLOSED {
+    rdf:first @<ConditionDefinition.identifier>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ConditionDefinition.identifier> 
+}
+
+<OneOrMore_ConditionDefinition.contact> CLOSED {
+    rdf:first @<ConditionDefinition.contact>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ConditionDefinition.contact> 
+}
+
+<OneOrMore_ConditionDefinition.useContext> CLOSED {
+    rdf:first @<ConditionDefinition.useContext>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ConditionDefinition.useContext> 
+}
+
+<OneOrMore_ConditionDefinition.jurisdiction> CLOSED {
+    rdf:first @<ConditionDefinition.jurisdiction>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ConditionDefinition.jurisdiction> 
+}
+
+<OneOrMore_ConditionDefinition.definition> CLOSED {
+    rdf:first @<ConditionDefinition.definition>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ConditionDefinition.definition> 
+}
+
+<OneOrMore_ConditionDefinition.observation> CLOSED {
+    rdf:first @<ConditionDefinition.observation>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ConditionDefinition.observation> 
+}
+
+<OneOrMore_ConditionDefinition.medication> CLOSED {
+    rdf:first @<ConditionDefinition.medication>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ConditionDefinition.medication> 
+}
+
+<OneOrMore_ConditionDefinition.precondition> CLOSED {
+    rdf:first @<ConditionDefinition.precondition>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ConditionDefinition.precondition> 
+}
+
+<OneOrMore_ConditionDefinition.team_CareTeam> CLOSED {
+    rdf:first @<ConditionDefinition.team> AND {fhir:link 
+			@<CareTeam> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ConditionDefinition.team_CareTeam> 
+}
+
+<OneOrMore_ConditionDefinition.questionnaire> CLOSED {
+    rdf:first @<ConditionDefinition.questionnaire>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ConditionDefinition.questionnaire> 
+}
+
+<OneOrMore_ConditionDefinition.plan> CLOSED {
+    rdf:first @<ConditionDefinition.plan>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ConditionDefinition.plan> 
+}
+
+<OneOrMore_CodeableConcept.coding> CLOSED {
+    rdf:first @<CodeableConcept.coding>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_CodeableConcept.coding> 
+}
+
+#---------------------- Reference Types -------------------
+
+#---------------------- Value Sets ------------------------

@@ -1,0 +1,39 @@
+﻿PREFIX fhir: <http://hl7.org/fhir/> 
+PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+BASE <http://hl7.org/fhir/shape/>
+
+
+# LS | AC | NB | PR | HON | BR | AD | SP | MID | CL | IN | VV
+<iso21090-EN-qualifier> EXTENDS @<Extension> CLOSED {   
+
+    a [fhir:iso21090-EN-qualifier];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v @<Extension.url> AND
+    	{fhir:value ["http://hl7.org/fhir/StructureDefinition/iso21090-EN-qualifier"]}; 
+    fhir:value (@<code> AND
+    	{fhir:value @fhirvs:name-part-qualifier} )  AND { rdf:type IRI } ; 
+    ^fhir:extension { ^fhir:family {a [fhir:HumanName]} OR 
+    				^fhir:given {a [fhir:HumanName]} OR 
+    				^fhir:prefix {a [fhir:HumanName]} OR 
+    				^fhir:suffix {a [fhir:HumanName]}
+    		}
+}  
+
+#---------------------- Data Types -------------------
+
+# Primitive Type code
+<code> EXTENDS @<string> CLOSED {   
+
+    a [fhir:code];
+    fhir:nodeRole [fhir:treeRoot]?;
+}  
+
+#---------------------- Cardinality Types (OneOrMore) -------------------
+
+#---------------------- Reference Types -------------------
+
+#---------------------- Value Sets ------------------------
+
+# A set of codes each of which specifies a certain subcategory of the name part in addition to the main name part type.
+fhirvs:name-part-qualifier ["LS" "AC" "NB" "PR" "HON" "BR" "AD" "SP" "MID" "CL" "IN" "VV"]

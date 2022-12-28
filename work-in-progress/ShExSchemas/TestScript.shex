@@ -1,0 +1,792 @@
+﻿PREFIX fhir: <http://hl7.org/fhir/> 
+PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+BASE <http://hl7.org/fhir/shape/>
+
+
+start=@<TestScript> AND {fhir:nodeRole [fhir:treeRoot]}
+
+
+# Describes a set of tests
+<TestScript> EXTENDS @<CanonicalResource> CLOSED {   
+
+    a [fhir:TestScript];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:url @<TestScript.url>?;            # Canonical identifier for this test 
+                                            # script, represented as a URI 
+                                            # (globally unique) 
+    fhir:identifier @<OneOrMore_TestScript.identifier>?;  # Additional identifier for the test 
+                                            # script 
+    fhir:version @<TestScript.version>?;    # Business version of the test script
+    fhir:name @<TestScript.name>;           # Name for this test script 
+                                            # (computer friendly) 
+    fhir:title @<TestScript.title>?;        # Name for this test script (human 
+                                            # friendly) 
+    fhir:status @<TestScript.status>;       # draft | active | retired | unknown
+    fhir:experimental @<TestScript.experimental>?;  # For testing purposes, not real 
+                                            # usage 
+    fhir:date @<TestScript.date>?;          # Date last changed
+    fhir:publisher @<TestScript.publisher>?;  # Name of the publisher 
+                                            # (organization or individual) 
+    fhir:contact @<OneOrMore_TestScript.contact>?;  # Contact details for the publisher
+    fhir:description @<TestScript.description>?;  # Natural language description of 
+                                            # the test script 
+    fhir:useContext @<OneOrMore_TestScript.useContext>?;  # The context that the content is 
+                                            # intended to support 
+    fhir:jurisdiction @<OneOrMore_TestScript.jurisdiction>?;  # Intended jurisdiction for test 
+                                            # script (if applicable) 
+    fhir:purpose @<TestScript.purpose>?;    # Why this test script is defined
+    fhir:copyright @<TestScript.copyright>?;  # Use and/or publishing restrictions
+    fhir:origin @<OneOrMore_TestScript.origin>?;  # An abstract server representing a 
+                                            # client or sender in a message 
+                                            # exchange 
+    fhir:destination @<OneOrMore_TestScript.destination>?;  # An abstract server representing a 
+                                            # destination or receiver in a 
+                                            # message exchange 
+    fhir:metadata @<TestScript.metadata>?;  # Required capability that is 
+                                            # assumed to function correctly on 
+                                            # the FHIR server being tested 
+    fhir:scope @<OneOrMore_TestScript.scope>?;  # Indication of the artifact(s) that 
+                                            # are tested by this test case 
+    fhir:fixture @<OneOrMore_TestScript.fixture>?;  # Fixture in the test script - by 
+                                            # reference (uri) 
+    fhir:profile @<OneOrMore_TestScript.profile_Resource>?;  # Reference of the validation profile
+    fhir:variable @<OneOrMore_TestScript.variable>?;  # Placeholder for evaluated elements
+    fhir:setup @<TestScript.setup>?;        # A series of required setup 
+                                            # operations before tests are 
+                                            # executed 
+    fhir:test @<OneOrMore_TestScript.test>?;  # A test in this script
+    fhir:teardown @<TestScript.teardown>?;  # A series of required clean up steps
+} AND (
+
+# Constraint: UniqueKey:cnl-0
+# Human readable:Name should be usable as an identifier for the module by machine processing applications such as code generation
+# XPath:not(exists(f:name/@value)) or matches(f:name/@value, '[A-Z]([A-Za-z0-9_]){0,254}')
+# Constraint:name.exists() implies name.matches('[A-Z]([A-Za-z0-9_]){0,254}')
+# ShEx:
+
+{ fhir:name . } AND { fhir:name { fhir:v /'[A-Z]([A-Za-z0-9_]){0,254}'/ }  }
+
+) AND (
+
+# Constraint: UniqueKey:tst-4
+# Human readable:TestScript metadata capability SHALL contain required or validated or both.
+# XPath:f:capability/f:required or f:capability/f:validated or (f:capability/f:required and f:capability/f:validated)
+# Constraint:capability.required.exists() or capability.validated.exists()
+# ShEx:
+
+{ fhir:capability.required . } OR { fhir:capability.validated . }
+
+) AND (
+
+# Constraint: UniqueKey:tst-3
+# Human readable:Variable can only contain one of expression, headerField or path.
+# XPath:not(f:expression and f:headerField and f:path)
+# Constraint:expression.empty() or headerField.empty() or path.empty()
+# ShEx:
+
+ NOT { fhir:expression {fhir:v .} }  OR  NOT { fhir:headerField {fhir:v .} }  OR  NOT { fhir:path {fhir:v .} } 
+
+) AND (
+
+# Constraint: UniqueKey:tst-1
+# Human readable:Setup action SHALL contain either an operation or assert but not both.
+# XPath:(f:operation or f:assert) and not(f:operation and f:assert)
+# Constraint:operation.exists() xor assert.exists()
+# ShEx:
+
+({ fhir:operation . } AND NOT  { fhir:assert . }) OR ( NOT { fhir:operation . } AND  { fhir:assert . })
+
+) AND (
+
+# Constraint: UniqueKey:tst-7
+# Human readable:Setup operation SHALL contain either sourceId or targetId or params or url.
+# XPath:f:sourceId or ((f:targetId or f:url or f:params) and (count(f:targetId) + count(f:url) + count(f:params) =1)) or (f:type/f:code/@value='capabilities' or f:type/f:code/@value='search' or f:type/f:code/@value='transaction' or f:type/f:code/@value='history')
+# Constraint:sourceId.exists() or (targetId.count() + url.count() + params.count() = 1) or (type.code in ('capabilities' |'search' | 'transaction' | 'history'))
+# ShEx:
+
+{ fhir:sourceId . } OR (( count( fhir:targetId ) SHEX_Plus_SHEX  count( fhir:url ) SHEX_Plus_SHEX  count( fhir:params )) { fhir:v [1] } ) OR ({ fhir:type.code } { fhir:v [('capabilities' | 'search' | 'transaction' | 'history')] } )
+
+) AND (
+
+# Constraint: UniqueKey:tst-12
+# Human readable:Setup action assert response and responseCode SHALL be empty when direction equals request
+# XPath:((count(f:response) + count(f:responseCode)) = 0 and (f:direction/@value='request')) or (count(f:direction) = 0) or (f:direction/@value='response')
+# Constraint:(response.empty() and responseCode.empty() and direction = 'request') or direction.empty() or direction = 'response'
+# ShEx:
+
+( NOT { fhir:response {fhir:v .} }  AND  NOT { fhir:responseCode {fhir:v .} }  AND ({ fhir:direction { fhir:v ['request'] }  })) OR  NOT { fhir:direction {fhir:v .} }  OR ({ fhir:direction { fhir:v ['response'] }  })
+
+) AND (
+
+# Constraint: UniqueKey:tst-5
+# Human readable:Only a single assertion SHALL be present within setup action assert element.
+# XPath:(count(f:contentType) + count(f:expression) + count(f:headerField) + count(f:minimumId) + count(f:navigationLinks) + count(f:path) + count(f:requestMethod) + count(f:resource) + count(f:responseCode) + count(f:response) + count(f:rule) + count(f:ruleset) + count(f:validateProfileId) <=1) or (((count(f:expression) + count(f:minimumId) <=2) or (count(f:expression) + count(f:validateProfileId) <=2)) and (count(f:expression) + count(f:path) <=1) and (count(f:minimumId) + count(f:validateProfileId) <=1)) or (((count(f:path) + count(f:minimumId) <=2) or (count(f:path) + count(f:validateProfileId) <=2)) and (count(f:expression) + count(f:path) <=1) and (count(f:minimumId) + count(f:validateProfileId) <=1))
+# Constraint:extension.exists() or (contentType.count() + expression.count() + headerField.count() + minimumId.count() + navigationLinks.count() + path.count() + requestMethod.count() + resource.count() + responseCode.count() + response.count() + validateProfileId.count() <=1) or (((expression.count() + minimumId.count() <=2) or (expression.count() + validateProfileId.count() <=2)) and (expression.count() + path.count() <=1) and (minimumId.count() + validateProfileId.count() <=1)) or (((path.count() + minimumId.count() <=2) or (path.count() + validateProfileId.count() <=2)) and (expression.count() + path.count() <=1) and (minimumId.count() + validateProfileId.count() <=1))
+# ShEx:
+
+{ fhir:extension . } OR (( count( fhir:contentType ) SHEX_Plus_SHEX  count( fhir:expression ) SHEX_Plus_SHEX  count( fhir:headerField ) SHEX_Plus_SHEX  count( fhir:minimumId ) SHEX_Plus_SHEX  count( fhir:navigationLinks ) SHEX_Plus_SHEX  count( fhir:path ) SHEX_Plus_SHEX  count( fhir:requestMethod ) SHEX_Plus_SHEX  count( fhir:resource ) SHEX_Plus_SHEX  count( fhir:responseCode ) SHEX_Plus_SHEX  count( fhir:response ) SHEX_Plus_SHEX  count( fhir:validateProfileId )) { fhir:v MaxInclusive 1 } ) OR (((( count( fhir:expression ) SHEX_Plus_SHEX  count( fhir:minimumId )) { fhir:v MaxInclusive 2 } ) OR (( count( fhir:expression ) SHEX_Plus_SHEX  count( fhir:validateProfileId )) { fhir:v MaxInclusive 2 } )) AND (( count( fhir:expression ) SHEX_Plus_SHEX  count( fhir:path )) { fhir:v MaxInclusive 1 } ) AND (( count( fhir:minimumId ) SHEX_Plus_SHEX  count( fhir:validateProfileId )) { fhir:v MaxInclusive 1 } )) OR (((( count( fhir:path ) SHEX_Plus_SHEX  count( fhir:minimumId )) { fhir:v MaxInclusive 2 } ) OR (( count( fhir:path ) SHEX_Plus_SHEX  count( fhir:validateProfileId )) { fhir:v MaxInclusive 2 } )) AND (( count( fhir:expression ) SHEX_Plus_SHEX  count( fhir:path )) { fhir:v MaxInclusive 1 } ) AND (( count( fhir:minimumId ) SHEX_Plus_SHEX  count( fhir:validateProfileId )) { fhir:v MaxInclusive 1 } ))
+
+) AND (
+
+# Constraint: UniqueKey:tst-10
+# Human readable:Setup action assert SHALL contain either compareToSourceId and compareToSourceExpression, compareToSourceId and compareToSourcePath or neither.
+# XPath:(f:compareToSourceId and f:compareToSourceExpression) or (f:compareToSourceId and f:compareToSourcePath) or not(f:compareToSourceId or f:compareToSourceExpression or f:compareToSourcePath)
+# Constraint:compareToSourceId.empty() xor (compareToSourceExpression.exists() or compareToSourcePath.exists())
+# ShEx:
+
+( NOT { fhir:compareToSourceId {fhir:v .} }  AND NOT  ({ fhir:compareToSourceExpression . } OR { fhir:compareToSourcePath . })) OR ( NOT  NOT { fhir:compareToSourceId {fhir:v .} }  AND  ({ fhir:compareToSourceExpression . } OR { fhir:compareToSourcePath . }))
+
+) AND (
+
+# Constraint: UniqueKey:tst-2
+# Human readable:Test action SHALL contain either an operation or assert but not both.
+# XPath:(f:operation or f:assert) and not(f:operation and f:assert)
+# Constraint:operation.exists() xor assert.exists()
+# ShEx:
+
+({ fhir:operation . } AND NOT  { fhir:assert . }) OR ( NOT { fhir:operation . } AND  { fhir:assert . })
+
+) AND (
+
+# Constraint: UniqueKey:tst-8
+# Human readable:Test operation SHALL contain either sourceId or targetId or params or url.
+# XPath:f:sourceId or (f:targetId or f:url or f:params) and (count(f:targetId) + count(f:url) + count(f:params) =1) or (f:type/f:code/@value='capabilities' or f:type/f:code/@value='search' or f:type/f:code/@value='transaction' or f:type/f:code/@value='history')
+# Constraint:sourceId.exists() or (targetId.count() + url.count() + params.count() = 1) or (type.code in ('capabilities' | 'search' | 'transaction' | 'history'))
+# ShEx:
+
+{ fhir:sourceId . } OR (( count( fhir:targetId ) SHEX_Plus_SHEX  count( fhir:url ) SHEX_Plus_SHEX  count( fhir:params )) { fhir:v [1] } ) OR ({ fhir:type.code } { fhir:v [('capabilities' | 'search' | 'transaction' | 'history')] } )
+
+) AND (
+
+# Constraint: UniqueKey:tst-11
+# Human readable:Test action assert SHALL contain either compareToSourceId and compareToSourceExpression, compareToSourceId and compareToSourcePath or neither.
+# XPath:(f:compareToSourceId and f:compareToSourceExpression) or (f:compareToSourceId and f:compareToSourcePath) or not(f:compareToSourceId or f:compareToSourceExpression or f:compareToSourcePath)
+# Constraint:compareToSourceId.empty() xor (compareToSourceExpression.exists() or compareToSourcePath.exists())
+# ShEx:
+
+( NOT { fhir:compareToSourceId {fhir:v .} }  AND NOT  ({ fhir:compareToSourceExpression . } OR { fhir:compareToSourcePath . })) OR ( NOT  NOT { fhir:compareToSourceId {fhir:v .} }  AND  ({ fhir:compareToSourceExpression . } OR { fhir:compareToSourcePath . }))
+
+) AND (
+
+# Constraint: UniqueKey:tst-13
+# Human readable:Test action assert response and response and responseCode SHALL be empty when direction equals request
+# XPath:((count(f:response) + count(f:responseCode)) = 0 and (f:direction/@value='request')) or (count(f:direction) = 0) or (f:direction/@value='response')
+# Constraint:(response.empty() and responseCode.empty() and direction = 'request') or direction.empty() or direction = 'response'
+# ShEx:
+
+( NOT { fhir:response {fhir:v .} }  AND  NOT { fhir:responseCode {fhir:v .} }  AND ({ fhir:direction { fhir:v ['request'] }  })) OR  NOT { fhir:direction {fhir:v .} }  OR ({ fhir:direction { fhir:v ['response'] }  })
+
+) AND (
+
+# Constraint: UniqueKey:tst-6
+# Human readable:Only a single assertion SHALL be present within test action assert element.
+# XPath:(count(f:contentType) + count(f:expression) + count(f:headerField) + count(f:minimumId) + count(f:navigationLinks) + count(f:path) + count(f:requestMethod) + count(f:resource) + count(f:responseCode) + count(f:response) + count(f:rule) + count(f:ruleset) + count(f:validateProfileId) <=1) or (((count(f:expression) + count(f:minimumId) <=2) or (count(f:expression) + count(f:validateProfileId) <=2)) and (count(f:expression) + count(f:path) <=1) and (count(f:minimumId) + count(f:validateProfileId) <=1)) or (((count(f:path) + count(f:minimumId) <=2) or (count(f:path) + count(f:validateProfileId) <=2)) and (count(f:expression) + count(f:path) <=1) and (count(f:minimumId) + count(f:validateProfileId) <=1))
+# Constraint:extension.exists() or (contentType.count() + expression.count() + headerField.count() + minimumId.count() + navigationLinks.count() + path.count() + requestMethod.count() + resource.count() + responseCode.count() + response.count() + validateProfileId.count() <=1) or (((expression.count() + minimumId.count() <=2) or (expression.count() + validateProfileId.count() <=2)) and (expression.count() + path.count() <=1) and (minimumId.count() + validateProfileId.count() <=1)) or (((path.count() + minimumId.count() <=2) or (path.count() + validateProfileId.count() <=2)) and (expression.count() + path.count() <=1) and (minimumId.count() + validateProfileId.count() <=1))
+# ShEx:
+
+{ fhir:extension . } OR (( count( fhir:contentType ) SHEX_Plus_SHEX  count( fhir:expression ) SHEX_Plus_SHEX  count( fhir:headerField ) SHEX_Plus_SHEX  count( fhir:minimumId ) SHEX_Plus_SHEX  count( fhir:navigationLinks ) SHEX_Plus_SHEX  count( fhir:path ) SHEX_Plus_SHEX  count( fhir:requestMethod ) SHEX_Plus_SHEX  count( fhir:resource ) SHEX_Plus_SHEX  count( fhir:responseCode ) SHEX_Plus_SHEX  count( fhir:response ) SHEX_Plus_SHEX  count( fhir:validateProfileId )) { fhir:v MaxInclusive 1 } ) OR (((( count( fhir:expression ) SHEX_Plus_SHEX  count( fhir:minimumId )) { fhir:v MaxInclusive 2 } ) OR (( count( fhir:expression ) SHEX_Plus_SHEX  count( fhir:validateProfileId )) { fhir:v MaxInclusive 2 } )) AND (( count( fhir:expression ) SHEX_Plus_SHEX  count( fhir:path )) { fhir:v MaxInclusive 1 } ) AND (( count( fhir:minimumId ) SHEX_Plus_SHEX  count( fhir:validateProfileId )) { fhir:v MaxInclusive 1 } )) OR (((( count( fhir:path ) SHEX_Plus_SHEX  count( fhir:minimumId )) { fhir:v MaxInclusive 2 } ) OR (( count( fhir:path ) SHEX_Plus_SHEX  count( fhir:validateProfileId )) { fhir:v MaxInclusive 2 } )) AND (( count( fhir:expression ) SHEX_Plus_SHEX  count( fhir:path )) { fhir:v MaxInclusive 1 } ) AND (( count( fhir:minimumId ) SHEX_Plus_SHEX  count( fhir:validateProfileId )) { fhir:v MaxInclusive 1 } ))
+
+) AND (
+
+# Constraint: UniqueKey:tst-9
+# Human readable:Teardown operation SHALL contain either sourceId or targetId or params or url.
+# XPath:f:sourceId or (f:targetId or f:url or (f:params and f:resource)) and (count(f:targetId) + count(f:url) + count(f:params) =1) or (f:type/f:code/@value='capabilities' or f:type/f:code/@value='search' or f:type/f:code/@value='transaction' or f:type/f:code/@value='history')
+# Constraint:sourceId.exists() or (targetId.count() + url.count() + params.count() = 1) or (type.code in ('capabilities' | 'search' | 'transaction' | 'history'))
+# ShEx:
+
+{ fhir:sourceId . } OR (( count( fhir:targetId ) SHEX_Plus_SHEX  count( fhir:url ) SHEX_Plus_SHEX  count( fhir:params )) { fhir:v [1] } ) OR ({ fhir:type.code } { fhir:v [('capabilities' | 'search' | 'transaction' | 'history')] } )
+
+)
+ 
+
+# An abstract server representing a destination or receiver in a message exchange
+<TestScript.destination> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:index @<TestScript.destination.index>;  # The index of the abstract 
+                                            # destination server starting at 1 
+    fhir:profile @<TestScript.destination.profile>;  # FHIR-Server | FHIR-SDC-FormManager 
+                                            # | FHIR-SDC-FormReceiver | 
+                                            # FHIR-SDC-FormProcessor 
+}  
+
+# Links to the FHIR specification
+<TestScript.metadata.link> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:url @<TestScript.metadata.link.url>;  # URL to the specification
+    fhir:description @<TestScript.metadata.link.description>?;  # Short description
+}  
+
+# A series of required setup operations before tests are executed
+<TestScript.setup> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:action @<OneOrMore_TestScript.setup.action>;  # A setup operation or assert to 
+                                            # perform 
+}  
+
+# A test in this script
+<TestScript.test> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:name @<TestScript.test.name>?;     # Tracking/logging name of this test
+    fhir:description @<TestScript.test.description>?;  # Tracking/reporting short 
+                                            # description of the test 
+    fhir:action @<OneOrMore_TestScript.test.action>;  # A test operation or assert to 
+                                            # perform 
+}  
+
+# Each operation can have one or more header elements
+<TestScript.setup.action.operation.requestHeader> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:field @<TestScript.setup.action.operation.requestHeader.field>;  # HTTP header field name
+    fhir:value @<TestScript.setup.action.operation.requestHeader.value>;  # HTTP headerfield value
+}  
+
+# A series of required clean up steps
+<TestScript.teardown> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:action @<OneOrMore_TestScript.teardown.action>;  # One or more teardown operations to 
+                                            # perform 
+}  
+
+# The assertion to perform
+<TestScript.setup.action.assert> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:label @<TestScript.setup.action.assert.label>?;  # Tracking/logging assertion label
+    fhir:description @<TestScript.setup.action.assert.description>?;  # Tracking/reporting assertion 
+                                            # description 
+    fhir:direction @<TestScript.setup.action.assert.direction>?;  # response | request
+    fhir:compareToSourceId @<TestScript.setup.action.assert.compareToSourceId>?;  # Id of the source fixture to be 
+                                            # evaluated 
+    fhir:compareToSourceExpression @<TestScript.setup.action.assert.compareToSourceExpression>?;  # The FHIRPath expression to 
+                                            # evaluate against the source 
+                                            # fixture 
+    fhir:compareToSourcePath @<TestScript.setup.action.assert.compareToSourcePath>?;  # XPath or JSONPath expression to 
+                                            # evaluate against the source 
+                                            # fixture 
+    fhir:contentType @<TestScript.setup.action.assert.contentType>?;  # Mime type to compare against the 
+                                            # 'Content-Type' header 
+    fhir:expression @<TestScript.setup.action.assert.expression>?;  # The FHIRPath expression to be 
+                                            # evaluated 
+    fhir:headerField @<TestScript.setup.action.assert.headerField>?;  # HTTP header field name
+    fhir:minimumId @<TestScript.setup.action.assert.minimumId>?;  # Fixture Id of minimum content 
+                                            # resource 
+    fhir:navigationLinks @<TestScript.setup.action.assert.navigationLinks>?;  # Perform validation on navigation 
+                                            # links? 
+    fhir:operator @<TestScript.setup.action.assert.operator>?;  # equals | notEquals | in | notIn | 
+                                            # greaterThan | lessThan | empty | 
+                                            # notEmpty | contains | notContains 
+                                            # | eval 
+    fhir:path @<TestScript.setup.action.assert.path>?;  # XPath or JSONPath expression
+    fhir:requestMethod @<TestScript.setup.action.assert.requestMethod>?;  # delete | get | options | patch | 
+                                            # post | put | head 
+    fhir:requestURL @<TestScript.setup.action.assert.requestURL>?;  # Request URL comparison value
+    fhir:resource @<TestScript.setup.action.assert.resource>?;  # Resource type
+    fhir:response @<TestScript.setup.action.assert.response>?;  # okay | created | noContent | 
+                                            # notModified | bad | forbidden | 
+                                            # notFound | methodNotAllowed | 
+                                            # conflict | gone | 
+                                            # preconditionFailed | unprocessable 
+    fhir:responseCode @<TestScript.setup.action.assert.responseCode>?;  # HTTP response code to test
+    fhir:sourceId @<TestScript.setup.action.assert.sourceId>?;  # Fixture Id of source expression or 
+                                            # headerField 
+    fhir:stopTestOnFail @<TestScript.setup.action.assert.stopTestOnFail>;  # If this assert fails, will the 
+                                            # current test execution stop? 
+    fhir:validateProfileId @<TestScript.setup.action.assert.validateProfileId>?;  # Profile Id of validation profile 
+                                            # reference 
+    fhir:value @<TestScript.setup.action.assert.value>?;  # The value to compare to
+    fhir:warningOnly @<TestScript.setup.action.assert.warningOnly>;  # Will this assert produce a warning 
+                                            # only on error? 
+}  
+
+# A setup operation or assert to perform
+<TestScript.setup.action> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:operation @<TestScript.setup.action.operation>?;  # The setup operation to perform
+    fhir:assert @<TestScript.setup.action.assert>?;  # The assertion to perform
+}  
+
+# An abstract server representing a client or sender in a message exchange
+<TestScript.origin> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:index @<TestScript.origin.index>;  # The index of the abstract origin 
+                                            # server starting at 1 
+    fhir:profile @<TestScript.origin.profile>;  # FHIR-Client | FHIR-SDC-FormFiller
+}  
+
+# The setup operation to perform
+<TestScript.setup.action.operation> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:type @<TestScript.setup.action.operation.type>?;  # The operation code type that will 
+                                            # be executed 
+    fhir:resource @<TestScript.setup.action.operation.resource>?;  # Resource type
+    fhir:label @<TestScript.setup.action.operation.label>?;  # Tracking/logging operation label
+    fhir:description @<TestScript.setup.action.operation.description>?;  # Tracking/reporting operation 
+                                            # description 
+    fhir:accept @<TestScript.setup.action.operation.accept>?;  # Mime type to accept in the payload 
+                                            # of the response, with charset etc. 
+    fhir:contentType @<TestScript.setup.action.operation.contentType>?;  # Mime type of the request payload 
+                                            # contents, with charset etc. 
+    fhir:destination @<TestScript.setup.action.operation.destination>?;  # Server responding to the request
+    fhir:encodeRequestUrl @<TestScript.setup.action.operation.encodeRequestUrl>;  # Whether or not to send the request 
+                                            # url in encoded format 
+    fhir:method @<TestScript.setup.action.operation.method>?;  # delete | get | options | patch | 
+                                            # post | put | head 
+    fhir:origin @<TestScript.setup.action.operation.origin>?;  # Server initiating the request
+    fhir:params @<TestScript.setup.action.operation.params>?;  # Explicitly defined path parameters
+    fhir:requestHeader @<OneOrMore_TestScript.setup.action.operation.requestHeader>?;  # Each operation can have one or 
+                                            # more header elements 
+    fhir:requestId @<TestScript.setup.action.operation.requestId>?;  # Fixture Id of mapped request
+    fhir:responseId @<TestScript.setup.action.operation.responseId>?;  # Fixture Id of mapped response
+    fhir:sourceId @<TestScript.setup.action.operation.sourceId>?;  # Fixture Id of body for PUT and 
+                                            # POST requests 
+    fhir:targetId @<TestScript.setup.action.operation.targetId>?;  # Id of fixture used for extracting 
+                                            # the [id],  [type], and [vid] for 
+                                            # GET requests 
+    fhir:url @<TestScript.setup.action.operation.url>?;  # Request URL
+}  
+
+# Capabilities  that are assumed to function correctly on the FHIR server being tested
+<TestScript.metadata.capability> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:required @<TestScript.metadata.capability.required>;  # Are the capabilities required?
+    fhir:validated @<TestScript.metadata.capability.validated>;  # Are the capabilities validated?
+    fhir:description @<TestScript.metadata.capability.description>?;  # The expected capabilities of the 
+                                            # server 
+    fhir:origin @<OneOrMore_TestScript.metadata.capability.origin>?;  # Which origin server these 
+                                            # requirements apply to 
+    fhir:destination @<TestScript.metadata.capability.destination>?;  # Which server these requirements 
+                                            # apply to 
+    fhir:link @<OneOrMore_TestScript.metadata.capability.link>?;  # Links to the FHIR specification
+    fhir:capabilities @<TestScript.metadata.capability.capabilities>;  # Required Capability Statement
+}  
+
+# Required capability that is assumed to function correctly on the FHIR server being tested
+<TestScript.metadata> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:link @<OneOrMore_TestScript.metadata.link>?;  # Links to the FHIR specification
+    fhir:capability @<OneOrMore_TestScript.metadata.capability>;  # Capabilities  that are assumed to 
+                                            # function correctly on the FHIR 
+                                            # server being tested 
+} AND (
+
+# Constraint: UniqueKey:cnl-0
+# Human readable:Name should be usable as an identifier for the module by machine processing applications such as code generation
+# XPath:not(exists(f:name/@value)) or matches(f:name/@value, '[A-Z]([A-Za-z0-9_]){0,254}')
+# Constraint:name.exists() implies name.matches('[A-Z]([A-Za-z0-9_]){0,254}')
+# ShEx:
+
+{ fhir:name . } AND { fhir:name { fhir:v /'[A-Z]([A-Za-z0-9_]){0,254}'/ }  }
+
+) AND (
+
+# Constraint: UniqueKey:tst-4
+# Human readable:TestScript metadata capability SHALL contain required or validated or both.
+# XPath:f:capability/f:required or f:capability/f:validated or (f:capability/f:required and f:capability/f:validated)
+# Constraint:capability.required.exists() or capability.validated.exists()
+# ShEx:
+
+{ fhir:capability.required . } OR { fhir:capability.validated . }
+
+) AND (
+
+# Constraint: UniqueKey:tst-3
+# Human readable:Variable can only contain one of expression, headerField or path.
+# XPath:not(f:expression and f:headerField and f:path)
+# Constraint:expression.empty() or headerField.empty() or path.empty()
+# ShEx:
+
+ NOT { fhir:expression {fhir:v .} }  OR  NOT { fhir:headerField {fhir:v .} }  OR  NOT { fhir:path {fhir:v .} } 
+
+) AND (
+
+# Constraint: UniqueKey:tst-1
+# Human readable:Setup action SHALL contain either an operation or assert but not both.
+# XPath:(f:operation or f:assert) and not(f:operation and f:assert)
+# Constraint:operation.exists() xor assert.exists()
+# ShEx:
+
+({ fhir:operation . } AND NOT  { fhir:assert . }) OR ( NOT { fhir:operation . } AND  { fhir:assert . })
+
+) AND (
+
+# Constraint: UniqueKey:tst-7
+# Human readable:Setup operation SHALL contain either sourceId or targetId or params or url.
+# XPath:f:sourceId or ((f:targetId or f:url or f:params) and (count(f:targetId) + count(f:url) + count(f:params) =1)) or (f:type/f:code/@value='capabilities' or f:type/f:code/@value='search' or f:type/f:code/@value='transaction' or f:type/f:code/@value='history')
+# Constraint:sourceId.exists() or (targetId.count() + url.count() + params.count() = 1) or (type.code in ('capabilities' |'search' | 'transaction' | 'history'))
+# ShEx:
+
+{ fhir:sourceId . } OR (( count( fhir:targetId ) SHEX_Plus_SHEX  count( fhir:url ) SHEX_Plus_SHEX  count( fhir:params )) { fhir:v [1] } ) OR ({ fhir:type.code } { fhir:v [('capabilities' | 'search' | 'transaction' | 'history')] } )
+
+) AND (
+
+# Constraint: UniqueKey:tst-12
+# Human readable:Setup action assert response and responseCode SHALL be empty when direction equals request
+# XPath:((count(f:response) + count(f:responseCode)) = 0 and (f:direction/@value='request')) or (count(f:direction) = 0) or (f:direction/@value='response')
+# Constraint:(response.empty() and responseCode.empty() and direction = 'request') or direction.empty() or direction = 'response'
+# ShEx:
+
+( NOT { fhir:response {fhir:v .} }  AND  NOT { fhir:responseCode {fhir:v .} }  AND ({ fhir:direction { fhir:v ['request'] }  })) OR  NOT { fhir:direction {fhir:v .} }  OR ({ fhir:direction { fhir:v ['response'] }  })
+
+) AND (
+
+# Constraint: UniqueKey:tst-5
+# Human readable:Only a single assertion SHALL be present within setup action assert element.
+# XPath:(count(f:contentType) + count(f:expression) + count(f:headerField) + count(f:minimumId) + count(f:navigationLinks) + count(f:path) + count(f:requestMethod) + count(f:resource) + count(f:responseCode) + count(f:response) + count(f:rule) + count(f:ruleset) + count(f:validateProfileId) <=1) or (((count(f:expression) + count(f:minimumId) <=2) or (count(f:expression) + count(f:validateProfileId) <=2)) and (count(f:expression) + count(f:path) <=1) and (count(f:minimumId) + count(f:validateProfileId) <=1)) or (((count(f:path) + count(f:minimumId) <=2) or (count(f:path) + count(f:validateProfileId) <=2)) and (count(f:expression) + count(f:path) <=1) and (count(f:minimumId) + count(f:validateProfileId) <=1))
+# Constraint:extension.exists() or (contentType.count() + expression.count() + headerField.count() + minimumId.count() + navigationLinks.count() + path.count() + requestMethod.count() + resource.count() + responseCode.count() + response.count() + validateProfileId.count() <=1) or (((expression.count() + minimumId.count() <=2) or (expression.count() + validateProfileId.count() <=2)) and (expression.count() + path.count() <=1) and (minimumId.count() + validateProfileId.count() <=1)) or (((path.count() + minimumId.count() <=2) or (path.count() + validateProfileId.count() <=2)) and (expression.count() + path.count() <=1) and (minimumId.count() + validateProfileId.count() <=1))
+# ShEx:
+
+{ fhir:extension . } OR (( count( fhir:contentType ) SHEX_Plus_SHEX  count( fhir:expression ) SHEX_Plus_SHEX  count( fhir:headerField ) SHEX_Plus_SHEX  count( fhir:minimumId ) SHEX_Plus_SHEX  count( fhir:navigationLinks ) SHEX_Plus_SHEX  count( fhir:path ) SHEX_Plus_SHEX  count( fhir:requestMethod ) SHEX_Plus_SHEX  count( fhir:resource ) SHEX_Plus_SHEX  count( fhir:responseCode ) SHEX_Plus_SHEX  count( fhir:response ) SHEX_Plus_SHEX  count( fhir:validateProfileId )) { fhir:v MaxInclusive 1 } ) OR (((( count( fhir:expression ) SHEX_Plus_SHEX  count( fhir:minimumId )) { fhir:v MaxInclusive 2 } ) OR (( count( fhir:expression ) SHEX_Plus_SHEX  count( fhir:validateProfileId )) { fhir:v MaxInclusive 2 } )) AND (( count( fhir:expression ) SHEX_Plus_SHEX  count( fhir:path )) { fhir:v MaxInclusive 1 } ) AND (( count( fhir:minimumId ) SHEX_Plus_SHEX  count( fhir:validateProfileId )) { fhir:v MaxInclusive 1 } )) OR (((( count( fhir:path ) SHEX_Plus_SHEX  count( fhir:minimumId )) { fhir:v MaxInclusive 2 } ) OR (( count( fhir:path ) SHEX_Plus_SHEX  count( fhir:validateProfileId )) { fhir:v MaxInclusive 2 } )) AND (( count( fhir:expression ) SHEX_Plus_SHEX  count( fhir:path )) { fhir:v MaxInclusive 1 } ) AND (( count( fhir:minimumId ) SHEX_Plus_SHEX  count( fhir:validateProfileId )) { fhir:v MaxInclusive 1 } ))
+
+) AND (
+
+# Constraint: UniqueKey:tst-10
+# Human readable:Setup action assert SHALL contain either compareToSourceId and compareToSourceExpression, compareToSourceId and compareToSourcePath or neither.
+# XPath:(f:compareToSourceId and f:compareToSourceExpression) or (f:compareToSourceId and f:compareToSourcePath) or not(f:compareToSourceId or f:compareToSourceExpression or f:compareToSourcePath)
+# Constraint:compareToSourceId.empty() xor (compareToSourceExpression.exists() or compareToSourcePath.exists())
+# ShEx:
+
+( NOT { fhir:compareToSourceId {fhir:v .} }  AND NOT  ({ fhir:compareToSourceExpression . } OR { fhir:compareToSourcePath . })) OR ( NOT  NOT { fhir:compareToSourceId {fhir:v .} }  AND  ({ fhir:compareToSourceExpression . } OR { fhir:compareToSourcePath . }))
+
+) AND (
+
+# Constraint: UniqueKey:tst-2
+# Human readable:Test action SHALL contain either an operation or assert but not both.
+# XPath:(f:operation or f:assert) and not(f:operation and f:assert)
+# Constraint:operation.exists() xor assert.exists()
+# ShEx:
+
+({ fhir:operation . } AND NOT  { fhir:assert . }) OR ( NOT { fhir:operation . } AND  { fhir:assert . })
+
+) AND (
+
+# Constraint: UniqueKey:tst-8
+# Human readable:Test operation SHALL contain either sourceId or targetId or params or url.
+# XPath:f:sourceId or (f:targetId or f:url or f:params) and (count(f:targetId) + count(f:url) + count(f:params) =1) or (f:type/f:code/@value='capabilities' or f:type/f:code/@value='search' or f:type/f:code/@value='transaction' or f:type/f:code/@value='history')
+# Constraint:sourceId.exists() or (targetId.count() + url.count() + params.count() = 1) or (type.code in ('capabilities' | 'search' | 'transaction' | 'history'))
+# ShEx:
+
+{ fhir:sourceId . } OR (( count( fhir:targetId ) SHEX_Plus_SHEX  count( fhir:url ) SHEX_Plus_SHEX  count( fhir:params )) { fhir:v [1] } ) OR ({ fhir:type.code } { fhir:v [('capabilities' | 'search' | 'transaction' | 'history')] } )
+
+) AND (
+
+# Constraint: UniqueKey:tst-11
+# Human readable:Test action assert SHALL contain either compareToSourceId and compareToSourceExpression, compareToSourceId and compareToSourcePath or neither.
+# XPath:(f:compareToSourceId and f:compareToSourceExpression) or (f:compareToSourceId and f:compareToSourcePath) or not(f:compareToSourceId or f:compareToSourceExpression or f:compareToSourcePath)
+# Constraint:compareToSourceId.empty() xor (compareToSourceExpression.exists() or compareToSourcePath.exists())
+# ShEx:
+
+( NOT { fhir:compareToSourceId {fhir:v .} }  AND NOT  ({ fhir:compareToSourceExpression . } OR { fhir:compareToSourcePath . })) OR ( NOT  NOT { fhir:compareToSourceId {fhir:v .} }  AND  ({ fhir:compareToSourceExpression . } OR { fhir:compareToSourcePath . }))
+
+) AND (
+
+# Constraint: UniqueKey:tst-13
+# Human readable:Test action assert response and response and responseCode SHALL be empty when direction equals request
+# XPath:((count(f:response) + count(f:responseCode)) = 0 and (f:direction/@value='request')) or (count(f:direction) = 0) or (f:direction/@value='response')
+# Constraint:(response.empty() and responseCode.empty() and direction = 'request') or direction.empty() or direction = 'response'
+# ShEx:
+
+( NOT { fhir:response {fhir:v .} }  AND  NOT { fhir:responseCode {fhir:v .} }  AND ({ fhir:direction { fhir:v ['request'] }  })) OR  NOT { fhir:direction {fhir:v .} }  OR ({ fhir:direction { fhir:v ['response'] }  })
+
+) AND (
+
+# Constraint: UniqueKey:tst-6
+# Human readable:Only a single assertion SHALL be present within test action assert element.
+# XPath:(count(f:contentType) + count(f:expression) + count(f:headerField) + count(f:minimumId) + count(f:navigationLinks) + count(f:path) + count(f:requestMethod) + count(f:resource) + count(f:responseCode) + count(f:response) + count(f:rule) + count(f:ruleset) + count(f:validateProfileId) <=1) or (((count(f:expression) + count(f:minimumId) <=2) or (count(f:expression) + count(f:validateProfileId) <=2)) and (count(f:expression) + count(f:path) <=1) and (count(f:minimumId) + count(f:validateProfileId) <=1)) or (((count(f:path) + count(f:minimumId) <=2) or (count(f:path) + count(f:validateProfileId) <=2)) and (count(f:expression) + count(f:path) <=1) and (count(f:minimumId) + count(f:validateProfileId) <=1))
+# Constraint:extension.exists() or (contentType.count() + expression.count() + headerField.count() + minimumId.count() + navigationLinks.count() + path.count() + requestMethod.count() + resource.count() + responseCode.count() + response.count() + validateProfileId.count() <=1) or (((expression.count() + minimumId.count() <=2) or (expression.count() + validateProfileId.count() <=2)) and (expression.count() + path.count() <=1) and (minimumId.count() + validateProfileId.count() <=1)) or (((path.count() + minimumId.count() <=2) or (path.count() + validateProfileId.count() <=2)) and (expression.count() + path.count() <=1) and (minimumId.count() + validateProfileId.count() <=1))
+# ShEx:
+
+{ fhir:extension . } OR (( count( fhir:contentType ) SHEX_Plus_SHEX  count( fhir:expression ) SHEX_Plus_SHEX  count( fhir:headerField ) SHEX_Plus_SHEX  count( fhir:minimumId ) SHEX_Plus_SHEX  count( fhir:navigationLinks ) SHEX_Plus_SHEX  count( fhir:path ) SHEX_Plus_SHEX  count( fhir:requestMethod ) SHEX_Plus_SHEX  count( fhir:resource ) SHEX_Plus_SHEX  count( fhir:responseCode ) SHEX_Plus_SHEX  count( fhir:response ) SHEX_Plus_SHEX  count( fhir:validateProfileId )) { fhir:v MaxInclusive 1 } ) OR (((( count( fhir:expression ) SHEX_Plus_SHEX  count( fhir:minimumId )) { fhir:v MaxInclusive 2 } ) OR (( count( fhir:expression ) SHEX_Plus_SHEX  count( fhir:validateProfileId )) { fhir:v MaxInclusive 2 } )) AND (( count( fhir:expression ) SHEX_Plus_SHEX  count( fhir:path )) { fhir:v MaxInclusive 1 } ) AND (( count( fhir:minimumId ) SHEX_Plus_SHEX  count( fhir:validateProfileId )) { fhir:v MaxInclusive 1 } )) OR (((( count( fhir:path ) SHEX_Plus_SHEX  count( fhir:minimumId )) { fhir:v MaxInclusive 2 } ) OR (( count( fhir:path ) SHEX_Plus_SHEX  count( fhir:validateProfileId )) { fhir:v MaxInclusive 2 } )) AND (( count( fhir:expression ) SHEX_Plus_SHEX  count( fhir:path )) { fhir:v MaxInclusive 1 } ) AND (( count( fhir:minimumId ) SHEX_Plus_SHEX  count( fhir:validateProfileId )) { fhir:v MaxInclusive 1 } ))
+
+) AND (
+
+# Constraint: UniqueKey:tst-9
+# Human readable:Teardown operation SHALL contain either sourceId or targetId or params or url.
+# XPath:f:sourceId or (f:targetId or f:url or (f:params and f:resource)) and (count(f:targetId) + count(f:url) + count(f:params) =1) or (f:type/f:code/@value='capabilities' or f:type/f:code/@value='search' or f:type/f:code/@value='transaction' or f:type/f:code/@value='history')
+# Constraint:sourceId.exists() or (targetId.count() + url.count() + params.count() = 1) or (type.code in ('capabilities' | 'search' | 'transaction' | 'history'))
+# ShEx:
+
+{ fhir:sourceId . } OR (( count( fhir:targetId ) SHEX_Plus_SHEX  count( fhir:url ) SHEX_Plus_SHEX  count( fhir:params )) { fhir:v [1] } ) OR ({ fhir:type.code } { fhir:v [('capabilities' | 'search' | 'transaction' | 'history')] } )
+
+)
+ 
+
+# A test operation or assert to perform
+<TestScript.test.action> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:operation @<TestScript.setup.action.operation>?;  # The setup operation to perform
+    fhir:assert @<TestScript.setup.action.assert>?;  # The setup assertion to perform
+}  
+
+# One or more teardown operations to perform
+<TestScript.teardown.action> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:operation @<TestScript.setup.action.operation>;  # The teardown operation to perform
+}  
+
+# Indication of the artifact(s) that are tested by this test case
+<TestScript.scope> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:artifact @<TestScript.scope.artifact>;  # The specific conformance artifact 
+                                            # being tested 
+    fhir:conformance @<TestScript.scope.conformance>?;  # required | optional | strict
+    fhir:phase @<TestScript.scope.phase>?;  # unit | integration | production
+}  
+
+# Placeholder for evaluated elements
+<TestScript.variable> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:name @<TestScript.variable.name>;  # Descriptive name for this variable
+    fhir:defaultValue @<TestScript.variable.defaultValue>?;  # Default, hard-coded, or 
+                                            # user-defined value for this 
+                                            # variable 
+    fhir:description @<TestScript.variable.description>?;  # Natural language description of 
+                                            # the variable 
+    fhir:expression @<TestScript.variable.expression>?;  # The FHIRPath expression against 
+                                            # the fixture body 
+    fhir:headerField @<TestScript.variable.headerField>?;  # HTTP header field name for source
+    fhir:hint @<TestScript.variable.hint>?;  # Hint help text for default value 
+                                            # to enter 
+    fhir:path @<TestScript.variable.path>?;  # XPath or JSONPath against the 
+                                            # fixture body 
+    fhir:sourceId @<TestScript.variable.sourceId>?;  # Fixture Id of source expression or 
+                                            # headerField within this variable 
+} AND (
+
+# Constraint: UniqueKey:cnl-0
+# Human readable:Name should be usable as an identifier for the module by machine processing applications such as code generation
+# XPath:not(exists(f:name/@value)) or matches(f:name/@value, '[A-Z]([A-Za-z0-9_]){0,254}')
+# Constraint:name.exists() implies name.matches('[A-Z]([A-Za-z0-9_]){0,254}')
+# ShEx:
+
+{ fhir:name . } AND { fhir:name { fhir:v /'[A-Z]([A-Za-z0-9_]){0,254}'/ }  }
+
+) AND (
+
+# Constraint: UniqueKey:tst-4
+# Human readable:TestScript metadata capability SHALL contain required or validated or both.
+# XPath:f:capability/f:required or f:capability/f:validated or (f:capability/f:required and f:capability/f:validated)
+# Constraint:capability.required.exists() or capability.validated.exists()
+# ShEx:
+
+{ fhir:capability.required . } OR { fhir:capability.validated . }
+
+) AND (
+
+# Constraint: UniqueKey:tst-3
+# Human readable:Variable can only contain one of expression, headerField or path.
+# XPath:not(f:expression and f:headerField and f:path)
+# Constraint:expression.empty() or headerField.empty() or path.empty()
+# ShEx:
+
+ NOT { fhir:expression {fhir:v .} }  OR  NOT { fhir:headerField {fhir:v .} }  OR  NOT { fhir:path {fhir:v .} } 
+
+) AND (
+
+# Constraint: UniqueKey:tst-1
+# Human readable:Setup action SHALL contain either an operation or assert but not both.
+# XPath:(f:operation or f:assert) and not(f:operation and f:assert)
+# Constraint:operation.exists() xor assert.exists()
+# ShEx:
+
+({ fhir:operation . } AND NOT  { fhir:assert . }) OR ( NOT { fhir:operation . } AND  { fhir:assert . })
+
+) AND (
+
+# Constraint: UniqueKey:tst-7
+# Human readable:Setup operation SHALL contain either sourceId or targetId or params or url.
+# XPath:f:sourceId or ((f:targetId or f:url or f:params) and (count(f:targetId) + count(f:url) + count(f:params) =1)) or (f:type/f:code/@value='capabilities' or f:type/f:code/@value='search' or f:type/f:code/@value='transaction' or f:type/f:code/@value='history')
+# Constraint:sourceId.exists() or (targetId.count() + url.count() + params.count() = 1) or (type.code in ('capabilities' |'search' | 'transaction' | 'history'))
+# ShEx:
+
+{ fhir:sourceId . } OR (( count( fhir:targetId ) SHEX_Plus_SHEX  count( fhir:url ) SHEX_Plus_SHEX  count( fhir:params )) { fhir:v [1] } ) OR ({ fhir:type.code } { fhir:v [('capabilities' | 'search' | 'transaction' | 'history')] } )
+
+) AND (
+
+# Constraint: UniqueKey:tst-12
+# Human readable:Setup action assert response and responseCode SHALL be empty when direction equals request
+# XPath:((count(f:response) + count(f:responseCode)) = 0 and (f:direction/@value='request')) or (count(f:direction) = 0) or (f:direction/@value='response')
+# Constraint:(response.empty() and responseCode.empty() and direction = 'request') or direction.empty() or direction = 'response'
+# ShEx:
+
+( NOT { fhir:response {fhir:v .} }  AND  NOT { fhir:responseCode {fhir:v .} }  AND ({ fhir:direction { fhir:v ['request'] }  })) OR  NOT { fhir:direction {fhir:v .} }  OR ({ fhir:direction { fhir:v ['response'] }  })
+
+) AND (
+
+# Constraint: UniqueKey:tst-5
+# Human readable:Only a single assertion SHALL be present within setup action assert element.
+# XPath:(count(f:contentType) + count(f:expression) + count(f:headerField) + count(f:minimumId) + count(f:navigationLinks) + count(f:path) + count(f:requestMethod) + count(f:resource) + count(f:responseCode) + count(f:response) + count(f:rule) + count(f:ruleset) + count(f:validateProfileId) <=1) or (((count(f:expression) + count(f:minimumId) <=2) or (count(f:expression) + count(f:validateProfileId) <=2)) and (count(f:expression) + count(f:path) <=1) and (count(f:minimumId) + count(f:validateProfileId) <=1)) or (((count(f:path) + count(f:minimumId) <=2) or (count(f:path) + count(f:validateProfileId) <=2)) and (count(f:expression) + count(f:path) <=1) and (count(f:minimumId) + count(f:validateProfileId) <=1))
+# Constraint:extension.exists() or (contentType.count() + expression.count() + headerField.count() + minimumId.count() + navigationLinks.count() + path.count() + requestMethod.count() + resource.count() + responseCode.count() + response.count() + validateProfileId.count() <=1) or (((expression.count() + minimumId.count() <=2) or (expression.count() + validateProfileId.count() <=2)) and (expression.count() + path.count() <=1) and (minimumId.count() + validateProfileId.count() <=1)) or (((path.count() + minimumId.count() <=2) or (path.count() + validateProfileId.count() <=2)) and (expression.count() + path.count() <=1) and (minimumId.count() + validateProfileId.count() <=1))
+# ShEx:
+
+{ fhir:extension . } OR (( count( fhir:contentType ) SHEX_Plus_SHEX  count( fhir:expression ) SHEX_Plus_SHEX  count( fhir:headerField ) SHEX_Plus_SHEX  count( fhir:minimumId ) SHEX_Plus_SHEX  count( fhir:navigationLinks ) SHEX_Plus_SHEX  count( fhir:path ) SHEX_Plus_SHEX  count( fhir:requestMethod ) SHEX_Plus_SHEX  count( fhir:resource ) SHEX_Plus_SHEX  count( fhir:responseCode ) SHEX_Plus_SHEX  count( fhir:response ) SHEX_Plus_SHEX  count( fhir:validateProfileId )) { fhir:v MaxInclusive 1 } ) OR (((( count( fhir:expression ) SHEX_Plus_SHEX  count( fhir:minimumId )) { fhir:v MaxInclusive 2 } ) OR (( count( fhir:expression ) SHEX_Plus_SHEX  count( fhir:validateProfileId )) { fhir:v MaxInclusive 2 } )) AND (( count( fhir:expression ) SHEX_Plus_SHEX  count( fhir:path )) { fhir:v MaxInclusive 1 } ) AND (( count( fhir:minimumId ) SHEX_Plus_SHEX  count( fhir:validateProfileId )) { fhir:v MaxInclusive 1 } )) OR (((( count( fhir:path ) SHEX_Plus_SHEX  count( fhir:minimumId )) { fhir:v MaxInclusive 2 } ) OR (( count( fhir:path ) SHEX_Plus_SHEX  count( fhir:validateProfileId )) { fhir:v MaxInclusive 2 } )) AND (( count( fhir:expression ) SHEX_Plus_SHEX  count( fhir:path )) { fhir:v MaxInclusive 1 } ) AND (( count( fhir:minimumId ) SHEX_Plus_SHEX  count( fhir:validateProfileId )) { fhir:v MaxInclusive 1 } ))
+
+) AND (
+
+# Constraint: UniqueKey:tst-10
+# Human readable:Setup action assert SHALL contain either compareToSourceId and compareToSourceExpression, compareToSourceId and compareToSourcePath or neither.
+# XPath:(f:compareToSourceId and f:compareToSourceExpression) or (f:compareToSourceId and f:compareToSourcePath) or not(f:compareToSourceId or f:compareToSourceExpression or f:compareToSourcePath)
+# Constraint:compareToSourceId.empty() xor (compareToSourceExpression.exists() or compareToSourcePath.exists())
+# ShEx:
+
+( NOT { fhir:compareToSourceId {fhir:v .} }  AND NOT  ({ fhir:compareToSourceExpression . } OR { fhir:compareToSourcePath . })) OR ( NOT  NOT { fhir:compareToSourceId {fhir:v .} }  AND  ({ fhir:compareToSourceExpression . } OR { fhir:compareToSourcePath . }))
+
+) AND (
+
+# Constraint: UniqueKey:tst-2
+# Human readable:Test action SHALL contain either an operation or assert but not both.
+# XPath:(f:operation or f:assert) and not(f:operation and f:assert)
+# Constraint:operation.exists() xor assert.exists()
+# ShEx:
+
+({ fhir:operation . } AND NOT  { fhir:assert . }) OR ( NOT { fhir:operation . } AND  { fhir:assert . })
+
+) AND (
+
+# Constraint: UniqueKey:tst-8
+# Human readable:Test operation SHALL contain either sourceId or targetId or params or url.
+# XPath:f:sourceId or (f:targetId or f:url or f:params) and (count(f:targetId) + count(f:url) + count(f:params) =1) or (f:type/f:code/@value='capabilities' or f:type/f:code/@value='search' or f:type/f:code/@value='transaction' or f:type/f:code/@value='history')
+# Constraint:sourceId.exists() or (targetId.count() + url.count() + params.count() = 1) or (type.code in ('capabilities' | 'search' | 'transaction' | 'history'))
+# ShEx:
+
+{ fhir:sourceId . } OR (( count( fhir:targetId ) SHEX_Plus_SHEX  count( fhir:url ) SHEX_Plus_SHEX  count( fhir:params )) { fhir:v [1] } ) OR ({ fhir:type.code } { fhir:v [('capabilities' | 'search' | 'transaction' | 'history')] } )
+
+) AND (
+
+# Constraint: UniqueKey:tst-11
+# Human readable:Test action assert SHALL contain either compareToSourceId and compareToSourceExpression, compareToSourceId and compareToSourcePath or neither.
+# XPath:(f:compareToSourceId and f:compareToSourceExpression) or (f:compareToSourceId and f:compareToSourcePath) or not(f:compareToSourceId or f:compareToSourceExpression or f:compareToSourcePath)
+# Constraint:compareToSourceId.empty() xor (compareToSourceExpression.exists() or compareToSourcePath.exists())
+# ShEx:
+
+( NOT { fhir:compareToSourceId {fhir:v .} }  AND NOT  ({ fhir:compareToSourceExpression . } OR { fhir:compareToSourcePath . })) OR ( NOT  NOT { fhir:compareToSourceId {fhir:v .} }  AND  ({ fhir:compareToSourceExpression . } OR { fhir:compareToSourcePath . }))
+
+) AND (
+
+# Constraint: UniqueKey:tst-13
+# Human readable:Test action assert response and response and responseCode SHALL be empty when direction equals request
+# XPath:((count(f:response) + count(f:responseCode)) = 0 and (f:direction/@value='request')) or (count(f:direction) = 0) or (f:direction/@value='response')
+# Constraint:(response.empty() and responseCode.empty() and direction = 'request') or direction.empty() or direction = 'response'
+# ShEx:
+
+( NOT { fhir:response {fhir:v .} }  AND  NOT { fhir:responseCode {fhir:v .} }  AND ({ fhir:direction { fhir:v ['request'] }  })) OR  NOT { fhir:direction {fhir:v .} }  OR ({ fhir:direction { fhir:v ['response'] }  })
+
+) AND (
+
+# Constraint: UniqueKey:tst-6
+# Human readable:Only a single assertion SHALL be present within test action assert element.
+# XPath:(count(f:contentType) + count(f:expression) + count(f:headerField) + count(f:minimumId) + count(f:navigationLinks) + count(f:path) + count(f:requestMethod) + count(f:resource) + count(f:responseCode) + count(f:response) + count(f:rule) + count(f:ruleset) + count(f:validateProfileId) <=1) or (((count(f:expression) + count(f:minimumId) <=2) or (count(f:expression) + count(f:validateProfileId) <=2)) and (count(f:expression) + count(f:path) <=1) and (count(f:minimumId) + count(f:validateProfileId) <=1)) or (((count(f:path) + count(f:minimumId) <=2) or (count(f:path) + count(f:validateProfileId) <=2)) and (count(f:expression) + count(f:path) <=1) and (count(f:minimumId) + count(f:validateProfileId) <=1))
+# Constraint:extension.exists() or (contentType.count() + expression.count() + headerField.count() + minimumId.count() + navigationLinks.count() + path.count() + requestMethod.count() + resource.count() + responseCode.count() + response.count() + validateProfileId.count() <=1) or (((expression.count() + minimumId.count() <=2) or (expression.count() + validateProfileId.count() <=2)) and (expression.count() + path.count() <=1) and (minimumId.count() + validateProfileId.count() <=1)) or (((path.count() + minimumId.count() <=2) or (path.count() + validateProfileId.count() <=2)) and (expression.count() + path.count() <=1) and (minimumId.count() + validateProfileId.count() <=1))
+# ShEx:
+
+{ fhir:extension . } OR (( count( fhir:contentType ) SHEX_Plus_SHEX  count( fhir:expression ) SHEX_Plus_SHEX  count( fhir:headerField ) SHEX_Plus_SHEX  count( fhir:minimumId ) SHEX_Plus_SHEX  count( fhir:navigationLinks ) SHEX_Plus_SHEX  count( fhir:path ) SHEX_Plus_SHEX  count( fhir:requestMethod ) SHEX_Plus_SHEX  count( fhir:resource ) SHEX_Plus_SHEX  count( fhir:responseCode ) SHEX_Plus_SHEX  count( fhir:response ) SHEX_Plus_SHEX  count( fhir:validateProfileId )) { fhir:v MaxInclusive 1 } ) OR (((( count( fhir:expression ) SHEX_Plus_SHEX  count( fhir:minimumId )) { fhir:v MaxInclusive 2 } ) OR (( count( fhir:expression ) SHEX_Plus_SHEX  count( fhir:validateProfileId )) { fhir:v MaxInclusive 2 } )) AND (( count( fhir:expression ) SHEX_Plus_SHEX  count( fhir:path )) { fhir:v MaxInclusive 1 } ) AND (( count( fhir:minimumId ) SHEX_Plus_SHEX  count( fhir:validateProfileId )) { fhir:v MaxInclusive 1 } )) OR (((( count( fhir:path ) SHEX_Plus_SHEX  count( fhir:minimumId )) { fhir:v MaxInclusive 2 } ) OR (( count( fhir:path ) SHEX_Plus_SHEX  count( fhir:validateProfileId )) { fhir:v MaxInclusive 2 } )) AND (( count( fhir:expression ) SHEX_Plus_SHEX  count( fhir:path )) { fhir:v MaxInclusive 1 } ) AND (( count( fhir:minimumId ) SHEX_Plus_SHEX  count( fhir:validateProfileId )) { fhir:v MaxInclusive 1 } ))
+
+) AND (
+
+# Constraint: UniqueKey:tst-9
+# Human readable:Teardown operation SHALL contain either sourceId or targetId or params or url.
+# XPath:f:sourceId or (f:targetId or f:url or (f:params and f:resource)) and (count(f:targetId) + count(f:url) + count(f:params) =1) or (f:type/f:code/@value='capabilities' or f:type/f:code/@value='search' or f:type/f:code/@value='transaction' or f:type/f:code/@value='history')
+# Constraint:sourceId.exists() or (targetId.count() + url.count() + params.count() = 1) or (type.code in ('capabilities' | 'search' | 'transaction' | 'history'))
+# ShEx:
+
+{ fhir:sourceId . } OR (( count( fhir:targetId ) SHEX_Plus_SHEX  count( fhir:url ) SHEX_Plus_SHEX  count( fhir:params )) { fhir:v [1] } ) OR ({ fhir:type.code } { fhir:v [('capabilities' | 'search' | 'transaction' | 'history')] } )
+
+)
+ 
+
+# Fixture in the test script - by reference (uri)
+<TestScript.fixture> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:autocreate @<TestScript.fixture.autocreate>;  # Whether or not to implicitly 
+                                            # create the fixture during setup 
+    fhir:autodelete @<TestScript.fixture.autodelete>;  # Whether or not to implicitly 
+                                            # delete the fixture during teardown 
+    fhir:resource @<TestScript.fixture.resource> AND {fhir:link 
+    			@<Resource> }?;  # Reference of the resource
+}  
+
+#---------------------- Data Types -------------------
+
+#---------------------- Cardinality Types (OneOrMore) -------------------
+
+<OneOrMore_TestScript.identifier> CLOSED {
+    rdf:first @<TestScript.identifier>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_TestScript.identifier> 
+}
+
+<OneOrMore_TestScript.contact> CLOSED {
+    rdf:first @<TestScript.contact>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_TestScript.contact> 
+}
+
+<OneOrMore_TestScript.useContext> CLOSED {
+    rdf:first @<TestScript.useContext>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_TestScript.useContext> 
+}
+
+<OneOrMore_TestScript.jurisdiction> CLOSED {
+    rdf:first @<TestScript.jurisdiction>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_TestScript.jurisdiction> 
+}
+
+<OneOrMore_TestScript.origin> CLOSED {
+    rdf:first @<TestScript.origin>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_TestScript.origin> 
+}
+
+<OneOrMore_TestScript.destination> CLOSED {
+    rdf:first @<TestScript.destination>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_TestScript.destination> 
+}
+
+<OneOrMore_TestScript.scope> CLOSED {
+    rdf:first @<TestScript.scope>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_TestScript.scope> 
+}
+
+<OneOrMore_TestScript.fixture> CLOSED {
+    rdf:first @<TestScript.fixture>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_TestScript.fixture> 
+}
+
+<OneOrMore_TestScript.profile_Resource> CLOSED {
+    rdf:first @<TestScript.profile> AND {fhir:link 
+			@<Resource> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_TestScript.profile_Resource> 
+}
+
+<OneOrMore_TestScript.variable> CLOSED {
+    rdf:first @<TestScript.variable>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_TestScript.variable> 
+}
+
+<OneOrMore_TestScript.test> CLOSED {
+    rdf:first @<TestScript.test>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_TestScript.test> 
+}
+
+<OneOrMore_TestScript.setup.action> CLOSED {
+    rdf:first @<TestScript.setup.action>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_TestScript.setup.action> 
+}
+
+<OneOrMore_TestScript.test.action> CLOSED {
+    rdf:first @<TestScript.test.action>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_TestScript.test.action> 
+}
+
+<OneOrMore_TestScript.teardown.action> CLOSED {
+    rdf:first @<TestScript.teardown.action>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_TestScript.teardown.action> 
+}
+
+<OneOrMore_TestScript.setup.action.operation.requestHeader> CLOSED {
+    rdf:first @<TestScript.setup.action.operation.requestHeader>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_TestScript.setup.action.operation.requestHeader> 
+}
+
+<OneOrMore_TestScript.metadata.capability.origin> CLOSED {
+    rdf:first @<TestScript.metadata.capability.origin>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_TestScript.metadata.capability.origin> 
+}
+
+<OneOrMore_TestScript.metadata.capability.link> CLOSED {
+    rdf:first @<TestScript.metadata.capability.link>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_TestScript.metadata.capability.link> 
+}
+
+<OneOrMore_TestScript.metadata.link> CLOSED {
+    rdf:first @<TestScript.metadata.link>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_TestScript.metadata.link> 
+}
+
+<OneOrMore_TestScript.metadata.capability> CLOSED {
+    rdf:first @<TestScript.metadata.capability>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_TestScript.metadata.capability> 
+}
+
+#---------------------- Reference Types -------------------
+
+#---------------------- Value Sets ------------------------

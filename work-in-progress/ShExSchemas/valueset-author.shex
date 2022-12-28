@@ -1,0 +1,40 @@
+﻿PREFIX fhir: <http://hl7.org/fhir/> 
+PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+BASE <http://hl7.org/fhir/shape/>
+
+
+# Entity/entities that create and may modify the Value Set
+<valueset-author> EXTENDS @<Extension> CLOSED {   
+
+    a [fhir:valueset-author];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v @<Extension.url> AND
+    	{fhir:value ["http://hl7.org/fhir/StructureDefinition/valueset-author"]}; 
+    fhir:value (@<ContactDetail> )  AND { rdf:type IRI } ; 
+    ^fhir:extension { a [fhir:ValueSet]
+    		}
+}  
+
+#---------------------- Data Types -------------------
+
+# Contact information
+<ContactDetail> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:ContactDetail];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:name @<ContactDetail.name>?;       # Name of an individual to contact
+    fhir:telecom @<OneOrMore_ContactDetail.telecom>?;  # Contact details for individual or 
+                                            # organization 
+}  
+
+#---------------------- Cardinality Types (OneOrMore) -------------------
+
+<OneOrMore_ContactDetail.telecom> CLOSED {
+    rdf:first @<ContactDetail.telecom>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ContactDetail.telecom> 
+}
+
+#---------------------- Reference Types -------------------
+
+#---------------------- Value Sets ------------------------

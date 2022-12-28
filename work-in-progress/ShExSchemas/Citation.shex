@@ -1,0 +1,543 @@
+﻿PREFIX fhir: <http://hl7.org/fhir/> 
+PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+BASE <http://hl7.org/fhir/shape/>
+
+
+start=@<Citation> AND {fhir:nodeRole [fhir:treeRoot]}
+
+
+# A description of identification, location, or contributorship of a publication (article or artifact)
+<Citation> EXTENDS @<MetadataResource> CLOSED {   
+
+    a [fhir:Citation];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:url @<Citation.url>?;              # Canonical identifier for this 
+                                            # citation, represented as a 
+                                            # globally unique URI 
+    fhir:identifier @<OneOrMore_Citation.identifier>?;  # Identifier for the Citation 
+                                            # resource itself 
+    fhir:version @<Citation.version>?;      # Business version of the citation
+    fhir:name @<Citation.name>?;            # Name for this citation (computer 
+                                            # friendly) 
+    fhir:title @<Citation.title>?;          # Name for this citation (human 
+                                            # friendly) 
+    fhir:status @<Citation.status>;         # draft | active | retired | unknown
+    fhir:experimental @<Citation.experimental>?;  # For testing purposes, not real 
+                                            # usage 
+    fhir:date @<Citation.date>?;            # Date last changed
+    fhir:publisher @<Citation.publisher>?;  # The publisher of the Citation, not 
+                                            # the publisher of the article or 
+                                            # artifact being cited 
+    fhir:contact @<OneOrMore_Citation.contact>?;  # Contact details for the publisher 
+                                            # of the Citation Resource 
+    fhir:description @<Citation.description>?;  # Natural language description of 
+                                            # the citation 
+    fhir:useContext @<OneOrMore_Citation.useContext>?;  # The context that the Citation 
+                                            # Resource content is intended to 
+                                            # support 
+    fhir:jurisdiction @<OneOrMore_Citation.jurisdiction>?;  # Intended jurisdiction for citation 
+                                            # (if applicable) 
+    fhir:purpose @<Citation.purpose>?;      # Why this citation is defined
+    fhir:copyright @<Citation.copyright>?;  # Use and/or publishing restrictions 
+                                            # for the Citation, not for the 
+                                            # cited artifact 
+    fhir:approvalDate @<Citation.approvalDate>?;  # When the citation was approved by 
+                                            # publisher 
+    fhir:lastReviewDate @<Citation.lastReviewDate>?;  # When the citation was last reviewed
+    fhir:effectivePeriod @<Citation.effectivePeriod>?;  # When the citation is expected to 
+                                            # be used 
+    fhir:author @<OneOrMore_Citation.author>?;  # Who authored the Citation
+    fhir:editor @<OneOrMore_Citation.editor>?;  # Who edited the Citation
+    fhir:reviewer @<OneOrMore_Citation.reviewer>?;  # Who reviewed the Citation
+    fhir:endorser @<OneOrMore_Citation.endorser>?;  # Who endorsed the Citation
+    fhir:summary @<OneOrMore_Citation.summary>?;  # A human-readable display of the 
+                                            # citation 
+    fhir:classification @<OneOrMore_Citation.classification>?;  # The assignment to an organizing 
+                                            # scheme 
+    fhir:note @<OneOrMore_Citation.note>?;  # Used for general notes and 
+                                            # annotations not coded elsewhere 
+    fhir:currentState @<OneOrMore_Citation.currentState>?;  # The status of the citation
+    fhir:statusDate @<OneOrMore_Citation.statusDate>?;  # An effective date or period for a 
+                                            # status of the citation 
+    fhir:relatedArtifact @<OneOrMore_Citation.relatedArtifact>?;  # Artifact related to the Citation 
+                                            # Resource 
+    fhir:citedArtifact @<Citation.citedArtifact>?;  # The article or artifact being 
+                                            # described 
+} AND (
+
+# Constraint: UniqueKey:cnl-0
+# Human readable:Name should be usable as an identifier for the module by machine processing applications such as code generation
+# XPath:not(exists(f:name/@value)) or matches(f:name/@value, '[A-Z]([A-Za-z0-9_]){0,254}')
+# Constraint:name.exists() implies name.matches('[A-Z]([A-Za-z0-9_]){0,254}')
+# ShEx:
+
+{ fhir:name . } AND { fhir:name { fhir:v /'[A-Z]([A-Za-z0-9_]){0,254}'/ }  }
+
+)
+ 
+
+# Defining the date on which the issue of the journal was published
+<Citation.citedArtifact.publicationForm.periodicRelease.dateOfPublication> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:date @<Citation.citedArtifact.publicationForm.periodicRelease.dateOfPublication.date>?;  # Date on which the issue of the 
+                                            # journal was published 
+    fhir:year @<Citation.citedArtifact.publicationForm.periodicRelease.dateOfPublication.year>?;  # Year on which the issue of the 
+                                            # journal was published 
+    fhir:month @<Citation.citedArtifact.publicationForm.periodicRelease.dateOfPublication.month>?;  # Month on which the issue of the 
+                                            # journal was published 
+    fhir:day @<Citation.citedArtifact.publicationForm.periodicRelease.dateOfPublication.day>?;  # Day on which the issue of the 
+                                            # journal was published 
+    fhir:season @<Citation.citedArtifact.publicationForm.periodicRelease.dateOfPublication.season>?;  # Season on which the issue of the 
+                                            # journal was published 
+    fhir:text @<Citation.citedArtifact.publicationForm.periodicRelease.dateOfPublication.text>?;  # Text representation of the date of 
+                                            # which the issue of the journal was 
+                                            # published 
+}  
+
+# The assignment to an organizing scheme
+<Citation.classification> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:type @<Citation.classification.type>?;  # The kind of classifier (e.g. 
+                                            # publication type, keyword) 
+    fhir:classifier @<OneOrMore_Citation.classification.classifier>?;  # The specific classification value
+}  
+
+# Used to record a display of the author/contributor list without separate coding for each list member
+<Citation.citedArtifact.contributorship.summary> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:type @<Citation.citedArtifact.contributorship.summary.type>?;  # Either authorList or 
+                                            # contributorshipStatement 
+    fhir:style @<Citation.citedArtifact.contributorship.summary.style>?;  # The format for the display string
+    fhir:source @<Citation.citedArtifact.contributorship.summary.source>?;  # Used to code the producer or rule 
+                                            # for creating the display string 
+    fhir:value @<Citation.citedArtifact.contributorship.summary.value>;  # The display string for the author 
+                                            # list, contributor list, or 
+                                            # contributorship statement 
+}  
+
+# The article or artifact being described
+<Citation.citedArtifact> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:identifier @<OneOrMore_Citation.citedArtifact.identifier>?;  # May include DOI, PMID, PMCID, etc.
+    fhir:relatedIdentifier @<OneOrMore_Citation.citedArtifact.relatedIdentifier>?;  # May include trial registry 
+                                            # identifiers 
+    fhir:dateAccessed @<Citation.citedArtifact.dateAccessed>?;  # When the cited artifact was 
+                                            # accessed 
+    fhir:version @<Citation.citedArtifact.version>?;  # The defined version of the cited 
+                                            # artifact 
+    fhir:currentState @<OneOrMore_Citation.citedArtifact.currentState>?;  # The status of the cited artifact
+    fhir:statusDate @<OneOrMore_Citation.citedArtifact.statusDate>?;  # An effective date or period for a 
+                                            # status of the cited artifact 
+    fhir:title @<OneOrMore_Citation.citedArtifact.title>?;  # The title details of the article 
+                                            # or artifact 
+    fhir:abstract @<OneOrMore_Citation.citedArtifact.abstract>?;  # Summary of the article or artifact
+    fhir:part @<Citation.citedArtifact.part>?;  # The component of the article or 
+                                            # artifact 
+    fhir:relatesTo @<OneOrMore_Citation.citedArtifact.relatesTo>?;  # The artifact related to the cited 
+                                            # artifact 
+    fhir:publicationForm @<OneOrMore_Citation.citedArtifact.publicationForm>?;  # If multiple, used to represent 
+                                            # alternative forms of the article 
+                                            # that are not separate citations 
+    fhir:webLocation @<OneOrMore_Citation.citedArtifact.webLocation>?;  # Used for any URL for the article 
+                                            # or artifact cited 
+    fhir:classification @<OneOrMore_Citation.citedArtifact.classification>?;  # The assignment to an organizing 
+                                            # scheme 
+    fhir:contributorship @<Citation.citedArtifact.contributorship>?;  # Attribution of authors and other 
+                                            # contributors 
+    fhir:note @<OneOrMore_Citation.citedArtifact.note>?;  # Any additional information or 
+                                            # content for the article or 
+                                            # artifact 
+}  
+
+# Summary of the article or artifact
+<Citation.citedArtifact.abstract> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:type @<Citation.citedArtifact.abstract.type>?;  # The kind of abstract
+    fhir:language @<Citation.citedArtifact.abstract.language>?;  # Used to express the specific 
+                                            # language 
+    fhir:text @<Citation.citedArtifact.abstract.text>;  # Abstract content
+    fhir:copyright @<Citation.citedArtifact.abstract.copyright>?;  # Copyright notice for the abstract
+}  
+
+# An effective date or period for a status of the cited artifact
+<Citation.citedArtifact.statusDate> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:activity @<Citation.citedArtifact.statusDate.activity>;  # Classification of the status
+    fhir:actual @<Citation.citedArtifact.statusDate.actual>?;  # Either occurred or expected
+    fhir:period @<Citation.citedArtifact.statusDate.period>;  # When the status started and/or 
+                                            # ended 
+}  
+
+# The assignment to an organizing scheme
+<Citation.citedArtifact.classification> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:type @<Citation.citedArtifact.classification.type>?;  # The kind of classifier (e.g. 
+                                            # publication type, keyword) 
+    fhir:classifier @<OneOrMore_Citation.citedArtifact.classification.classifier>?;  # The specific classification value
+    fhir:artifactAssessment @<OneOrMore_Citation.citedArtifact.classification.artifactAssessment_ArtifactAssessment>?;  # Complex or externally created 
+                                            # classification 
+}  
+
+# A human-readable display of the citation
+<Citation.summary> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:style @<Citation.summary.style>?;  # Format for display of the citation
+    fhir:text @<Citation.summary.text>;     # The human-readable display of the 
+                                            # citation 
+}  
+
+# The component of the article or artifact
+<Citation.citedArtifact.part> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:type @<Citation.citedArtifact.part.type>?;  # The kind of component
+    fhir:value @<Citation.citedArtifact.part.value>?;  # The specification of the component
+    fhir:baseCitation @<Citation.citedArtifact.part.baseCitation> AND {fhir:link 
+    			@<Citation> }?;  # The citation for the full article 
+                                            # or artifact 
+}  
+
+# Attribution of authors and other contributors
+<Citation.citedArtifact.contributorship> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:complete @<Citation.citedArtifact.contributorship.complete>?;  # Indicates if the list includes all 
+                                            # authors and/or contributors 
+    fhir:entry @<OneOrMore_Citation.citedArtifact.contributorship.entry>?;  # An individual entity named in the 
+                                            # list 
+    fhir:summary @<OneOrMore_Citation.citedArtifact.contributorship.summary>?;  # Used to record a display of the 
+                                            # author/contributor list without 
+                                            # separate coding for each list 
+                                            # member 
+}  
+
+# An effective date or period for a status of the citation
+<Citation.statusDate> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:activity @<Citation.statusDate.activity>;  # Classification of the status
+    fhir:actual @<Citation.statusDate.actual>?;  # Either occurred or expected
+    fhir:period @<Citation.statusDate.period>;  # When the status started and/or 
+                                            # ended 
+}  
+
+# If multiple, used to represent alternative forms of the article that are not separate citations
+<Citation.citedArtifact.publicationForm> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:publishedIn @<Citation.citedArtifact.publicationForm.publishedIn>?;  # The collection the cited article 
+                                            # or artifact is published in 
+    fhir:periodicRelease @<Citation.citedArtifact.publicationForm.periodicRelease>?;  # The specific issue in which the 
+                                            # cited article resides 
+    fhir:articleDate @<Citation.citedArtifact.publicationForm.articleDate>?;  # The date the article was added to 
+                                            # the database, or the date the 
+                                            # article was released 
+    fhir:lastRevisionDate @<Citation.citedArtifact.publicationForm.lastRevisionDate>?;  # The date the article was last 
+                                            # revised or updated in the database 
+    fhir:language @<OneOrMore_Citation.citedArtifact.publicationForm.language>?;  # Language in which this form of the 
+                                            # article is published 
+    fhir:accessionNumber @<Citation.citedArtifact.publicationForm.accessionNumber>?;  # Entry number or identifier for 
+                                            # inclusion in a database 
+    fhir:pageString @<Citation.citedArtifact.publicationForm.pageString>?;  # Used for full display of pagination
+    fhir:firstPage @<Citation.citedArtifact.publicationForm.firstPage>?;  # Used for isolated representation 
+                                            # of first page 
+    fhir:lastPage @<Citation.citedArtifact.publicationForm.lastPage>?;  # Used for isolated representation 
+                                            # of last page 
+    fhir:pageCount @<Citation.citedArtifact.publicationForm.pageCount>?;  # Number of pages or screens
+    fhir:copyright @<Citation.citedArtifact.publicationForm.copyright>?;  # Copyright notice for the full 
+                                            # article or artifact 
+}  
+
+# The defined version of the cited artifact
+<Citation.citedArtifact.version> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:value @<Citation.citedArtifact.version.value>;  # The version number or other 
+                                            # version identifier 
+    fhir:baseCitation @<Citation.citedArtifact.version.baseCitation> AND {fhir:link 
+    			@<Citation> }?;  # Citation for the main version of 
+                                            # the cited artifact 
+}  
+
+# The artifact related to the cited artifact
+<Citation.citedArtifact.relatesTo> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:type @<Citation.citedArtifact.relatesTo.type>;  # documentation | justification | 
+                                            # predecessor | successor | 
+                                            # derived-from | depends-on | 
+                                            # composed-of | part-of | amends | 
+                                            # amended-with | appends | 
+                                            # appended-with | cites | cited-by | 
+                                            # comments-on | comment-in | 
+                                            # contains | contained-in | corrects 
+                                            # | correction-in | replaces | 
+                                            # replaced-with | retracts | 
+                                            # retracted-by | signs | similar-to 
+                                            # | supports | supported-with | 
+                                            # transforms | transformed-into | 
+                                            # transformed-with | cite-as | 
+                                            # created-with | documents | reprint 
+                                            # | reprint-of | specification-of 
+    fhir:classifier @<OneOrMore_Citation.citedArtifact.relatesTo.classifier>?;  # Additional classifiers
+    fhir:label @<Citation.citedArtifact.relatesTo.label>?;  # Short label
+    fhir:display @<Citation.citedArtifact.relatesTo.display>?;  # Brief description of the related 
+                                            # artifact 
+    fhir:citation @<Citation.citedArtifact.relatesTo.citation>?;  # Bibliographic citation for the 
+                                            # artifact 
+    fhir:document @<Citation.citedArtifact.relatesTo.document>?;  # What document is being referenced
+    fhir:resource @<Citation.citedArtifact.relatesTo.resource>?;  # What artifact is being referenced
+    fhir:resourceReference @<Citation.citedArtifact.relatesTo.resourceReference>?;  # What artifact, if not a 
+                                            # conformance resource 
+}  
+
+# The collection the cited article or artifact is published in
+<Citation.citedArtifact.publicationForm.publishedIn> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:type @<Citation.citedArtifact.publicationForm.publishedIn.type>?;  # Kind of container (e.g. 
+                                            # Periodical, database, or book) 
+    fhir:identifier @<OneOrMore_Citation.citedArtifact.publicationForm.publishedIn.identifier>?;  # Journal identifiers include ISSN, 
+                                            # ISO Abbreviation and NLMuniqueID; 
+                                            # Book identifiers include ISBN 
+    fhir:title @<Citation.citedArtifact.publicationForm.publishedIn.title>?;  # Name of the database or title of 
+                                            # the book or journal 
+    fhir:publisher @<Citation.citedArtifact.publicationForm.publishedIn.publisher> AND {fhir:link 
+    			@<Organization> }?;  # Name of the publisher
+    fhir:publisherLocation @<Citation.citedArtifact.publicationForm.publishedIn.publisherLocation>?;  # Geographic location of the 
+                                            # publisher 
+}  
+
+# Used for any URL for the article or artifact cited
+<Citation.citedArtifact.webLocation> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:classifier @<OneOrMore_Citation.citedArtifact.webLocation.classifier>?;  # Code the reason for different 
+                                            # URLs, e.g. abstract and full-text 
+    fhir:url @<Citation.citedArtifact.webLocation.url>?;  # The specific URL
+}  
+
+# An individual entity named in the list
+<Citation.citedArtifact.contributorship.entry> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:contributor @<Citation.citedArtifact.contributorship.entry.contributor> AND {fhir:link 
+    			@<Organization> OR 
+    			@<Practitioner> };  # The identity of the individual 
+                                            # entity 
+    fhir:forenameInitials @<Citation.citedArtifact.contributorship.entry.forenameInitials>?;  # Initials for forename
+    fhir:affiliation @<OneOrMore_Citation.citedArtifact.contributorship.entry.affiliation_Organization_OR_PractitionerRole>?;  # Organizational affiliation
+    fhir:contributionType @<OneOrMore_Citation.citedArtifact.contributorship.entry.contributionType>?;  # The specific contribution
+    fhir:role @<Citation.citedArtifact.contributorship.entry.role>?;  # The role of the contributor (e.g. 
+                                            # author, editor, reviewer) 
+    fhir:contributionInstance @<OneOrMore_Citation.citedArtifact.contributorship.entry.contributionInstance>?;  # Contributions with accounting for 
+                                            # time or number 
+    fhir:correspondingContact @<Citation.citedArtifact.contributorship.entry.correspondingContact>?;  # Indication of which contributor is 
+                                            # the corresponding contributor for 
+                                            # the role 
+    fhir:rankingOrder @<Citation.citedArtifact.contributorship.entry.rankingOrder>?;  # Ranked order of contribution
+}  
+
+# Contributions with accounting for time or number
+<Citation.citedArtifact.contributorship.entry.contributionInstance> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:type @<Citation.citedArtifact.contributorship.entry.contributionInstance.type>;  # The specific contribution
+    fhir:time @<Citation.citedArtifact.contributorship.entry.contributionInstance.time>?;  # The time that the contribution was 
+                                            # made 
+}  
+
+# The title details of the article or artifact
+<Citation.citedArtifact.title> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:type @<OneOrMore_Citation.citedArtifact.title.type>?;  # The kind of title
+    fhir:language @<Citation.citedArtifact.title.language>?;  # Used to express the specific 
+                                            # language 
+    fhir:text @<Citation.citedArtifact.title.text>;  # The title of the article or 
+                                            # artifact 
+}  
+
+# The specific issue in which the cited article resides
+<Citation.citedArtifact.publicationForm.periodicRelease> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:citedMedium @<Citation.citedArtifact.publicationForm.periodicRelease.citedMedium>?;  # Internet or Print
+    fhir:volume @<Citation.citedArtifact.publicationForm.periodicRelease.volume>?;  # Volume number of journal in which 
+                                            # the article is published 
+    fhir:issue @<Citation.citedArtifact.publicationForm.periodicRelease.issue>?;  # Issue, part or supplement of 
+                                            # journal in which the article is 
+                                            # published 
+    fhir:dateOfPublication @<Citation.citedArtifact.publicationForm.periodicRelease.dateOfPublication>?;  # Defining the date on which the 
+                                            # issue of the journal was published 
+}  
+
+#---------------------- Data Types -------------------
+
+#---------------------- Cardinality Types (OneOrMore) -------------------
+
+<OneOrMore_Citation.identifier> CLOSED {
+    rdf:first @<Citation.identifier>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Citation.identifier> 
+}
+
+<OneOrMore_Citation.contact> CLOSED {
+    rdf:first @<Citation.contact>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Citation.contact> 
+}
+
+<OneOrMore_Citation.useContext> CLOSED {
+    rdf:first @<Citation.useContext>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Citation.useContext> 
+}
+
+<OneOrMore_Citation.jurisdiction> CLOSED {
+    rdf:first @<Citation.jurisdiction>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Citation.jurisdiction> 
+}
+
+<OneOrMore_Citation.author> CLOSED {
+    rdf:first @<Citation.author>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Citation.author> 
+}
+
+<OneOrMore_Citation.editor> CLOSED {
+    rdf:first @<Citation.editor>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Citation.editor> 
+}
+
+<OneOrMore_Citation.reviewer> CLOSED {
+    rdf:first @<Citation.reviewer>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Citation.reviewer> 
+}
+
+<OneOrMore_Citation.endorser> CLOSED {
+    rdf:first @<Citation.endorser>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Citation.endorser> 
+}
+
+<OneOrMore_Citation.summary> CLOSED {
+    rdf:first @<Citation.summary>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Citation.summary> 
+}
+
+<OneOrMore_Citation.classification> CLOSED {
+    rdf:first @<Citation.classification>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Citation.classification> 
+}
+
+<OneOrMore_Citation.note> CLOSED {
+    rdf:first @<Citation.note>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Citation.note> 
+}
+
+<OneOrMore_Citation.currentState> CLOSED {
+    rdf:first @<Citation.currentState>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Citation.currentState> 
+}
+
+<OneOrMore_Citation.statusDate> CLOSED {
+    rdf:first @<Citation.statusDate>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Citation.statusDate> 
+}
+
+<OneOrMore_Citation.relatedArtifact> CLOSED {
+    rdf:first @<Citation.relatedArtifact>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Citation.relatedArtifact> 
+}
+
+<OneOrMore_Citation.classification.classifier> CLOSED {
+    rdf:first @<Citation.classification.classifier>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Citation.classification.classifier> 
+}
+
+<OneOrMore_Citation.citedArtifact.identifier> CLOSED {
+    rdf:first @<Citation.citedArtifact.identifier>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Citation.citedArtifact.identifier> 
+}
+
+<OneOrMore_Citation.citedArtifact.relatedIdentifier> CLOSED {
+    rdf:first @<Citation.citedArtifact.relatedIdentifier>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Citation.citedArtifact.relatedIdentifier> 
+}
+
+<OneOrMore_Citation.citedArtifact.currentState> CLOSED {
+    rdf:first @<Citation.citedArtifact.currentState>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Citation.citedArtifact.currentState> 
+}
+
+<OneOrMore_Citation.citedArtifact.statusDate> CLOSED {
+    rdf:first @<Citation.citedArtifact.statusDate>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Citation.citedArtifact.statusDate> 
+}
+
+<OneOrMore_Citation.citedArtifact.title> CLOSED {
+    rdf:first @<Citation.citedArtifact.title>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Citation.citedArtifact.title> 
+}
+
+<OneOrMore_Citation.citedArtifact.abstract> CLOSED {
+    rdf:first @<Citation.citedArtifact.abstract>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Citation.citedArtifact.abstract> 
+}
+
+<OneOrMore_Citation.citedArtifact.relatesTo> CLOSED {
+    rdf:first @<Citation.citedArtifact.relatesTo>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Citation.citedArtifact.relatesTo> 
+}
+
+<OneOrMore_Citation.citedArtifact.publicationForm> CLOSED {
+    rdf:first @<Citation.citedArtifact.publicationForm>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Citation.citedArtifact.publicationForm> 
+}
+
+<OneOrMore_Citation.citedArtifact.webLocation> CLOSED {
+    rdf:first @<Citation.citedArtifact.webLocation>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Citation.citedArtifact.webLocation> 
+}
+
+<OneOrMore_Citation.citedArtifact.classification> CLOSED {
+    rdf:first @<Citation.citedArtifact.classification>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Citation.citedArtifact.classification> 
+}
+
+<OneOrMore_Citation.citedArtifact.note> CLOSED {
+    rdf:first @<Citation.citedArtifact.note>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Citation.citedArtifact.note> 
+}
+
+<OneOrMore_Citation.citedArtifact.classification.classifier> CLOSED {
+    rdf:first @<Citation.citedArtifact.classification.classifier>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Citation.citedArtifact.classification.classifier> 
+}
+
+<OneOrMore_Citation.citedArtifact.classification.artifactAssessment_ArtifactAssessment> CLOSED {
+    rdf:first @<Citation.citedArtifact.classification.artifactAssessment> AND {fhir:link 
+			@<ArtifactAssessment> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Citation.citedArtifact.classification.artifactAssessment_ArtifactAssessment> 
+}
+
+<OneOrMore_Citation.citedArtifact.contributorship.entry> CLOSED {
+    rdf:first @<Citation.citedArtifact.contributorship.entry>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Citation.citedArtifact.contributorship.entry> 
+}
+
+<OneOrMore_Citation.citedArtifact.contributorship.summary> CLOSED {
+    rdf:first @<Citation.citedArtifact.contributorship.summary>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Citation.citedArtifact.contributorship.summary> 
+}
+
+<OneOrMore_Citation.citedArtifact.publicationForm.language> CLOSED {
+    rdf:first @<Citation.citedArtifact.publicationForm.language>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Citation.citedArtifact.publicationForm.language> 
+}
+
+<OneOrMore_Citation.citedArtifact.relatesTo.classifier> CLOSED {
+    rdf:first @<Citation.citedArtifact.relatesTo.classifier>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Citation.citedArtifact.relatesTo.classifier> 
+}
+
+<OneOrMore_Citation.citedArtifact.publicationForm.publishedIn.identifier> CLOSED {
+    rdf:first @<Citation.citedArtifact.publicationForm.publishedIn.identifier>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Citation.citedArtifact.publicationForm.publishedIn.identifier> 
+}
+
+<OneOrMore_Citation.citedArtifact.webLocation.classifier> CLOSED {
+    rdf:first @<Citation.citedArtifact.webLocation.classifier>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Citation.citedArtifact.webLocation.classifier> 
+}
+
+<OneOrMore_Citation.citedArtifact.contributorship.entry.affiliation_Organization_OR_PractitionerRole> CLOSED {
+    rdf:first @<Citation.citedArtifact.contributorship.entry.affiliation> AND {fhir:link 
+			@<Organization> OR 
+			@<PractitionerRole> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Citation.citedArtifact.contributorship.entry.affiliation_Organization_OR_PractitionerRole> 
+}
+
+<OneOrMore_Citation.citedArtifact.contributorship.entry.contributionType> CLOSED {
+    rdf:first @<Citation.citedArtifact.contributorship.entry.contributionType>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Citation.citedArtifact.contributorship.entry.contributionType> 
+}
+
+<OneOrMore_Citation.citedArtifact.contributorship.entry.contributionInstance> CLOSED {
+    rdf:first @<Citation.citedArtifact.contributorship.entry.contributionInstance>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Citation.citedArtifact.contributorship.entry.contributionInstance> 
+}
+
+<OneOrMore_Citation.citedArtifact.title.type> CLOSED {
+    rdf:first @<Citation.citedArtifact.title.type>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Citation.citedArtifact.title.type> 
+}
+
+#---------------------- Reference Types -------------------
+
+#---------------------- Value Sets ------------------------

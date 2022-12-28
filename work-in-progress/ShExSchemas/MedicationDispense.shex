@@ -1,0 +1,181 @@
+﻿PREFIX fhir: <http://hl7.org/fhir/> 
+PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+BASE <http://hl7.org/fhir/shape/>
+
+
+start=@<MedicationDispense> AND {fhir:nodeRole [fhir:treeRoot]}
+
+
+# Dispensing a medication to a named patient
+<MedicationDispense> EXTENDS @<DomainResource> CLOSED {   
+
+    a [fhir:MedicationDispense];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:identifier @<OneOrMore_MedicationDispense.identifier>?;  # External identifier
+    fhir:basedOn @<OneOrMore_MedicationDispense.basedOn_CarePlan>?;  # Plan that is fulfilled by this 
+                                            # dispense 
+    fhir:partOf @<OneOrMore_MedicationDispense.partOf_MedicationAdministration_OR_Procedure>?;  # Event that dispense is part of
+    fhir:status @<MedicationDispense.status>;  # preparation | in-progress | 
+                                            # cancelled | on-hold | completed | 
+                                            # entered-in-error | stopped | 
+                                            # declined | unknown 
+    fhir:notPerformedReason @<MedicationDispense.notPerformedReason>?;  # Why a dispense was not performed
+    fhir:statusChanged @<MedicationDispense.statusChanged>?;  # When the status changed
+    fhir:category @<OneOrMore_MedicationDispense.category>?;  # Type of medication dispense
+    fhir:medication @<MedicationDispense.medication>;  # What medication was supplied
+    fhir:subject @<MedicationDispense.subject> AND {fhir:link 
+    			@<Group> OR 
+    			@<Patient> };  # Who the dispense is for
+    fhir:encounter @<MedicationDispense.encounter> AND {fhir:link 
+    			@<Encounter> }?;  # Encounter associated with event
+    fhir:supportingInformation @<OneOrMore_MedicationDispense.supportingInformation_Resource>?;  # Information that supports the 
+                                            # dispensing of the medication 
+    fhir:performer @<OneOrMore_MedicationDispense.performer>?;  # Who performed event
+    fhir:location @<MedicationDispense.location> AND {fhir:link 
+    			@<Location> }?;  # Where the dispense occurred
+    fhir:authorizingPrescription @<OneOrMore_MedicationDispense.authorizingPrescription_MedicationRequest>?;  # Medication order that authorizes 
+                                            # the dispense 
+    fhir:type @<MedicationDispense.type>?;  # Trial fill, partial fill, 
+                                            # emergency fill, etc. 
+    fhir:quantity @<MedicationDispense.quantity>?;  # Amount dispensed
+    fhir:daysSupply @<MedicationDispense.daysSupply>?;  # Amount of medication expressed as 
+                                            # a timing amount 
+    fhir:recorded @<MedicationDispense.recorded>?;  # When the recording of the dispense 
+                                            # started 
+    fhir:whenPrepared @<MedicationDispense.whenPrepared>?;  # When product was packaged and 
+                                            # reviewed 
+    fhir:whenHandedOver @<MedicationDispense.whenHandedOver>?;  # When product was given out
+    fhir:destination @<MedicationDispense.destination> AND {fhir:link 
+    			@<Location> }?;  # Where the medication was sent
+    fhir:receiver @<OneOrMore_MedicationDispense.receiver_Location_OR_Patient_OR_Practitioner_OR_PractitionerRole_OR_RelatedPerson>?;  # Who collected the medication or 
+                                            # where the medication was delivered 
+    fhir:note @<OneOrMore_MedicationDispense.note>?;  # Information about the dispense
+    fhir:renderedDosageInstruction @<MedicationDispense.renderedDosageInstruction>?;  # Full representation of the dosage 
+                                            # instructions 
+    fhir:dosageInstruction @<OneOrMore_MedicationDispense.dosageInstruction>?;  # How the medication is to be used 
+                                            # by the patient or administered by 
+                                            # the caregiver 
+    fhir:substitution @<MedicationDispense.substitution>?;  # Whether a substitution was 
+                                            # performed on the dispense 
+    fhir:eventHistory @<OneOrMore_MedicationDispense.eventHistory_Provenance>?;  # A list of relevant lifecycle events
+} AND (
+
+# Constraint: UniqueKey:mdd-1
+# Human readable:whenHandedOver cannot be before whenPrepared
+# XPath:not(exists(f:whenHandedOver/@value)) or not(exists(f:whenPrepared/@value)) or ( f:whenHandedOver/@value >= f:whenPrepared/@value)
+# Constraint:whenHandedOver.empty() or whenPrepared.empty() or whenHandedOver >= whenPrepared
+# ShEx:
+
+ NOT { fhir:whenHandedOver {fhir:v .} }  OR  NOT { fhir:whenPrepared {fhir:v .} }  OR ({ fhir:whenHandedOver { fhir:v MinInclusive { fhir:whenPrepared } }  })
+
+)
+ 
+
+# Who performed event
+<MedicationDispense.performer> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:function @<MedicationDispense.performer.function>?;  # Who performed the dispense and 
+                                            # what they did 
+    fhir:actor @<MedicationDispense.performer.actor> AND {fhir:link 
+    			@<CareTeam> OR 
+    			@<Device> OR 
+    			@<Organization> OR 
+    			@<Patient> OR 
+    			@<Practitioner> OR 
+    			@<PractitionerRole> OR 
+    			@<RelatedPerson> };  # Individual who was performing
+}  
+
+# Whether a substitution was performed on the dispense
+<MedicationDispense.substitution> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:wasSubstituted @<MedicationDispense.substitution.wasSubstituted>;  # Whether a substitution was or was 
+                                            # not performed on the dispense 
+    fhir:type @<MedicationDispense.substitution.type>?;  # Code signifying whether a 
+                                            # different drug was dispensed from 
+                                            # what was prescribed 
+    fhir:reason @<OneOrMore_MedicationDispense.substitution.reason>?;  # Why was substitution made
+    fhir:responsibleParty @<MedicationDispense.substitution.responsibleParty> AND {fhir:link 
+    			@<Organization> OR 
+    			@<Practitioner> OR 
+    			@<PractitionerRole> }?;  # Who is responsible for the 
+                                            # substitution 
+}  
+
+#---------------------- Data Types -------------------
+
+#---------------------- Cardinality Types (OneOrMore) -------------------
+
+<OneOrMore_MedicationDispense.identifier> CLOSED {
+    rdf:first @<MedicationDispense.identifier>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_MedicationDispense.identifier> 
+}
+
+<OneOrMore_MedicationDispense.basedOn_CarePlan> CLOSED {
+    rdf:first @<MedicationDispense.basedOn> AND {fhir:link 
+			@<CarePlan> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_MedicationDispense.basedOn_CarePlan> 
+}
+
+<OneOrMore_MedicationDispense.partOf_MedicationAdministration_OR_Procedure> CLOSED {
+    rdf:first @<MedicationDispense.partOf> AND {fhir:link 
+			@<MedicationAdministration> OR 
+			@<Procedure> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_MedicationDispense.partOf_MedicationAdministration_OR_Procedure> 
+}
+
+<OneOrMore_MedicationDispense.category> CLOSED {
+    rdf:first @<MedicationDispense.category>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_MedicationDispense.category> 
+}
+
+<OneOrMore_MedicationDispense.supportingInformation_Resource> CLOSED {
+    rdf:first @<MedicationDispense.supportingInformation> AND {fhir:link 
+			@<Resource> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_MedicationDispense.supportingInformation_Resource> 
+}
+
+<OneOrMore_MedicationDispense.performer> CLOSED {
+    rdf:first @<MedicationDispense.performer>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_MedicationDispense.performer> 
+}
+
+<OneOrMore_MedicationDispense.authorizingPrescription_MedicationRequest> CLOSED {
+    rdf:first @<MedicationDispense.authorizingPrescription> AND {fhir:link 
+			@<MedicationRequest> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_MedicationDispense.authorizingPrescription_MedicationRequest> 
+}
+
+<OneOrMore_MedicationDispense.receiver_Location_OR_Patient_OR_Practitioner_OR_PractitionerRole_OR_RelatedPerson> CLOSED {
+    rdf:first @<MedicationDispense.receiver> AND {fhir:link 
+			@<Location> OR 
+			@<Patient> OR 
+			@<Practitioner> OR 
+			@<PractitionerRole> OR 
+			@<RelatedPerson> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_MedicationDispense.receiver_Location_OR_Patient_OR_Practitioner_OR_PractitionerRole_OR_RelatedPerson> 
+}
+
+<OneOrMore_MedicationDispense.note> CLOSED {
+    rdf:first @<MedicationDispense.note>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_MedicationDispense.note> 
+}
+
+<OneOrMore_MedicationDispense.dosageInstruction> CLOSED {
+    rdf:first @<MedicationDispense.dosageInstruction>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_MedicationDispense.dosageInstruction> 
+}
+
+<OneOrMore_MedicationDispense.eventHistory_Provenance> CLOSED {
+    rdf:first @<MedicationDispense.eventHistory> AND {fhir:link 
+			@<Provenance> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_MedicationDispense.eventHistory_Provenance> 
+}
+
+<OneOrMore_MedicationDispense.substitution.reason> CLOSED {
+    rdf:first @<MedicationDispense.substitution.reason>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_MedicationDispense.substitution.reason> 
+}
+
+#---------------------- Reference Types -------------------
+
+#---------------------- Value Sets ------------------------

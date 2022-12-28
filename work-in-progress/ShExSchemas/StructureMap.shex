@@ -1,0 +1,317 @@
+﻿PREFIX fhir: <http://hl7.org/fhir/> 
+PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+BASE <http://hl7.org/fhir/shape/>
+
+
+start=@<StructureMap> AND {fhir:nodeRole [fhir:treeRoot]}
+
+
+# A Map of relationships between 2 structures that can be used to transform data
+<StructureMap> EXTENDS @<CanonicalResource> CLOSED {   
+
+    a [fhir:StructureMap];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:url @<StructureMap.url>;           # Canonical identifier for this 
+                                            # structure map, represented as a 
+                                            # URI (globally unique) 
+    fhir:identifier @<OneOrMore_StructureMap.identifier>?;  # Additional identifier for the 
+                                            # structure map 
+    fhir:version @<StructureMap.version>?;  # Business version of the structure 
+                                            # map 
+    fhir:name @<StructureMap.name>;         # Name for this structure map 
+                                            # (computer friendly) 
+    fhir:title @<StructureMap.title>?;      # Name for this structure map (human 
+                                            # friendly) 
+    fhir:status @<StructureMap.status>;     # draft | active | retired | unknown
+    fhir:experimental @<StructureMap.experimental>?;  # For testing purposes, not real 
+                                            # usage 
+    fhir:date @<StructureMap.date>?;        # Date last changed
+    fhir:publisher @<StructureMap.publisher>?;  # Name of the publisher 
+                                            # (organization or individual) 
+    fhir:contact @<OneOrMore_StructureMap.contact>?;  # Contact details for the publisher
+    fhir:description @<StructureMap.description>?;  # Natural language description of 
+                                            # the structure map 
+    fhir:useContext @<OneOrMore_StructureMap.useContext>?;  # The context that the content is 
+                                            # intended to support 
+    fhir:jurisdiction @<OneOrMore_StructureMap.jurisdiction>?;  # Intended jurisdiction for 
+                                            # structure map (if applicable) 
+    fhir:purpose @<StructureMap.purpose>?;  # Why this structure map is defined
+    fhir:copyright @<StructureMap.copyright>?;  # Use and/or publishing restrictions
+    fhir:structure @<OneOrMore_StructureMap.structure>?;  # Structure Definition used by this 
+                                            # map 
+    fhir:import @<OneOrMore_StructureMap.import>?;  # Other maps used by this map 
+                                            # (canonical URLs) 
+    fhir:group @<OneOrMore_StructureMap.group>;  # Named sections for reader 
+                                            # convenience 
+} AND (
+
+# Constraint: UniqueKey:cnl-0
+# Human readable:Name should be usable as an identifier for the module by machine processing applications such as code generation
+# XPath:not(exists(f:name/@value)) or matches(f:name/@value, '[A-Z]([A-Za-z0-9_]){0,254}')
+# Constraint:name.exists() implies name.matches('[A-Z]([A-Za-z0-9_]){0,254}')
+# ShEx:
+
+{ fhir:name . } AND { fhir:name { fhir:v /'[A-Z]([A-Za-z0-9_]){0,254}'/ }  }
+
+) AND (
+
+# Constraint: UniqueKey:smp-1
+# Human readable:Can only have an element if you have a context
+# XPath:not(f:element) or (f:context)
+# Constraint:element.exists() implies context.exists()
+# ShEx:
+
+{ fhir:element . } AND { fhir:context . }
+
+)
+ 
+
+# Named sections for reader convenience
+<StructureMap.group> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:name @<StructureMap.group.name>;   # Human-readable label
+    fhir:extends @<StructureMap.group.extends>?;  # Another group that this group adds 
+                                            # rules to 
+    fhir:typeMode @<StructureMap.group.typeMode>?;  # types | type-and-types
+    fhir:documentation @<StructureMap.group.documentation>?;  # Additional description/explanation 
+                                            # for group 
+    fhir:input @<OneOrMore_StructureMap.group.input>;  # Named instance provided when 
+                                            # invoking the map 
+    fhir:rule @<OneOrMore_StructureMap.group.rule>?;  # Transform Rule from source to 
+                                            # target 
+}  
+
+# Named instance provided when invoking the map
+<StructureMap.group.input> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:name @<StructureMap.group.input.name>;  # Name for this instance of data
+    fhir:type @<StructureMap.group.input.type>?;  # Type for this instance of data
+    fhir:mode @<StructureMap.group.input.mode>;  # source | target
+    fhir:documentation @<StructureMap.group.input.documentation>?;  # Documentation for this instance of 
+                                            # data 
+}  
+
+# Source inputs to the mapping
+<StructureMap.group.rule.source> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:context @<StructureMap.group.rule.source.context>;  # Type or variable this rule applies 
+                                            # to 
+    fhir:min @<StructureMap.group.rule.source.min>?;  # Specified minimum cardinality
+    fhir:max @<StructureMap.group.rule.source.max>?;  # Specified maximum cardinality 
+                                            # (number or *) 
+    fhir:type @<StructureMap.group.rule.source.type>?;  # Rule only applies if source has 
+                                            # this type 
+    fhir:defaultValue @<StructureMap.group.rule.source.defaultValue>?;  # Default value if no value exists
+    fhir:element @<StructureMap.group.rule.source.element>?;  # Optional field for this source
+    fhir:listMode @<StructureMap.group.rule.source.listMode>?;  # first | not_first | last | 
+                                            # not_last | only_one 
+    fhir:variable @<StructureMap.group.rule.source.variable>?;  # Named context for field, if a 
+                                            # field is specified 
+    fhir:condition @<StructureMap.group.rule.source.condition>?;  # FHIRPath expression  - must be 
+                                            # true or the rule does not apply 
+    fhir:check @<StructureMap.group.rule.source.check>?;  # FHIRPath expression  - must be 
+                                            # true or the mapping engine throws 
+                                            # an error instead of completing 
+    fhir:logMessage @<StructureMap.group.rule.source.logMessage>?;  # Message to put in log if source 
+                                            # exists (FHIRPath) 
+}  
+
+# Which other rules to apply in the context of this rule
+<StructureMap.group.rule.dependent> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:name @<StructureMap.group.rule.dependent.name>;  # Name of a rule or group to apply
+    fhir:parameter @<OneOrMore_StructureMap.group.rule.target.parameter>;  # Parameter to pass to the rule or 
+                                            # group 
+}  
+
+# Rules contained in this rule
+<StructureMap.group.rule.rule> CLOSED {   
+}  
+
+# Content to create because of this mapping rule
+<StructureMap.group.rule.target> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:context @<StructureMap.group.rule.target.context>?;  # Variable this rule applies to
+    fhir:element @<StructureMap.group.rule.target.element>?;  # Field to create in the context
+    fhir:variable @<StructureMap.group.rule.target.variable>?;  # Named context for field, if 
+                                            # desired, and a field is specified 
+    fhir:listMode @<OneOrMore_StructureMap.group.rule.target.listMode>?;  # first | share | last | collate
+    fhir:listRuleId @<StructureMap.group.rule.target.listRuleId>?;  # Internal rule reference for shared 
+                                            # list items 
+    fhir:transform @<StructureMap.group.rule.target.transform>?;  # create | copy +
+    fhir:parameter @<OneOrMore_StructureMap.group.rule.target.parameter>?;  # Parameters to the transform
+}  
+
+# Transform Rule from source to target
+<StructureMap.group.rule> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:name @<StructureMap.group.rule.name>?;  # Name of the rule for internal 
+                                            # references 
+    fhir:source @<OneOrMore_StructureMap.group.rule.source>;  # Source inputs to the mapping
+    fhir:target @<OneOrMore_StructureMap.group.rule.target>?;  # Content to create because of this 
+                                            # mapping rule 
+    fhir:rule @<OneOrMore_StructureMap.group.rule>?;  # Rules contained in this rule
+    fhir:dependent @<OneOrMore_StructureMap.group.rule.dependent>?;  # Which other rules to apply in the 
+                                            # context of this rule 
+    fhir:documentation @<StructureMap.group.rule.documentation>?;  # Documentation for this instance of 
+                                            # data 
+}  
+
+# Parameters to the transform
+<StructureMap.group.rule.target.parameter> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:value (@<id>  OR 
+    			@<string>  OR 
+    			@<boolean>  OR 
+    			@<integer>  OR 
+    			@<decimal>  OR 
+    			@<date>  OR 
+    			@<time>  OR 
+    			@<dateTime> )  AND { rdf:type IRI } ;  # Parameter value - variable or 
+                                            # literal 
+}  
+
+# Structure Definition used by this map
+<StructureMap.structure> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:url @<StructureMap.structure.url>;  # Canonical reference to structure 
+                                            # definition 
+    fhir:mode @<StructureMap.structure.mode>;  # source | queried | target | 
+                                            # produced 
+    fhir:alias @<StructureMap.structure.alias>?;  # Name for type in this map
+    fhir:documentation @<StructureMap.structure.documentation>?;  # Documentation on use of structure
+}  
+
+#---------------------- Data Types -------------------
+
+# Primitive Type date
+<date> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:date];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v @<date.value>?;                  # Primitive value for date
+}  
+
+# Primitive Type dateTime
+<dateTime> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:dateTime];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v @<dateTime.value>?;              # Primitive value for dateTime
+}  
+
+# Primitive Type boolean
+<boolean> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:boolean];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v @<boolean.value>?;               # Primitive value for boolean
+}  
+
+# Primitive Type string
+<string> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:string];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v @<string.value>?;                # Primitive value for string
+}  
+
+# Primitive Type id
+<id> EXTENDS @<string> CLOSED {   
+
+    a [fhir:id];
+    fhir:nodeRole [fhir:treeRoot]?;
+}  
+
+# Primitive Type integer
+<integer> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:integer];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v @<integer.value>?;               # Primitive value for integer
+}  
+
+# Primitive Type time
+<time> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:time];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v @<time.value>?;                  # Primitive value for time
+}  
+
+# Primitive Type decimal
+<decimal> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:decimal];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v @<decimal.value>?;               # Primitive value for decimal
+}  
+
+#---------------------- Cardinality Types (OneOrMore) -------------------
+
+<OneOrMore_StructureMap.identifier> CLOSED {
+    rdf:first @<StructureMap.identifier>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_StructureMap.identifier> 
+}
+
+<OneOrMore_StructureMap.contact> CLOSED {
+    rdf:first @<StructureMap.contact>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_StructureMap.contact> 
+}
+
+<OneOrMore_StructureMap.useContext> CLOSED {
+    rdf:first @<StructureMap.useContext>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_StructureMap.useContext> 
+}
+
+<OneOrMore_StructureMap.jurisdiction> CLOSED {
+    rdf:first @<StructureMap.jurisdiction>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_StructureMap.jurisdiction> 
+}
+
+<OneOrMore_StructureMap.structure> CLOSED {
+    rdf:first @<StructureMap.structure>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_StructureMap.structure> 
+}
+
+<OneOrMore_StructureMap.import> CLOSED {
+    rdf:first @<StructureMap.import>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_StructureMap.import> 
+}
+
+<OneOrMore_StructureMap.group> CLOSED {
+    rdf:first @<StructureMap.group>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_StructureMap.group> 
+}
+
+<OneOrMore_StructureMap.group.input> CLOSED {
+    rdf:first @<StructureMap.group.input>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_StructureMap.group.input> 
+}
+
+<OneOrMore_StructureMap.group.rule> CLOSED {
+    rdf:first @<StructureMap.group.rule>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_StructureMap.group.rule> 
+}
+
+<OneOrMore_StructureMap.group.rule.target.parameter> CLOSED {
+    rdf:first @<StructureMap.group.rule.target.parameter>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_StructureMap.group.rule.target.parameter> 
+}
+
+<OneOrMore_StructureMap.group.rule.target.listMode> CLOSED {
+    rdf:first @<StructureMap.group.rule.target.listMode>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_StructureMap.group.rule.target.listMode> 
+}
+
+<OneOrMore_StructureMap.group.rule.source> CLOSED {
+    rdf:first @<StructureMap.group.rule.source>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_StructureMap.group.rule.source> 
+}
+
+<OneOrMore_StructureMap.group.rule.target> CLOSED {
+    rdf:first @<StructureMap.group.rule.target>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_StructureMap.group.rule.target> 
+}
+
+<OneOrMore_StructureMap.group.rule.dependent> CLOSED {
+    rdf:first @<StructureMap.group.rule.dependent>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_StructureMap.group.rule.dependent> 
+}
+
+#---------------------- Reference Types -------------------
+
+#---------------------- Value Sets ------------------------

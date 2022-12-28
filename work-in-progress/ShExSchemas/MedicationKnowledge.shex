@@ -1,0 +1,574 @@
+﻿PREFIX fhir: <http://hl7.org/fhir/> 
+PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+BASE <http://hl7.org/fhir/shape/>
+
+
+start=@<MedicationKnowledge> AND {fhir:nodeRole [fhir:treeRoot]}
+
+
+# Definition of Medication Knowledge
+<MedicationKnowledge> EXTENDS @<DomainResource> CLOSED {   
+
+    a [fhir:MedicationKnowledge];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:identifier @<OneOrMore_MedicationKnowledge.identifier>?;  # Business identifier for this 
+                                            # medication 
+    fhir:code @<MedicationKnowledge.code>?;  # Code that identifies this 
+                                            # medication 
+    fhir:status @<MedicationKnowledge.status>?;  # active | entered-in-error | 
+                                            # inactive 
+    fhir:author @<MedicationKnowledge.author> AND {fhir:link 
+    			@<Organization> }?;  # Creator or owner of the knowledge 
+                                            # or information about the 
+                                            # medication 
+    fhir:intendedJurisdiction @<OneOrMore_MedicationKnowledge.intendedJurisdiction>?;  # Codes that identify the different 
+                                            # jurisdictions for which the 
+                                            # information of this resource was 
+                                            # created 
+    fhir:name @<OneOrMore_MedicationKnowledge.name>?;  # A name associated with the 
+                                            # medication being described 
+    fhir:relatedMedicationKnowledge @<OneOrMore_MedicationKnowledge.relatedMedicationKnowledge>?;  # Associated or related medication 
+                                            # information 
+    fhir:associatedMedication @<OneOrMore_MedicationKnowledge.associatedMedication_Medication>?;  # The set of medication resources 
+                                            # that are associated with this 
+                                            # medication 
+    fhir:productType @<OneOrMore_MedicationKnowledge.productType>?;  # Category of the medication or 
+                                            # product 
+    fhir:monograph @<OneOrMore_MedicationKnowledge.monograph>?;  # Associated documentation about the 
+                                            # medication 
+    fhir:preparationInstruction @<MedicationKnowledge.preparationInstruction>?;  # The instructions for preparing the 
+                                            # medication 
+    fhir:cost @<OneOrMore_MedicationKnowledge.cost>?;  # The pricing of the medication
+    fhir:monitoringProgram @<OneOrMore_MedicationKnowledge.monitoringProgram>?;  # Program under which a medication 
+                                            # is reviewed 
+    fhir:indicationGuideline @<OneOrMore_MedicationKnowledge.indicationGuideline>?;  # Guidelines or protocols for 
+                                            # administration of the medication 
+                                            # for an indication 
+    fhir:medicineClassification @<OneOrMore_MedicationKnowledge.medicineClassification>?;  # Categorization of the medication 
+                                            # within a formulary or 
+                                            # classification system 
+    fhir:packaging @<OneOrMore_MedicationKnowledge.packaging>?;  # Details about packaged medications
+    fhir:clinicalUseIssue @<OneOrMore_MedicationKnowledge.clinicalUseIssue_ClinicalUseDefinition>?;  # Potential clinical issue with or 
+                                            # between medication(s) 
+    fhir:storageGuideline @<OneOrMore_MedicationKnowledge.storageGuideline>?;  # How the medication should be stored
+    fhir:regulatory @<OneOrMore_MedicationKnowledge.regulatory>?;  # Regulatory information about a 
+                                            # medication 
+    fhir:definitional @<MedicationKnowledge.definitional>?;  # Minimal definition information 
+                                            # about the medication 
+}  
+
+# Minimal definition information about the medication
+<MedicationKnowledge.definitional> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:definition @<OneOrMore_MedicationKnowledge.definitional.definition_MedicinalProductDefinition>?;  # Definitional resources that 
+                                            # provide more information about 
+                                            # this medication 
+    fhir:doseForm @<MedicationKnowledge.definitional.doseForm>?;  # powder | tablets | capsule +
+    fhir:intendedRoute @<OneOrMore_MedicationKnowledge.definitional.intendedRoute>?;  # The intended or approved route of 
+                                            # administration 
+    fhir:ingredient @<OneOrMore_MedicationKnowledge.definitional.ingredient>?;  # Active or inactive ingredient
+    fhir:drugCharacteristic @<OneOrMore_MedicationKnowledge.definitional.drugCharacteristic>?;  # Specifies descriptive properties 
+                                            # of the medicine 
+}  
+
+# Active or inactive ingredient
+<MedicationKnowledge.definitional.ingredient> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:item @<MedicationKnowledge.definitional.ingredient.item>;  # Substances contained in the 
+                                            # medication 
+    fhir:type @<MedicationKnowledge.definitional.ingredient.type>?;  # A code that defines the type of 
+                                            # ingredient, active, base, etc. 
+    fhir:strength (@<Ratio>  OR 
+    			@<CodeableConcept>  OR 
+    			@<Quantity> )  AND { rdf:type IRI } ?;  # Quantity of ingredient present
+}  
+
+# Guidelines or protocols for administration of the medication for an indication
+<MedicationKnowledge.indicationGuideline> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:indication @<OneOrMore_MedicationKnowledge.indicationGuideline.indication>?;  # Indication for use that applies to 
+                                            # the specific administration 
+                                            # guideline 
+    fhir:dosingGuideline @<OneOrMore_MedicationKnowledge.indicationGuideline.dosingGuideline>?;  # Guidelines for dosage of the 
+                                            # medication 
+}  
+
+# Regulatory information about a medication
+<MedicationKnowledge.regulatory> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:regulatoryAuthority @<MedicationKnowledge.regulatory.regulatoryAuthority> AND {fhir:link 
+    			@<Organization> };  # Specifies the authority of the 
+                                            # regulation 
+    fhir:substitution @<OneOrMore_MedicationKnowledge.regulatory.substitution>?;  # Specifies if changes are allowed 
+                                            # when dispensing a medication from 
+                                            # a regulatory perspective 
+    fhir:schedule @<OneOrMore_MedicationKnowledge.regulatory.schedule>?;  # Specifies the schedule of a 
+                                            # medication in jurisdiction 
+    fhir:maxDispense @<MedicationKnowledge.regulatory.maxDispense>?;  # The maximum number of units of the 
+                                            # medication that can be dispensed 
+                                            # in a period 
+}  
+
+# Setting or value of environment for adequate storage
+<MedicationKnowledge.storageGuideline.environmentalSetting> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:type @<MedicationKnowledge.storageGuideline.environmentalSetting.type>;  # Categorization of the setting
+    fhir:value (@<Quantity>  OR 
+    			@<Range>  OR 
+    			@<CodeableConcept> )  AND { rdf:type IRI } ;  # Value of the setting
+}  
+
+# Associated documentation about the medication
+<MedicationKnowledge.monograph> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:type @<MedicationKnowledge.monograph.type>?;  # The category of medication document
+    fhir:source @<MedicationKnowledge.monograph.source> AND {fhir:link 
+    			@<DocumentReference> }?;  # Associated documentation about the 
+                                            # medication 
+}  
+
+# Categorization of the medication within a formulary or classification system
+<MedicationKnowledge.medicineClassification> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:type @<MedicationKnowledge.medicineClassification.type>;  # The type of category for the 
+                                            # medication (for example, 
+                                            # therapeutic classification, 
+                                            # therapeutic sub-classification) 
+    fhir:source (@<string>  OR 
+    			@<uri> )  AND { rdf:type IRI } ?;  # The source of the classification
+    fhir:classification @<OneOrMore_MedicationKnowledge.medicineClassification.classification>?;  # Specific category assigned to the 
+                                            # medication 
+}  
+
+# Program under which a medication is reviewed
+<MedicationKnowledge.monitoringProgram> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:type @<MedicationKnowledge.monitoringProgram.type>?;  # Type of program under which the 
+                                            # medication is monitored 
+    fhir:name @<MedicationKnowledge.monitoringProgram.name>?;  # Name of the reviewing program
+}  
+
+# How the medication should be stored
+<MedicationKnowledge.storageGuideline> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:reference @<MedicationKnowledge.storageGuideline.reference>?;  # Reference to additional information
+    fhir:note @<OneOrMore_MedicationKnowledge.storageGuideline.note>?;  # Additional storage notes
+    fhir:stabilityDuration @<MedicationKnowledge.storageGuideline.stabilityDuration>?;  # Duration remains stable
+    fhir:environmentalSetting @<OneOrMore_MedicationKnowledge.storageGuideline.environmentalSetting>?;  # Setting or value of environment 
+                                            # for adequate storage 
+}  
+
+# The pricing of the medication
+<MedicationKnowledge.cost> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:effectiveDate @<OneOrMore_MedicationKnowledge.cost.effectiveDate>?;  # The date range for which the cost 
+                                            # is effective 
+    fhir:type @<MedicationKnowledge.cost.type>;  # The category of the cost 
+                                            # information 
+    fhir:source @<MedicationKnowledge.cost.source>?;  # The source or owner for the price 
+                                            # information 
+    fhir:cost (@<Money>  OR 
+    			@<CodeableConcept> )  AND { rdf:type IRI } ;  # The price or category of the cost 
+                                            # of the medication 
+}  
+
+# Dosage for the medication for the specific guidelines
+<MedicationKnowledge.indicationGuideline.dosingGuideline.dosage> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:type @<MedicationKnowledge.indicationGuideline.dosingGuideline.dosage.type>;  # Category of dosage for a medication
+    fhir:dosage @<OneOrMore_MedicationKnowledge.indicationGuideline.dosingGuideline.dosage.dosage>;  # Dosage for the medication for the 
+                                            # specific guidelines 
+}  
+
+# Specifies descriptive properties of the medicine
+<MedicationKnowledge.definitional.drugCharacteristic> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:type @<MedicationKnowledge.definitional.drugCharacteristic.type>?;  # Code specifying the type of 
+                                            # characteristic of medication 
+    fhir:value (@<CodeableConcept>  OR 
+    			@<string>  OR 
+    			@<SimpleQuantity>  OR 
+    			@<base64Binary>  OR 
+    			@<Attachment> )  AND { rdf:type IRI } ?;  # Description of the characteristic
+}  
+
+# Guidelines for dosage of the medication
+<MedicationKnowledge.indicationGuideline.dosingGuideline> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:treatmentIntent @<MedicationKnowledge.indicationGuideline.dosingGuideline.treatmentIntent>?;  # Intention of the treatment
+    fhir:dosage @<OneOrMore_MedicationKnowledge.indicationGuideline.dosingGuideline.dosage>?;  # Dosage for the medication for the 
+                                            # specific guidelines 
+    fhir:administrationTreatment @<MedicationKnowledge.indicationGuideline.dosingGuideline.administrationTreatment>?;  # Type of treatment the guideline 
+                                            # applies to 
+    fhir:patientCharacteristic @<OneOrMore_MedicationKnowledge.indicationGuideline.dosingGuideline.patientCharacteristic>?;  # Characteristics of the patient 
+                                            # that are relevant to the 
+                                            # administration guidelines 
+}  
+
+# Associated or related medication information
+<MedicationKnowledge.relatedMedicationKnowledge> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:type @<MedicationKnowledge.relatedMedicationKnowledge.type>;  # Category of medicationKnowledge
+    fhir:reference @<OneOrMore_MedicationKnowledge.relatedMedicationKnowledge.reference_MedicationKnowledge>;  # Associated documentation about the 
+                                            # associated medication knowledge 
+}  
+
+# The maximum number of units of the medication that can be dispensed in a period
+<MedicationKnowledge.regulatory.maxDispense> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:quantity @<MedicationKnowledge.regulatory.maxDispense.quantity>;  # The maximum number of units of the 
+                                            # medication that can be dispensed 
+    fhir:period @<MedicationKnowledge.regulatory.maxDispense.period>?;  # The period that applies to the 
+                                            # maximum number of units 
+}  
+
+# Specifies if changes are allowed when dispensing a medication from a regulatory perspective
+<MedicationKnowledge.regulatory.substitution> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:type @<MedicationKnowledge.regulatory.substitution.type>;  # Specifies the type of substitution 
+                                            # allowed 
+    fhir:allowed @<MedicationKnowledge.regulatory.substitution.allowed>;  # Specifies if regulation allows for 
+                                            # changes in the medication when 
+                                            # dispensing 
+}  
+
+# Details about packaged medications
+<MedicationKnowledge.packaging> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:cost @<OneOrMore_MedicationKnowledge.cost>?;  # Cost of the packaged medication
+    fhir:packagedProduct @<MedicationKnowledge.packaging.packagedProduct> AND {fhir:link 
+    			@<PackagedProductDefinition> }?;  # The packaged medication that is 
+                                            # being priced 
+}  
+
+# Characteristics of the patient that are relevant to the administration guidelines
+<MedicationKnowledge.indicationGuideline.dosingGuideline.patientCharacteristic> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:type @<MedicationKnowledge.indicationGuideline.dosingGuideline.patientCharacteristic.type>;  # Categorization of specific 
+                                            # characteristic that is relevant to 
+                                            # the administration guideline 
+    fhir:value (@<CodeableConcept>  OR 
+    			@<Quantity>  OR 
+    			@<Range> )  AND { rdf:type IRI } ?;  # The specific characteristic
+}  
+
+#---------------------- Data Types -------------------
+
+# An amount of economic utility in some recognized currency
+<Money> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Money];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:value @<Money.value>?;             # Numerical value (with implicit 
+                                            # precision) 
+    fhir:currency @<Money.currency>?;       # ISO 4217 Currency Code
+}  
+
+# Primitive Type string
+<string> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:string];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v @<string.value>?;                # Primitive value for string
+}  
+
+# Primitive Type base64Binary
+<base64Binary> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:base64Binary];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v @<base64Binary.value>?;          # Primitive value for base64Binary
+}  
+
+# A fixed quantity (no comparator)
+<SimpleQuantity> EXTENDS @<Quantity> CLOSED {   
+
+    a [fhir:SimpleQuantity];
+    fhir:nodeRole [fhir:treeRoot]?;
+} AND (
+
+# Constraint: UniqueKey:sqty-1
+# Human readable:The comparator is not used on a SimpleQuantity
+# XPath:not(exists(f:comparator))
+# Constraint:comparator.empty()
+# ShEx:
+
+ NOT { fhir:comparator {fhir:v .} } 
+
+)
+ 
+
+# A measured or measurable amount
+<Quantity> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Quantity];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:value @<Quantity.value>?;          # Numerical value (with implicit 
+                                            # precision) 
+    fhir:comparator @<Quantity.comparator>?;  # < | <= | >= | > | ad - how to 
+                                            # understand the value 
+    fhir:unit @<Quantity.unit>?;            # Unit representation
+    fhir:system @<Quantity.system>?;        # System that defines coded unit form
+    fhir:code @<Quantity.code>?;            # Coded form of the unit
+} AND (
+
+# Constraint: UniqueKey:qty-3
+# Human readable:If a code for the unit is present, the system SHALL also be present
+# XPath:not(exists(f:code)) or exists(f:system)
+# Constraint:code.empty() or system.exists()
+# ShEx:
+
+ NOT { fhir:code {fhir:v .} }  OR { fhir:system . }
+
+)
+ 
+
+# A ratio of two Quantity values - a numerator and a denominator
+<Ratio> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Ratio];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:numerator @<Ratio.numerator>?;     # Numerator value
+    fhir:denominator @<Ratio.denominator>?;  # Denominator value
+} AND (
+
+# Constraint: UniqueKey:rat-1
+# Human readable:Numerator and denominator SHALL both be present, or both are absent. If both are absent, there SHALL be some extension present
+# XPath:(count(f:numerator) = count(f:denominator)) and ((count(f:numerator) > 0) or (count(f:extension) > 0))
+# Constraint:(numerator.empty() xor denominator.exists()) and (numerator.exists() or extension.exists())
+# ShEx:
+
+(( NOT { fhir:numerator {fhir:v .} }  AND NOT  { fhir:denominator . }) OR ( NOT  NOT { fhir:numerator {fhir:v .} }  AND  { fhir:denominator . })) AND ({ fhir:numerator . } OR { fhir:extension . })
+
+)
+ 
+
+# Content in a format defined elsewhere
+<Attachment> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Attachment];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:contentType @<Attachment.contentType>?;  # Mime type of the content, with 
+                                            # charset etc. 
+    fhir:language @<Attachment.language>?;  # Human language of the content 
+                                            # (BCP-47) 
+    fhir:data @<Attachment.data>?;          # Data inline, base64ed
+    fhir:url @<Attachment.url>?;            # Uri where the data can be found
+    fhir:size @<Attachment.size>?;          # Number of bytes of content (if url 
+                                            # provided) 
+    fhir:hash @<Attachment.hash>?;          # Hash of the data (sha-1, base64ed)
+    fhir:title @<Attachment.title>?;        # Label to display in place of the 
+                                            # data 
+    fhir:creation @<Attachment.creation>?;  # Date attachment was first created
+    fhir:height @<Attachment.height>?;      # Height of the image in pixels 
+                                            # (photo/video) 
+    fhir:width @<Attachment.width>?;        # Width of the image in pixels 
+                                            # (photo/video) 
+    fhir:frames @<Attachment.frames>?;      # Number of frames if > 1 (photo)
+    fhir:duration @<Attachment.duration>?;  # Length in seconds (audio / video)
+    fhir:pages @<Attachment.pages>?;        # Number of printed pages
+} AND (
+
+# Constraint: UniqueKey:att-1
+# Human readable:If the Attachment has data, it SHALL have a contentType
+# XPath:not(exists(f:data)) or exists(f:contentType)
+# Constraint:data.empty() or contentType.exists()
+# ShEx:
+
+ NOT { fhir:data {fhir:v .} }  OR { fhir:contentType . }
+
+)
+ 
+
+# Set of values bounded by low and high
+<Range> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Range];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:low @<Range.low>?;                 # Low limit
+    fhir:high @<Range.high>?;               # High limit
+} AND (
+
+# Constraint: UniqueKey:rng-2
+# Human readable:If present, low SHALL have a lower value than high
+# XPath:not(exists(f:low/f:value/@value)) or not(exists(f:high/f:value/@value)) or (number(f:low/f:value/@value) <= number(f:high/f:value/@value))
+# Constraint:low.value.empty() or high.value.empty() or (low <= high)
+# ShEx:
+
+ NOT { fhir:low fhir:value {fhir:v .} }  OR  NOT { fhir:high fhir:value {fhir:v .} }  OR ({ fhir:low { fhir:v MaxInclusive { fhir:high } }  })
+
+)
+ 
+
+# Primitive Type uri
+<uri> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:uri];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v @<uri.value>?;                   # Primitive value for uri
+}  
+
+# Concept - reference to a terminology or just  text
+<CodeableConcept> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:CodeableConcept];
+    fhir:nodeRole [fhir:treeRoot]?;
+    a NONLITERAL*;
+    fhir:coding @<OneOrMore_CodeableConcept.coding>?;  # Code defined by a terminology 
+                                            # system 
+    fhir:text @<CodeableConcept.text>?;     # Plain text representation of the 
+                                            # concept 
+}  
+
+#---------------------- Cardinality Types (OneOrMore) -------------------
+
+<OneOrMore_MedicationKnowledge.identifier> CLOSED {
+    rdf:first @<MedicationKnowledge.identifier>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_MedicationKnowledge.identifier> 
+}
+
+<OneOrMore_MedicationKnowledge.intendedJurisdiction> CLOSED {
+    rdf:first @<MedicationKnowledge.intendedJurisdiction>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_MedicationKnowledge.intendedJurisdiction> 
+}
+
+<OneOrMore_MedicationKnowledge.name> CLOSED {
+    rdf:first @<MedicationKnowledge.name>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_MedicationKnowledge.name> 
+}
+
+<OneOrMore_MedicationKnowledge.relatedMedicationKnowledge> CLOSED {
+    rdf:first @<MedicationKnowledge.relatedMedicationKnowledge>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_MedicationKnowledge.relatedMedicationKnowledge> 
+}
+
+<OneOrMore_MedicationKnowledge.associatedMedication_Medication> CLOSED {
+    rdf:first @<MedicationKnowledge.associatedMedication> AND {fhir:link 
+			@<Medication> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_MedicationKnowledge.associatedMedication_Medication> 
+}
+
+<OneOrMore_MedicationKnowledge.productType> CLOSED {
+    rdf:first @<MedicationKnowledge.productType>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_MedicationKnowledge.productType> 
+}
+
+<OneOrMore_MedicationKnowledge.monograph> CLOSED {
+    rdf:first @<MedicationKnowledge.monograph>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_MedicationKnowledge.monograph> 
+}
+
+<OneOrMore_MedicationKnowledge.cost> CLOSED {
+    rdf:first @<MedicationKnowledge.cost>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_MedicationKnowledge.cost> 
+}
+
+<OneOrMore_MedicationKnowledge.monitoringProgram> CLOSED {
+    rdf:first @<MedicationKnowledge.monitoringProgram>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_MedicationKnowledge.monitoringProgram> 
+}
+
+<OneOrMore_MedicationKnowledge.indicationGuideline> CLOSED {
+    rdf:first @<MedicationKnowledge.indicationGuideline>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_MedicationKnowledge.indicationGuideline> 
+}
+
+<OneOrMore_MedicationKnowledge.medicineClassification> CLOSED {
+    rdf:first @<MedicationKnowledge.medicineClassification>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_MedicationKnowledge.medicineClassification> 
+}
+
+<OneOrMore_MedicationKnowledge.packaging> CLOSED {
+    rdf:first @<MedicationKnowledge.packaging>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_MedicationKnowledge.packaging> 
+}
+
+<OneOrMore_MedicationKnowledge.clinicalUseIssue_ClinicalUseDefinition> CLOSED {
+    rdf:first @<MedicationKnowledge.clinicalUseIssue> AND {fhir:link 
+			@<ClinicalUseDefinition> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_MedicationKnowledge.clinicalUseIssue_ClinicalUseDefinition> 
+}
+
+<OneOrMore_MedicationKnowledge.storageGuideline> CLOSED {
+    rdf:first @<MedicationKnowledge.storageGuideline>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_MedicationKnowledge.storageGuideline> 
+}
+
+<OneOrMore_MedicationKnowledge.regulatory> CLOSED {
+    rdf:first @<MedicationKnowledge.regulatory>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_MedicationKnowledge.regulatory> 
+}
+
+<OneOrMore_MedicationKnowledge.definitional.definition_MedicinalProductDefinition> CLOSED {
+    rdf:first @<MedicationKnowledge.definitional.definition> AND {fhir:link 
+			@<MedicinalProductDefinition> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_MedicationKnowledge.definitional.definition_MedicinalProductDefinition> 
+}
+
+<OneOrMore_MedicationKnowledge.definitional.intendedRoute> CLOSED {
+    rdf:first @<MedicationKnowledge.definitional.intendedRoute>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_MedicationKnowledge.definitional.intendedRoute> 
+}
+
+<OneOrMore_MedicationKnowledge.definitional.ingredient> CLOSED {
+    rdf:first @<MedicationKnowledge.definitional.ingredient>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_MedicationKnowledge.definitional.ingredient> 
+}
+
+<OneOrMore_MedicationKnowledge.definitional.drugCharacteristic> CLOSED {
+    rdf:first @<MedicationKnowledge.definitional.drugCharacteristic>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_MedicationKnowledge.definitional.drugCharacteristic> 
+}
+
+<OneOrMore_MedicationKnowledge.indicationGuideline.indication> CLOSED {
+    rdf:first @<MedicationKnowledge.indicationGuideline.indication>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_MedicationKnowledge.indicationGuideline.indication> 
+}
+
+<OneOrMore_MedicationKnowledge.indicationGuideline.dosingGuideline> CLOSED {
+    rdf:first @<MedicationKnowledge.indicationGuideline.dosingGuideline>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_MedicationKnowledge.indicationGuideline.dosingGuideline> 
+}
+
+<OneOrMore_MedicationKnowledge.regulatory.substitution> CLOSED {
+    rdf:first @<MedicationKnowledge.regulatory.substitution>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_MedicationKnowledge.regulatory.substitution> 
+}
+
+<OneOrMore_MedicationKnowledge.regulatory.schedule> CLOSED {
+    rdf:first @<MedicationKnowledge.regulatory.schedule>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_MedicationKnowledge.regulatory.schedule> 
+}
+
+<OneOrMore_MedicationKnowledge.medicineClassification.classification> CLOSED {
+    rdf:first @<MedicationKnowledge.medicineClassification.classification>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_MedicationKnowledge.medicineClassification.classification> 
+}
+
+<OneOrMore_MedicationKnowledge.storageGuideline.note> CLOSED {
+    rdf:first @<MedicationKnowledge.storageGuideline.note>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_MedicationKnowledge.storageGuideline.note> 
+}
+
+<OneOrMore_MedicationKnowledge.storageGuideline.environmentalSetting> CLOSED {
+    rdf:first @<MedicationKnowledge.storageGuideline.environmentalSetting>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_MedicationKnowledge.storageGuideline.environmentalSetting> 
+}
+
+<OneOrMore_MedicationKnowledge.cost.effectiveDate> CLOSED {
+    rdf:first @<MedicationKnowledge.cost.effectiveDate>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_MedicationKnowledge.cost.effectiveDate> 
+}
+
+<OneOrMore_MedicationKnowledge.indicationGuideline.dosingGuideline.dosage.dosage> CLOSED {
+    rdf:first @<MedicationKnowledge.indicationGuideline.dosingGuideline.dosage.dosage>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_MedicationKnowledge.indicationGuideline.dosingGuideline.dosage.dosage> 
+}
+
+<OneOrMore_MedicationKnowledge.indicationGuideline.dosingGuideline.dosage> CLOSED {
+    rdf:first @<MedicationKnowledge.indicationGuideline.dosingGuideline.dosage>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_MedicationKnowledge.indicationGuideline.dosingGuideline.dosage> 
+}
+
+<OneOrMore_MedicationKnowledge.indicationGuideline.dosingGuideline.patientCharacteristic> CLOSED {
+    rdf:first @<MedicationKnowledge.indicationGuideline.dosingGuideline.patientCharacteristic>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_MedicationKnowledge.indicationGuideline.dosingGuideline.patientCharacteristic> 
+}
+
+<OneOrMore_MedicationKnowledge.relatedMedicationKnowledge.reference_MedicationKnowledge> CLOSED {
+    rdf:first @<MedicationKnowledge.relatedMedicationKnowledge.reference> AND {fhir:link 
+			@<MedicationKnowledge> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_MedicationKnowledge.relatedMedicationKnowledge.reference_MedicationKnowledge> 
+}
+
+<OneOrMore_CodeableConcept.coding> CLOSED {
+    rdf:first @<CodeableConcept.coding>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_CodeableConcept.coding> 
+}
+
+#---------------------- Reference Types -------------------
+
+#---------------------- Value Sets ------------------------

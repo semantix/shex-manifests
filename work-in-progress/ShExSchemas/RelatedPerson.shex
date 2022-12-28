@@ -1,0 +1,87 @@
+﻿PREFIX fhir: <http://hl7.org/fhir/> 
+PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+BASE <http://hl7.org/fhir/shape/>
+
+
+start=@<RelatedPerson> AND {fhir:nodeRole [fhir:treeRoot]}
+
+
+# A person that is related to a patient, but who is not a direct target of care
+<RelatedPerson> EXTENDS @<DomainResource> CLOSED {   
+
+    a [fhir:RelatedPerson];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:identifier @<OneOrMore_RelatedPerson.identifier>?;  # A human identifier for this person
+    fhir:active @<RelatedPerson.active>?;   # Whether this related person's 
+                                            # record is in active use 
+    fhir:patient @<RelatedPerson.patient> AND {fhir:link 
+    			@<Patient> };  # The patient this person is related 
+                                            # to 
+    fhir:relationship @<OneOrMore_RelatedPerson.relationship>?;  # The relationship of the related 
+                                            # person to the patient 
+    fhir:name @<OneOrMore_RelatedPerson.name>?;  # A name associated with the person
+    fhir:telecom @<OneOrMore_RelatedPerson.telecom>?;  # A contact detail for the person
+    fhir:gender @<RelatedPerson.gender>?;   # male | female | other | unknown
+    fhir:birthDate @<RelatedPerson.birthDate>?;  # The date on which the related 
+                                            # person was born 
+    fhir:address @<OneOrMore_RelatedPerson.address>?;  # Address where the related person 
+                                            # can be contacted or visited 
+    fhir:photo @<OneOrMore_RelatedPerson.photo>?;  # Image of the person
+    fhir:period @<RelatedPerson.period>?;   # Period of time that this 
+                                            # relationship is considered valid 
+    fhir:communication @<OneOrMore_RelatedPerson.communication>?;  # A language which may be used to 
+                                            # communicate with the related 
+                                            # person about the patient's health 
+}  
+
+# A language which may be used to communicate with the related person about the patient's health
+<RelatedPerson.communication> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:language @<RelatedPerson.communication.language>;  # The language which can be used to 
+                                            # communicate with the related 
+                                            # person about the patient's health 
+    fhir:preferred @<RelatedPerson.communication.preferred>?;  # Language preference indicator
+}  
+
+#---------------------- Data Types -------------------
+
+#---------------------- Cardinality Types (OneOrMore) -------------------
+
+<OneOrMore_RelatedPerson.identifier> CLOSED {
+    rdf:first @<RelatedPerson.identifier>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_RelatedPerson.identifier> 
+}
+
+<OneOrMore_RelatedPerson.relationship> CLOSED {
+    rdf:first @<RelatedPerson.relationship>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_RelatedPerson.relationship> 
+}
+
+<OneOrMore_RelatedPerson.name> CLOSED {
+    rdf:first @<RelatedPerson.name>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_RelatedPerson.name> 
+}
+
+<OneOrMore_RelatedPerson.telecom> CLOSED {
+    rdf:first @<RelatedPerson.telecom>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_RelatedPerson.telecom> 
+}
+
+<OneOrMore_RelatedPerson.address> CLOSED {
+    rdf:first @<RelatedPerson.address>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_RelatedPerson.address> 
+}
+
+<OneOrMore_RelatedPerson.photo> CLOSED {
+    rdf:first @<RelatedPerson.photo>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_RelatedPerson.photo> 
+}
+
+<OneOrMore_RelatedPerson.communication> CLOSED {
+    rdf:first @<RelatedPerson.communication>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_RelatedPerson.communication> 
+}
+
+#---------------------- Reference Types -------------------
+
+#---------------------- Value Sets ------------------------

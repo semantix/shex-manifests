@@ -1,0 +1,504 @@
+﻿PREFIX fhir: <http://hl7.org/fhir/> 
+PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+BASE <http://hl7.org/fhir/shape/>
+
+
+start=@<AdverseEvent> AND {fhir:nodeRole [fhir:treeRoot]}
+
+
+# Medical care, research study or other healthcare event causing physical injury
+<AdverseEvent> EXTENDS @<DomainResource> CLOSED {   
+
+    a [fhir:AdverseEvent];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:identifier @<OneOrMore_AdverseEvent.identifier>?;  # Business identifier for the event
+    fhir:status @<AdverseEvent.status>;     # in-progress | completed | 
+                                            # entered-in-error | unknown 
+    fhir:actuality @<AdverseEvent.actuality>;  # actual | potential
+    fhir:category @<OneOrMore_AdverseEvent.category>?;  # wrong-patient | procedure-mishap | 
+                                            # medication-mishap | device | 
+                                            # unsafe-physical-environment | 
+                                            # hospital-aquired-infection | 
+                                            # wrong-body-site 
+    fhir:code @<AdverseEvent.code>?;        # Event or incident that occurred or 
+                                            # was averted 
+    fhir:subject @<AdverseEvent.subject> AND {fhir:link 
+    			@<Group> OR 
+    			@<Patient> OR 
+    			@<Practitioner> OR 
+    			@<RelatedPerson> };  # Subject impacted by event
+    fhir:encounter @<AdverseEvent.encounter> AND {fhir:link 
+    			@<Encounter> }?;  # The Encounter associated with the 
+                                            # start of the AdverseEvent 
+    fhir:occurrence (@<dateTime>  OR 
+    			@<Period>  OR 
+    			@<Timing> )  AND { rdf:type IRI } ?;  # When the event occurred
+    fhir:detected @<AdverseEvent.detected>?;  # When the event was detected
+    fhir:recordedDate @<AdverseEvent.recordedDate>?;  # When the event was recorded
+    fhir:resultingCondition @<OneOrMore_AdverseEvent.resultingCondition_Condition>?;  # Effect on the subject due to this 
+                                            # event 
+    fhir:location @<AdverseEvent.location> AND {fhir:link 
+    			@<Location> }?;  # Location where adverse event 
+                                            # occurred 
+    fhir:seriousness @<AdverseEvent.seriousness>?;  # Seriousness or gravity of the event
+    fhir:outcome @<OneOrMore_AdverseEvent.outcome>?;  # Type of outcome from the adverse 
+                                            # event 
+    fhir:recorder @<AdverseEvent.recorder> AND {fhir:link 
+    			@<Patient> OR 
+    			@<Practitioner> OR 
+    			@<PractitionerRole> OR 
+    			@<RelatedPerson> }?;  # Who recorded the adverse event
+    fhir:participant @<OneOrMore_AdverseEvent.participant>?;  # Who was involved in the adverse 
+                                            # event or the potential adverse 
+                                            # event and what they did 
+    fhir:expectedInResearchStudy @<AdverseEvent.expectedInResearchStudy>?;  # Considered likely or probable or 
+                                            # anticipated in the research study 
+    fhir:suspectEntity @<OneOrMore_AdverseEvent.suspectEntity>?;  # The suspected agent causing the 
+                                            # adverse event 
+    fhir:contributingFactor @<OneOrMore_AdverseEvent.contributingFactor>?;  # Contributing factors suspected to 
+                                            # have increased the probability or 
+                                            # severity of the adverse event 
+    fhir:preventiveAction @<OneOrMore_AdverseEvent.preventiveAction>?;  # Preventive actions that 
+                                            # contributed to avoiding the 
+                                            # adverse event 
+    fhir:mitigatingAction @<OneOrMore_AdverseEvent.mitigatingAction>?;  # Ameliorating actions taken after 
+                                            # the adverse event occured in order 
+                                            # to reduce the extent of harm 
+    fhir:supportingInfo @<OneOrMore_AdverseEvent.supportingInfo>?;  # Supporting information relevant to 
+                                            # the event 
+    fhir:study @<OneOrMore_AdverseEvent.study_ResearchStudy>?;  # Research study that the subject is 
+                                            # enrolled in 
+}  
+
+# Who was involved in the adverse event or the potential adverse event and what they did
+<AdverseEvent.participant> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:function @<AdverseEvent.participant.function>?;  # Type of involvement
+    fhir:actor @<AdverseEvent.participant.actor> AND {fhir:link 
+    			@<CareTeam> OR 
+    			@<Device> OR 
+    			@<Organization> OR 
+    			@<Patient> OR 
+    			@<Practitioner> OR 
+    			@<PractitionerRole> OR 
+    			@<RelatedPerson> };  # Who was involved in the adverse 
+                                            # event or the potential adverse 
+                                            # event 
+}  
+
+# Preventive actions that contributed to avoiding the adverse event
+<AdverseEvent.preventiveAction> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:item ((@<Reference>  AND {fhir:link @<Immunization> OR 
+    			 @<Procedure> OR 
+    			 @<DocumentReference> OR 
+    			 @<MedicationAdministration> OR 
+    			 @<MedicationRequest> })  OR 
+    			@<CodeableConcept> )  AND { rdf:type IRI } ;  # Action that contributed to 
+                                            # avoiding the adverse event 
+}  
+
+# Ameliorating actions taken after the adverse event occured in order to reduce the extent of harm
+<AdverseEvent.mitigatingAction> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:item ((@<Reference>  AND {fhir:link @<Procedure> OR 
+    			 @<DocumentReference> OR 
+    			 @<MedicationAdministration> OR 
+    			 @<MedicationRequest> })  OR 
+    			@<CodeableConcept> )  AND { rdf:type IRI } ;  # Ameliorating action taken after 
+                                            # the adverse event occured in order 
+                                            # to reduce the extent of harm 
+}  
+
+# The suspected agent causing the adverse event
+<AdverseEvent.suspectEntity> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:instance (@<CodeableConcept>  OR 
+    			(@<Reference>  AND {fhir:link @<Immunization> OR 
+    			 @<Procedure> OR 
+    			 @<Substance> OR 
+    			 @<Medication> OR 
+    			 @<MedicationAdministration> OR 
+    			 @<MedicationUsage> OR 
+    			 @<Device> OR 
+    			 @<BiologicallyDerivedProduct> OR 
+    			 @<ResearchStudy> }) )  AND { rdf:type IRI } ;  # Refers to the specific entity that 
+                                            # caused the adverse event 
+    fhir:causality @<AdverseEvent.suspectEntity.causality>?;  # Information on the possible cause 
+                                            # of the event 
+}  
+
+# Supporting information relevant to the event
+<AdverseEvent.supportingInfo> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:item ((@<Reference>  AND {fhir:link @<Condition> OR 
+    			 @<Observation> OR 
+    			 @<AllergyIntolerance> OR 
+    			 @<FamilyMemberHistory> OR 
+    			 @<Immunization> OR 
+    			 @<Procedure> OR 
+    			 @<DocumentReference> })  OR 
+    			@<CodeableConcept> )  AND { rdf:type IRI } ;  # Subject medical history or 
+                                            # document relevant to this adverse 
+                                            # event 
+}  
+
+# Information on the possible cause of the event
+<AdverseEvent.suspectEntity.causality> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:assessmentMethod @<AdverseEvent.suspectEntity.causality.assessmentMethod>?;  # Method of evaluating the 
+                                            # relatedness of the suspected 
+                                            # entity to the event 
+    fhir:entityRelatedness @<AdverseEvent.suspectEntity.causality.entityRelatedness>?;  # Result of the assessment regarding 
+                                            # the relatedness of the suspected 
+                                            # entity to the event 
+    fhir:author @<AdverseEvent.suspectEntity.causality.author> AND {fhir:link 
+    			@<Patient> OR 
+    			@<Practitioner> OR 
+    			@<PractitionerRole> OR 
+    			@<RelatedPerson> }?;  # Author of the information on the 
+                                            # possible cause of the event 
+}  
+
+# Contributing factors suspected to have increased the probability or severity of the adverse event
+<AdverseEvent.contributingFactor> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:item ((@<Reference>  AND {fhir:link @<Condition> OR 
+    			 @<Observation> OR 
+    			 @<AllergyIntolerance> OR 
+    			 @<FamilyMemberHistory> OR 
+    			 @<Immunization> OR 
+    			 @<Procedure> OR 
+    			 @<DocumentReference> })  OR 
+    			@<CodeableConcept> )  AND { rdf:type IRI } ;  # Item suspected to have increased 
+                                            # the probability or severity of the 
+                                            # adverse event 
+}  
+
+#---------------------- Data Types -------------------
+
+# Primitive Type dateTime
+<dateTime> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:dateTime];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v @<dateTime.value>?;              # Primitive value for dateTime
+}  
+
+# A reference from one resource to another
+<Reference> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Reference];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:link IRI?;
+    fhir:reference @<Reference.reference>?;  # Literal reference, Relative, 
+                                            # internal or absolute URL 
+    fhir:type @<Reference.type>?;           # Type the reference refers to (e.g. 
+                                            # "Patient") 
+    fhir:identifier @<Reference.identifier>?;  # Logical reference, when literal 
+                                            # reference is not known 
+    fhir:display @<Reference.display>?;     # Text alternative for the resource
+} AND (
+
+# Constraint: UniqueKey:ref-1
+# Human readable:SHALL have a contained resource if a local reference is provided
+# XPath:not(starts-with(f:reference/@value, '#')) or exists(ancestor::*[self::f:entry or self::f:parameter]/f:resource/f:*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')]|/*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')])
+# Constraint:reference.startsWith('#').not() or (reference.substring(1).trace('url') in %rootResource.contained.id.trace('ids')) or (reference='#' and %rootResource!=%resource)
+# ShEx:
+
+
+)
+ 
+
+# Time range defined by start and end date/time
+<Period> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Period];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:start @<Period.start>?;            # Starting time with inclusive 
+                                            # boundary 
+    fhir:end @<Period.end>?;                # End time with inclusive boundary, 
+                                            # if not ongoing 
+} AND (
+
+# Constraint: UniqueKey:per-1
+# Human readable:If present, start SHALL have a lower or equal value than end
+# XPath:not(exists(f:start/@value)) or not(exists(f:end/@value)) or (xs:dateTime(f:start/@value) <= xs:dateTime(f:end/@value))
+# Constraint:start.hasValue().not() or end.hasValue().not() or (start <= end)
+# ShEx:
+
+ NOT { fhir:start  . } OR  NOT { fhir:end  . } OR ({ fhir:start { fhir:v MaxInclusive { fhir:end } }  })
+
+)
+ 
+
+# A timing schedule that specifies an event that may occur multiple times
+<Timing> EXTENDS @<BackboneType> CLOSED {   
+
+    a [fhir:Timing];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:event @<OneOrMore_Timing.event>?;  # When the event occurs
+    fhir:repeat @<Timing.repeat>?;          # When the event is to occur
+    fhir:code @<Timing.code>?;              # C | BID | TID | QID | AM | PM | QD 
+                                            # | QOD | + 
+} AND (
+
+# Constraint: UniqueKey:tim-9
+# Human readable:If there's an offset, there must be a when (and not C, CM, CD, CV)
+# XPath:not(exists(f:offset)) or exists(f:when)
+# Constraint:offset.empty() or (when.exists() and ((when in ('C' | 'CM' | 'CD' | 'CV')).not()))
+# ShEx:
+
+ NOT { fhir:offset {fhir:v .} }  OR ({ fhir:when . } AND ( NOT { { fhir:when { fhir:v [('C' | 'CM' | 'CD' | 'CV')] }  } }))
+
+) AND (
+
+# Constraint: UniqueKey:tim-5
+# Human readable:period SHALL be a non-negative value
+# XPath:f:period/@value >= 0 or not(f:period/@value)
+# Constraint:period.exists() implies period >= 0
+# ShEx:
+
+{ fhir:period . } AND ({ fhir:period { fhir:v MinInclusive 0 }  })
+
+) AND (
+
+# Constraint: UniqueKey:tim-6
+# Human readable:If there's a periodMax, there must be a period
+# XPath:not(exists(f:periodMax)) or exists(f:period)
+# Constraint:periodMax.empty() or period.exists()
+# ShEx:
+
+ NOT { fhir:periodMax {fhir:v .} }  OR { fhir:period . }
+
+) AND (
+
+# Constraint: UniqueKey:tim-7
+# Human readable:If there's a durationMax, there must be a duration
+# XPath:not(exists(f:durationMax)) or exists(f:duration)
+# Constraint:durationMax.empty() or duration.exists()
+# ShEx:
+
+ NOT { fhir:durationMax {fhir:v .} }  OR { fhir:duration . }
+
+) AND (
+
+# Constraint: UniqueKey:tim-8
+# Human readable:If there's a countMax, there must be a count
+# XPath:not(exists(f:countMax)) or exists(f:count)
+# Constraint:countMax.empty() or count.exists()
+# ShEx:
+
+ NOT { fhir:countMax {fhir:v .} }  OR { fhir:count . }
+
+) AND (
+
+# Constraint: UniqueKey:tim-1
+# Human readable:if there's a duration, there needs to be duration units
+# XPath:not(exists(f:duration)) or exists(f:durationUnit)
+# Constraint:duration.empty() or durationUnit.exists()
+# ShEx:
+
+ NOT { fhir:duration {fhir:v .} }  OR { fhir:durationUnit . }
+
+) AND (
+
+# Constraint: UniqueKey:tim-10
+# Human readable:If there's a timeOfDay, there cannot be a when, or vice versa
+# XPath:not(exists(f:timeOfDay)) or not(exists(f:when))
+# Constraint:timeOfDay.empty() or when.empty()
+# ShEx:
+
+ NOT { fhir:timeOfDay {fhir:v .} }  OR  NOT { fhir:when {fhir:v .} } 
+
+) AND (
+
+# Constraint: UniqueKey:tim-2
+# Human readable:if there's a period, there needs to be period units
+# XPath:not(exists(f:period)) or exists(f:periodUnit)
+# Constraint:period.empty() or periodUnit.exists()
+# ShEx:
+
+ NOT { fhir:period {fhir:v .} }  OR { fhir:periodUnit . }
+
+) AND (
+
+# Constraint: UniqueKey:tim-4
+# Human readable:duration SHALL be a non-negative value
+# XPath:f:duration/@value >= 0 or not(f:duration/@value)
+# Constraint:duration.exists() implies duration >= 0
+# ShEx:
+
+{ fhir:duration . } AND ({ fhir:duration { fhir:v MinInclusive 0 }  })
+
+)
+ 
+
+# Concept - reference to a terminology or just  text
+<CodeableConcept> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:CodeableConcept];
+    fhir:nodeRole [fhir:treeRoot]?;
+    a NONLITERAL*;
+    fhir:coding @<OneOrMore_CodeableConcept.coding>?;  # Code defined by a terminology 
+                                            # system 
+    fhir:text @<CodeableConcept.text>?;     # Plain text representation of the 
+                                            # concept 
+}  
+
+# When the event is to occur
+<Timing.repeat> EXTENDS @<Element> CLOSED {   
+    fhir:bounds (@<Duration>  OR 
+    			@<Range>  OR 
+    			@<Period> )  AND { rdf:type IRI } ?;  # Length/Range of lengths, or (Start 
+                                            # and/or end) limits 
+    fhir:count @<Timing.repeat.count>?;     # Number of times to repeat
+    fhir:countMax @<Timing.repeat.countMax>?;  # Maximum number of times to repeat
+    fhir:duration @<Timing.repeat.duration>?;  # How long when it happens
+    fhir:durationMax @<Timing.repeat.durationMax>?;  # How long when it happens (Max)
+    fhir:durationUnit @<Timing.repeat.durationUnit>?;  # s | min | h | d | wk | mo | a - 
+                                            # unit of time (UCUM) 
+    fhir:frequency @<Timing.repeat.frequency>?;  # Indicates the number of 
+                                            # repetitions that should occur 
+                                            # within a period. I.e. Event occurs 
+                                            # frequency times per period 
+    fhir:frequencyMax @<Timing.repeat.frequencyMax>?;  # Event occurs up to frequencyMax 
+                                            # times per period 
+    fhir:period @<Timing.repeat.period>?;   # The duration to which the 
+                                            # frequency applies. I.e. Event 
+                                            # occurs frequency times per period 
+    fhir:periodMax @<Timing.repeat.periodMax>?;  # Upper limit of period (3-4 hours)
+    fhir:periodUnit @<Timing.repeat.periodUnit>?;  # s | min | h | d | wk | mo | a - 
+                                            # unit of time (UCUM) 
+    fhir:dayOfWeek @<OneOrMore_Timing.repeat.dayOfWeek>?;  # mon | tue | wed | thu | fri | sat 
+                                            # | sun 
+    fhir:timeOfDay @<OneOrMore_Timing.repeat.timeOfDay>?;  # Time of day for action
+    fhir:when @<OneOrMore_Timing.repeat.when>?;  # Code for time period of occurrence
+    fhir:offset @<Timing.repeat.offset>?;   # Minutes from event (before or 
+                                            # after) 
+} AND (
+
+
+
+)
+ 
+
+# A length of time
+<Duration> EXTENDS @<Quantity> CLOSED {   
+
+    a [fhir:Duration];
+    fhir:nodeRole [fhir:treeRoot]?;
+} AND (
+
+# Constraint: UniqueKey:drt-1
+# Human readable:There SHALL be a code if there is a value and it SHALL be an expression of time.  If system is present, it SHALL be UCUM.
+# XPath:(f:code or not(f:value)) and (not(exists(f:system)) or f:system/@value='http://unitsofmeasure.org')
+# Constraint:code.exists() implies ((system = %ucum) and value.exists())
+# ShEx:
+
+{ fhir:code . } AND (({ fhir:system { fhir:v ['http://unitsofmeasure.org'] }  }) AND { fhir:value . })
+
+)
+ 
+
+# Set of values bounded by low and high
+<Range> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Range];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:low @<Range.low>?;                 # Low limit
+    fhir:high @<Range.high>?;               # High limit
+} AND (
+
+# Constraint: UniqueKey:rng-2
+# Human readable:If present, low SHALL have a lower value than high
+# XPath:not(exists(f:low/f:value/@value)) or not(exists(f:high/f:value/@value)) or (number(f:low/f:value/@value) <= number(f:high/f:value/@value))
+# Constraint:low.value.empty() or high.value.empty() or (low <= high)
+# ShEx:
+
+ NOT { fhir:low fhir:value {fhir:v .} }  OR  NOT { fhir:high fhir:value {fhir:v .} }  OR ({ fhir:low { fhir:v MaxInclusive { fhir:high } }  })
+
+)
+ 
+
+#---------------------- Cardinality Types (OneOrMore) -------------------
+
+<OneOrMore_AdverseEvent.identifier> CLOSED {
+    rdf:first @<AdverseEvent.identifier>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_AdverseEvent.identifier> 
+}
+
+<OneOrMore_AdverseEvent.category> CLOSED {
+    rdf:first @<AdverseEvent.category>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_AdverseEvent.category> 
+}
+
+<OneOrMore_AdverseEvent.resultingCondition_Condition> CLOSED {
+    rdf:first @<AdverseEvent.resultingCondition> AND {fhir:link 
+			@<Condition> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_AdverseEvent.resultingCondition_Condition> 
+}
+
+<OneOrMore_AdverseEvent.outcome> CLOSED {
+    rdf:first @<AdverseEvent.outcome>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_AdverseEvent.outcome> 
+}
+
+<OneOrMore_AdverseEvent.participant> CLOSED {
+    rdf:first @<AdverseEvent.participant>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_AdverseEvent.participant> 
+}
+
+<OneOrMore_AdverseEvent.suspectEntity> CLOSED {
+    rdf:first @<AdverseEvent.suspectEntity>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_AdverseEvent.suspectEntity> 
+}
+
+<OneOrMore_AdverseEvent.contributingFactor> CLOSED {
+    rdf:first @<AdverseEvent.contributingFactor>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_AdverseEvent.contributingFactor> 
+}
+
+<OneOrMore_AdverseEvent.preventiveAction> CLOSED {
+    rdf:first @<AdverseEvent.preventiveAction>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_AdverseEvent.preventiveAction> 
+}
+
+<OneOrMore_AdverseEvent.mitigatingAction> CLOSED {
+    rdf:first @<AdverseEvent.mitigatingAction>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_AdverseEvent.mitigatingAction> 
+}
+
+<OneOrMore_AdverseEvent.supportingInfo> CLOSED {
+    rdf:first @<AdverseEvent.supportingInfo>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_AdverseEvent.supportingInfo> 
+}
+
+<OneOrMore_AdverseEvent.study_ResearchStudy> CLOSED {
+    rdf:first @<AdverseEvent.study> AND {fhir:link 
+			@<ResearchStudy> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_AdverseEvent.study_ResearchStudy> 
+}
+
+<OneOrMore_Timing.event> CLOSED {
+    rdf:first @<Timing.event>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Timing.event> 
+}
+
+<OneOrMore_CodeableConcept.coding> CLOSED {
+    rdf:first @<CodeableConcept.coding>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_CodeableConcept.coding> 
+}
+
+<OneOrMore_Timing.repeat.dayOfWeek> CLOSED {
+    rdf:first @<Timing.repeat.dayOfWeek>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Timing.repeat.dayOfWeek> 
+}
+
+<OneOrMore_Timing.repeat.timeOfDay> CLOSED {
+    rdf:first @<Timing.repeat.timeOfDay>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Timing.repeat.timeOfDay> 
+}
+
+<OneOrMore_Timing.repeat.when> CLOSED {
+    rdf:first @<Timing.repeat.when>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Timing.repeat.when> 
+}
+
+#---------------------- Reference Types -------------------
+
+#---------------------- Value Sets ------------------------

@@ -1,0 +1,233 @@
+﻿PREFIX fhir: <http://hl7.org/fhir/> 
+PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+BASE <http://hl7.org/fhir/shape/>
+
+
+start=@<Communication> AND {fhir:nodeRole [fhir:treeRoot]}
+
+
+# A clinical or business level record of information being transmitted or shared
+<Communication> EXTENDS @<DomainResource> CLOSED {   
+
+    a [fhir:Communication];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:identifier @<OneOrMore_Communication.identifier>?;  # Unique identifier
+    fhir:instantiatesCanonical @<OneOrMore_Communication.instantiatesCanonical>?;  # Instantiates FHIR protocol or 
+                                            # definition 
+    fhir:instantiatesUri @<OneOrMore_Communication.instantiatesUri>?;  # Instantiates external protocol or 
+                                            # definition 
+    fhir:basedOn @<OneOrMore_Communication.basedOn_Resource>?;  # Request fulfilled by this 
+                                            # communication 
+    fhir:partOf @<OneOrMore_Communication.partOf_Resource>?;  # Part of referenced event (e.g. 
+                                            # Communication, Procedure) 
+    fhir:inResponseTo @<OneOrMore_Communication.inResponseTo_Communication>?;  # Reply to
+    fhir:status @<Communication.status>;    # preparation | in-progress | 
+                                            # not-done | on-hold | stopped | 
+                                            # completed | entered-in-error | 
+                                            # unknown 
+    fhir:statusReason @<Communication.statusReason>?;  # Reason for current status
+    fhir:category @<OneOrMore_Communication.category>?;  # Message category
+    fhir:priority @<Communication.priority>?;  # routine | urgent | asap | stat
+    fhir:medium @<OneOrMore_Communication.medium>?;  # A channel of communication
+    fhir:subject @<Communication.subject> AND {fhir:link 
+    			@<Group> OR 
+    			@<Patient> }?;  # Focus of message
+    fhir:topic @<Communication.topic>?;     # Description of the purpose/content
+    fhir:about @<OneOrMore_Communication.about_Resource>?;  # Resources that pertain to this 
+                                            # communication 
+    fhir:encounter @<Communication.encounter> AND {fhir:link 
+    			@<Encounter> }?;  # The Encounter during which this 
+                                            # Communication was created 
+    fhir:sent @<Communication.sent>?;       # When sent
+    fhir:received @<Communication.received>?;  # When received
+    fhir:recipient @<OneOrMore_Communication.recipient_CareTeam_OR_Device_OR_Endpoint_OR_Group_OR_HealthcareService_OR_Location_OR_Organization_OR_Patient_OR_Practitioner_OR_PractitionerRole_OR_RelatedPerson>?;  # Who the information is shared with
+    fhir:sender @<Communication.sender> AND {fhir:link 
+    			@<CareTeam> OR 
+    			@<Device> OR 
+    			@<Endpoint> OR 
+    			@<HealthcareService> OR 
+    			@<Organization> OR 
+    			@<Patient> OR 
+    			@<Practitioner> OR 
+    			@<PractitionerRole> OR 
+    			@<RelatedPerson> }?;  # Who shares the information
+    fhir:reason @<OneOrMore_Communication.reason>?;  # Indication for message
+    fhir:payload @<OneOrMore_Communication.payload>?;  # Message payload
+    fhir:note @<OneOrMore_Communication.note>?;  # Comments made about the 
+                                            # communication 
+}  
+
+# Message payload
+<Communication.payload> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:content (@<Attachment>  OR 
+    			(@<Reference>  AND {fhir:link @<Resource> })  OR 
+    			@<CodeableConcept> )  AND { rdf:type IRI } ;  # Message part content
+}  
+
+#---------------------- Data Types -------------------
+
+# A reference from one resource to another
+<Reference> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Reference];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:link IRI?;
+    fhir:reference @<Reference.reference>?;  # Literal reference, Relative, 
+                                            # internal or absolute URL 
+    fhir:type @<Reference.type>?;           # Type the reference refers to (e.g. 
+                                            # "Patient") 
+    fhir:identifier @<Reference.identifier>?;  # Logical reference, when literal 
+                                            # reference is not known 
+    fhir:display @<Reference.display>?;     # Text alternative for the resource
+} AND (
+
+# Constraint: UniqueKey:ref-1
+# Human readable:SHALL have a contained resource if a local reference is provided
+# XPath:not(starts-with(f:reference/@value, '#')) or exists(ancestor::*[self::f:entry or self::f:parameter]/f:resource/f:*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')]|/*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')])
+# Constraint:reference.startsWith('#').not() or (reference.substring(1).trace('url') in %rootResource.contained.id.trace('ids')) or (reference='#' and %rootResource!=%resource)
+# ShEx:
+
+
+)
+ 
+
+# Content in a format defined elsewhere
+<Attachment> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Attachment];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:contentType @<Attachment.contentType>?;  # Mime type of the content, with 
+                                            # charset etc. 
+    fhir:language @<Attachment.language>?;  # Human language of the content 
+                                            # (BCP-47) 
+    fhir:data @<Attachment.data>?;          # Data inline, base64ed
+    fhir:url @<Attachment.url>?;            # Uri where the data can be found
+    fhir:size @<Attachment.size>?;          # Number of bytes of content (if url 
+                                            # provided) 
+    fhir:hash @<Attachment.hash>?;          # Hash of the data (sha-1, base64ed)
+    fhir:title @<Attachment.title>?;        # Label to display in place of the 
+                                            # data 
+    fhir:creation @<Attachment.creation>?;  # Date attachment was first created
+    fhir:height @<Attachment.height>?;      # Height of the image in pixels 
+                                            # (photo/video) 
+    fhir:width @<Attachment.width>?;        # Width of the image in pixels 
+                                            # (photo/video) 
+    fhir:frames @<Attachment.frames>?;      # Number of frames if > 1 (photo)
+    fhir:duration @<Attachment.duration>?;  # Length in seconds (audio / video)
+    fhir:pages @<Attachment.pages>?;        # Number of printed pages
+} AND (
+
+# Constraint: UniqueKey:att-1
+# Human readable:If the Attachment has data, it SHALL have a contentType
+# XPath:not(exists(f:data)) or exists(f:contentType)
+# Constraint:data.empty() or contentType.exists()
+# ShEx:
+
+ NOT { fhir:data {fhir:v .} }  OR { fhir:contentType . }
+
+)
+ 
+
+# Concept - reference to a terminology or just  text
+<CodeableConcept> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:CodeableConcept];
+    fhir:nodeRole [fhir:treeRoot]?;
+    a NONLITERAL*;
+    fhir:coding @<OneOrMore_CodeableConcept.coding>?;  # Code defined by a terminology 
+                                            # system 
+    fhir:text @<CodeableConcept.text>?;     # Plain text representation of the 
+                                            # concept 
+}  
+
+#---------------------- Cardinality Types (OneOrMore) -------------------
+
+<OneOrMore_Communication.identifier> CLOSED {
+    rdf:first @<Communication.identifier>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Communication.identifier> 
+}
+
+<OneOrMore_Communication.instantiatesCanonical> CLOSED {
+    rdf:first @<Communication.instantiatesCanonical>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Communication.instantiatesCanonical> 
+}
+
+<OneOrMore_Communication.instantiatesUri> CLOSED {
+    rdf:first @<Communication.instantiatesUri>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Communication.instantiatesUri> 
+}
+
+<OneOrMore_Communication.basedOn_Resource> CLOSED {
+    rdf:first @<Communication.basedOn> AND {fhir:link 
+			@<Resource> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Communication.basedOn_Resource> 
+}
+
+<OneOrMore_Communication.partOf_Resource> CLOSED {
+    rdf:first @<Communication.partOf> AND {fhir:link 
+			@<Resource> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Communication.partOf_Resource> 
+}
+
+<OneOrMore_Communication.inResponseTo_Communication> CLOSED {
+    rdf:first @<Communication.inResponseTo> AND {fhir:link 
+			@<Communication> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Communication.inResponseTo_Communication> 
+}
+
+<OneOrMore_Communication.category> CLOSED {
+    rdf:first @<Communication.category>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Communication.category> 
+}
+
+<OneOrMore_Communication.medium> CLOSED {
+    rdf:first @<Communication.medium>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Communication.medium> 
+}
+
+<OneOrMore_Communication.about_Resource> CLOSED {
+    rdf:first @<Communication.about> AND {fhir:link 
+			@<Resource> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Communication.about_Resource> 
+}
+
+<OneOrMore_Communication.recipient_CareTeam_OR_Device_OR_Endpoint_OR_Group_OR_HealthcareService_OR_Location_OR_Organization_OR_Patient_OR_Practitioner_OR_PractitionerRole_OR_RelatedPerson> CLOSED {
+    rdf:first @<Communication.recipient> AND {fhir:link 
+			@<CareTeam> OR 
+			@<Device> OR 
+			@<Endpoint> OR 
+			@<Group> OR 
+			@<HealthcareService> OR 
+			@<Location> OR 
+			@<Organization> OR 
+			@<Patient> OR 
+			@<Practitioner> OR 
+			@<PractitionerRole> OR 
+			@<RelatedPerson> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Communication.recipient_CareTeam_OR_Device_OR_Endpoint_OR_Group_OR_HealthcareService_OR_Location_OR_Organization_OR_Patient_OR_Practitioner_OR_PractitionerRole_OR_RelatedPerson> 
+}
+
+<OneOrMore_Communication.reason> CLOSED {
+    rdf:first @<Communication.reason>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Communication.reason> 
+}
+
+<OneOrMore_Communication.payload> CLOSED {
+    rdf:first @<Communication.payload>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Communication.payload> 
+}
+
+<OneOrMore_Communication.note> CLOSED {
+    rdf:first @<Communication.note>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Communication.note> 
+}
+
+<OneOrMore_CodeableConcept.coding> CLOSED {
+    rdf:first @<CodeableConcept.coding>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_CodeableConcept.coding> 
+}
+
+#---------------------- Reference Types -------------------
+
+#---------------------- Value Sets ------------------------

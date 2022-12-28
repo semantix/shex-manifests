@@ -1,0 +1,36 @@
+﻿PREFIX fhir: <http://hl7.org/fhir/> 
+PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+BASE <http://hl7.org/fhir/shape/>
+
+
+# equivalent | equal | wider | subsumes | narrower | specializes | inexact | unmatched | disjoint
+<elementdefinition-equivalence> EXTENDS @<Extension> CLOSED {   
+
+    a [fhir:elementdefinition-equivalence];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v @<Extension.url> AND
+    	{fhir:value ["http://hl7.org/fhir/StructureDefinition/elementdefinition-equivalence"]}; 
+    fhir:value (@<code> AND
+    	{fhir:value @fhirvs:concept-map-equivalence} )  AND { rdf:type IRI } ; 
+    ^fhir:extension { ^fhir:mapping {a [fhir:ElementDefinition]}
+    		}
+}  
+
+#---------------------- Data Types -------------------
+
+# Primitive Type code
+<code> EXTENDS @<string> CLOSED {   
+
+    a [fhir:code];
+    fhir:nodeRole [fhir:treeRoot]?;
+}  
+
+#---------------------- Cardinality Types (OneOrMore) -------------------
+
+#---------------------- Reference Types -------------------
+
+#---------------------- Value Sets ------------------------
+
+# The degree of equivalence between concepts.
+fhirvs:concept-map-equivalence ["relatedto" "equivalent" "equal" "wider" "subsumes" "narrower" "specializes" "inexact" "unmatched" "disjoint"]

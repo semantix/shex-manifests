@@ -1,0 +1,91 @@
+﻿PREFIX fhir: <http://hl7.org/fhir/> 
+PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+BASE <http://hl7.org/fhir/shape/>
+
+
+start=@<CompartmentDefinition> AND {fhir:nodeRole [fhir:treeRoot]}
+
+
+# Compartment Definition for a resource
+<CompartmentDefinition> EXTENDS @<CanonicalResource> CLOSED {   
+
+    a [fhir:CompartmentDefinition];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:url @<CompartmentDefinition.url>;  # Canonical identifier for this 
+                                            # compartment definition, 
+                                            # represented as a URI (globally 
+                                            # unique) 
+    fhir:version @<CompartmentDefinition.version>?;  # Business version of the 
+                                            # compartment definition 
+    fhir:name @<CompartmentDefinition.name>;  # Name for this compartment 
+                                            # definition (computer friendly) 
+    fhir:status @<CompartmentDefinition.status>;  # draft | active | retired | unknown
+    fhir:experimental @<CompartmentDefinition.experimental>?;  # For testing purposes, not real 
+                                            # usage 
+    fhir:date @<CompartmentDefinition.date>?;  # Date last changed
+    fhir:publisher @<CompartmentDefinition.publisher>?;  # Name of the publisher 
+                                            # (organization or individual) 
+    fhir:contact @<OneOrMore_CompartmentDefinition.contact>?;  # Contact details for the publisher
+    fhir:description @<CompartmentDefinition.description>?;  # Natural language description of 
+                                            # the compartment definition 
+    fhir:useContext @<OneOrMore_CompartmentDefinition.useContext>?;  # The context that the content is 
+                                            # intended to support 
+    fhir:purpose @<CompartmentDefinition.purpose>?;  # Why this compartment definition is 
+                                            # defined 
+    fhir:code @<CompartmentDefinition.code>;  # Patient | Encounter | 
+                                            # RelatedPerson | Practitioner | 
+                                            # Device 
+    fhir:search @<CompartmentDefinition.search>;  # Whether the search syntax is 
+                                            # supported 
+    fhir:resource @<OneOrMore_CompartmentDefinition.resource>?;  # How a resource is related to the 
+                                            # compartment 
+} AND (
+
+# Constraint: UniqueKey:cnl-0
+# Human readable:Name should be usable as an identifier for the module by machine processing applications such as code generation
+# XPath:not(exists(f:name/@value)) or matches(f:name/@value, '[A-Z]([A-Za-z0-9_]){0,254}')
+# Constraint:name.exists() implies name.matches('[A-Z]([A-Za-z0-9_]){0,254}')
+# ShEx:
+
+{ fhir:name . } AND { fhir:name { fhir:v /'[A-Z]([A-Za-z0-9_]){0,254}'/ }  }
+
+)
+ 
+
+# How a resource is related to the compartment
+<CompartmentDefinition.resource> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:code @<CompartmentDefinition.resource.code>;  # Name of resource type
+    fhir:param @<OneOrMore_CompartmentDefinition.resource.param>?;  # Search Parameter Name, or chained 
+                                            # parameters 
+    fhir:documentation @<CompartmentDefinition.resource.documentation>?;  # Additional documentation about the 
+                                            # resource and compartment 
+}  
+
+#---------------------- Data Types -------------------
+
+#---------------------- Cardinality Types (OneOrMore) -------------------
+
+<OneOrMore_CompartmentDefinition.contact> CLOSED {
+    rdf:first @<CompartmentDefinition.contact>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_CompartmentDefinition.contact> 
+}
+
+<OneOrMore_CompartmentDefinition.useContext> CLOSED {
+    rdf:first @<CompartmentDefinition.useContext>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_CompartmentDefinition.useContext> 
+}
+
+<OneOrMore_CompartmentDefinition.resource> CLOSED {
+    rdf:first @<CompartmentDefinition.resource>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_CompartmentDefinition.resource> 
+}
+
+<OneOrMore_CompartmentDefinition.resource.param> CLOSED {
+    rdf:first @<CompartmentDefinition.resource.param>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_CompartmentDefinition.resource.param> 
+}
+
+#---------------------- Reference Types -------------------
+
+#---------------------- Value Sets ------------------------

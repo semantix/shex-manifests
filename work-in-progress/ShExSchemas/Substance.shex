@@ -1,0 +1,101 @@
+﻿PREFIX fhir: <http://hl7.org/fhir/> 
+PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+BASE <http://hl7.org/fhir/shape/>
+
+
+start=@<Substance> AND {fhir:nodeRole [fhir:treeRoot]}
+
+
+# A homogeneous material with a definite composition
+<Substance> EXTENDS @<DomainResource> CLOSED {   
+
+    a [fhir:Substance];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:identifier @<OneOrMore_Substance.identifier>?;  # Unique identifier
+    fhir:instance @<Substance.instance>;    # Is this an instance of a substance 
+                                            # or a kind of one 
+    fhir:status @<Substance.status>?;       # active | inactive | 
+                                            # entered-in-error 
+    fhir:category @<OneOrMore_Substance.category>?;  # What class/type of substance this 
+                                            # is 
+    fhir:code @<Substance.code>;            # What substance this is
+    fhir:description @<Substance.description>?;  # Textual description of the 
+                                            # substance, comments 
+    fhir:expiry @<Substance.expiry>?;       # When no longer valid to use
+    fhir:quantity @<Substance.quantity>?;   # Amount of substance in the package
+    fhir:ingredient @<OneOrMore_Substance.ingredient>?;  # Composition information about the 
+                                            # substance 
+}  
+
+# Composition information about the substance
+<Substance.ingredient> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:quantity @<Substance.ingredient.quantity>?;  # Optional amount (concentration)
+    fhir:substance (@<CodeableConcept>  OR 
+    			(@<Reference>  AND {fhir:link @<Substance> }) )  AND { rdf:type IRI } ;  # A component of the substance
+}  
+
+#---------------------- Data Types -------------------
+
+# A reference from one resource to another
+<Reference> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Reference];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:link IRI?;
+    fhir:reference @<Reference.reference>?;  # Literal reference, Relative, 
+                                            # internal or absolute URL 
+    fhir:type @<Reference.type>?;           # Type the reference refers to (e.g. 
+                                            # "Patient") 
+    fhir:identifier @<Reference.identifier>?;  # Logical reference, when literal 
+                                            # reference is not known 
+    fhir:display @<Reference.display>?;     # Text alternative for the resource
+} AND (
+
+# Constraint: UniqueKey:ref-1
+# Human readable:SHALL have a contained resource if a local reference is provided
+# XPath:not(starts-with(f:reference/@value, '#')) or exists(ancestor::*[self::f:entry or self::f:parameter]/f:resource/f:*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')]|/*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')])
+# Constraint:reference.startsWith('#').not() or (reference.substring(1).trace('url') in %rootResource.contained.id.trace('ids')) or (reference='#' and %rootResource!=%resource)
+# ShEx:
+
+
+)
+ 
+
+# Concept - reference to a terminology or just  text
+<CodeableConcept> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:CodeableConcept];
+    fhir:nodeRole [fhir:treeRoot]?;
+    a NONLITERAL*;
+    fhir:coding @<OneOrMore_CodeableConcept.coding>?;  # Code defined by a terminology 
+                                            # system 
+    fhir:text @<CodeableConcept.text>?;     # Plain text representation of the 
+                                            # concept 
+}  
+
+#---------------------- Cardinality Types (OneOrMore) -------------------
+
+<OneOrMore_Substance.identifier> CLOSED {
+    rdf:first @<Substance.identifier>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Substance.identifier> 
+}
+
+<OneOrMore_Substance.category> CLOSED {
+    rdf:first @<Substance.category>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Substance.category> 
+}
+
+<OneOrMore_Substance.ingredient> CLOSED {
+    rdf:first @<Substance.ingredient>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Substance.ingredient> 
+}
+
+<OneOrMore_CodeableConcept.coding> CLOSED {
+    rdf:first @<CodeableConcept.coding>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_CodeableConcept.coding> 
+}
+
+#---------------------- Reference Types -------------------
+
+#---------------------- Value Sets ------------------------

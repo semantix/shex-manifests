@@ -1,0 +1,466 @@
+﻿PREFIX fhir: <http://hl7.org/fhir/> 
+PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+BASE <http://hl7.org/fhir/shape/>
+
+
+start=@<MeasureReport> AND {fhir:nodeRole [fhir:treeRoot]}
+
+
+# Results of a measure evaluation
+<MeasureReport> EXTENDS @<DomainResource> CLOSED {   
+
+    a [fhir:MeasureReport];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:identifier @<OneOrMore_Identifier>?;  # Additional identifier for the 
+                                            # MeasureReport 
+    fhir:status @<code> AND
+    	{fhir:value @fhirvs:measure-report-status};  # complete | pending | error
+    fhir:type @<code> AND
+    	{fhir:value @fhirvs:measure-report-type};  # individual | subject-list | 
+                                            # summary | data-collection 
+    fhir:dataUpdateType @<code> AND
+    	{fhir:value @fhirvs:submit-data-update-type}?;  # incremental | snapshot
+    fhir:measure @<canonical>;              # What measure was calculated
+    fhir:subject @<Reference> AND {fhir:link 
+    			@<Device> OR 
+    			@<Group> OR 
+    			@<Location> OR 
+    			@<Patient> OR 
+    			@<Practitioner> OR 
+    			@<PractitionerRole> OR 
+    			@<RelatedPerson> }?;  # What individual(s) the report is 
+                                            # for 
+    fhir:date @<dateTime>?;                 # When the report was generated
+    fhir:reporter @<Reference> AND {fhir:link 
+    			@<Group> OR 
+    			@<Location> OR 
+    			@<Organization> OR 
+    			@<Practitioner> OR 
+    			@<PractitionerRole> }?;  # Who is reporting the data
+    fhir:reportingVendor @<Reference> AND {fhir:link 
+    			@<Organization> }?;  # What vendor prepared the data
+    fhir:period @<Period>;                  # What period the report covers
+    fhir:scoring @<CodeableConcept>?;       # What scoring method (e.g. 
+                                            # proportion, ratio, 
+                                            # continuous-variable) 
+    fhir:improvementNotation @<CodeableConcept>?;  # increase | decrease
+    fhir:group @<OneOrMore_MeasureReport.group>?;  # Measure results for each group
+    fhir:evaluatedResource @<OneOrMore_Reference_Resource>?;  # What data was used to calculate 
+                                            # the measure score 
+} AND (
+
+# Constraint: UniqueKey:mrp-2
+# Human readable:Stratifiers SHALL be either a single criteria or a set of criteria components
+# XPath:not(f:kind/@value='data-collection') or not(exists(f:group))
+# Constraint:group.stratifier.stratum.all(value.exists() xor component.exists())
+# ShEx:
+
+{ fhir:group.stratifier.stratum SHEX_all_SHEX ( }
+
+) AND (
+
+# Constraint: UniqueKey:mrp-1
+# Human readable:Measure Reports used for data collection SHALL NOT communicate group and score information
+# XPath:not(f:kind/@value='data-collection') or not(exists(f:group))
+# Constraint:(type != 'data-collection') or group.exists().not()
+# ShEx:
+
+({ fhir:type { fhir:v [ . -'data-collection'] } }) OR  NOT { fhir:group  . }
+
+)
+ 
+
+# Population results in this stratum
+<MeasureReport.group.stratifier.stratum.population> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:code @<CodeableConcept>?;          # initial-population | numerator | 
+                                            # numerator-exclusion | denominator 
+                                            # | denominator-exclusion | 
+                                            # denominator-exception | 
+                                            # measure-population | 
+                                            # measure-population-exclusion | 
+                                            # measure-observation 
+    fhir:count @<integer>?;                 # Size of the population
+    fhir:subjectResults @<Reference> AND {fhir:link 
+    			@<List> }?;  # For subject-list reports, the 
+                                            # subject results in this population 
+}  
+
+# The populations in the group
+<MeasureReport.group.population> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:code @<CodeableConcept>?;          # initial-population | numerator | 
+                                            # numerator-exclusion | denominator 
+                                            # | denominator-exclusion | 
+                                            # denominator-exception | 
+                                            # measure-population | 
+                                            # measure-population-exclusion | 
+                                            # measure-observation 
+    fhir:count @<integer>?;                 # Size of the population
+    fhir:subjectResults @<Reference> AND {fhir:link 
+    			@<List> }?;  # For subject-list reports, the 
+                                            # subject results in this population 
+}  
+
+# Stratum results, one for each unique value, or set of values, in the stratifier, or stratifier components
+<MeasureReport.group.stratifier.stratum> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:value (@<CodeableConcept>  OR 
+    			@<boolean>  OR 
+    			@<Quantity>  OR 
+    			@<Range>  OR 
+    			@<Reference> )  AND { rdf:type IRI } ?;  # The stratum value, e.g. male
+    fhir:component @<OneOrMore_MeasureReport.group.stratifier.stratum.component>?;  # Stratifier component values
+    fhir:population @<OneOrMore_MeasureReport.group.stratifier.stratum.population>?;  # Population results in this stratum
+    fhir:measureScore (@<Quantity>  OR 
+    			@<dateTime>  OR 
+    			@<CodeableConcept>  OR 
+    			@<Period>  OR 
+    			@<Range>  OR 
+    			@<Duration> )  AND { rdf:type IRI } ?;  # What score this stratum achieved
+}  
+
+# Stratifier component values
+<MeasureReport.group.stratifier.stratum.component> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:code @<CodeableConcept>;           # What stratifier component of the 
+                                            # group 
+    fhir:value (@<CodeableConcept>  OR 
+    			@<boolean>  OR 
+    			@<Quantity>  OR 
+    			@<Range>  OR 
+    			@<Reference> )  AND { rdf:type IRI } ;  # The stratum component value, e.g. 
+                                            # male 
+}  
+
+# Measure results for each group
+<MeasureReport.group> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:code @<CodeableConcept>?;          # Meaning of the group
+    fhir:population @<OneOrMore_MeasureReport.group.population>?;  # The populations in the group
+    fhir:measureScore (@<Quantity>  OR 
+    			@<dateTime>  OR 
+    			@<CodeableConcept>  OR 
+    			@<Period>  OR 
+    			@<Range>  OR 
+    			@<Duration> )  AND { rdf:type IRI } ?;  # What score this group achieved
+    fhir:stratifier @<OneOrMore_MeasureReport.group.stratifier>?;  # Stratification results
+}  
+
+# Stratification results
+<MeasureReport.group.stratifier> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:code @<OneOrMore_CodeableConcept>?;  # What stratifier of the group
+    fhir:stratum @<OneOrMore_MeasureReport.group.stratifier.stratum>?;  # Stratum results, one for each 
+                                            # unique value, or set of values, in 
+                                            # the stratifier, or stratifier 
+                                            # components 
+}  
+
+#---------------------- Data Types -------------------
+
+# Primitive Type dateTime
+<dateTime> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:dateTime];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v xsd:gYear OR xsd:gYearMonth OR xsd:date OR xsd:dateTime?;  # Primitive value for dateTime
+}  
+
+# Primitive Type code
+<code> EXTENDS @<string> CLOSED {   
+
+    a [fhir:code];
+    fhir:nodeRole [fhir:treeRoot]?;
+}  
+
+# A reference from one resource to another
+<Reference> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Reference];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:link IRI?;
+    fhir:reference @<string>?;              # Literal reference, Relative, 
+                                            # internal or absolute URL 
+    fhir:type @<uri>?;                      # Type the reference refers to (e.g. 
+                                            # "Patient") 
+    fhir:identifier @<Identifier>?;         # Logical reference, when literal 
+                                            # reference is not known 
+    fhir:display @<string>?;                # Text alternative for the resource
+} AND (
+
+# Constraint: UniqueKey:ref-1
+# Human readable:SHALL have a contained resource if a local reference is provided
+# XPath:not(starts-with(f:reference/@value, '#')) or exists(ancestor::*[self::f:entry or self::f:parameter]/f:resource/f:*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')]|/*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')])
+# Constraint:reference.startsWith('#').not() or (reference.substring(1).trace('url') in %rootResource.contained.id.trace('ids')) or (reference='#' and %rootResource!=%resource)
+# ShEx:
+
+ NOT { fhir:reference  SHEX_startsWith_SHEX ('#') } OR ({ fhir:reference SHEX_substring_SHEX (1) SHEX_trace_SHEX ('url') } { fhir:v ['%rootResource'.contained.id SHEX_trace_SHEX ('ids')] } ) OR (({ fhir:reference { fhir:v ['#'] }  }) AND ('%rootResource' { fhir:v [ . -'%resource'] }))
+
+)
+ 
+
+# Time range defined by start and end date/time
+<Period> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Period];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:start @<dateTime>?;                # Starting time with inclusive 
+                                            # boundary 
+    fhir:end @<dateTime>?;                  # End time with inclusive boundary, 
+                                            # if not ongoing 
+} AND (
+
+# Constraint: UniqueKey:per-1
+# Human readable:If present, start SHALL have a lower or equal value than end
+# XPath:not(exists(f:start/@value)) or not(exists(f:end/@value)) or (xs:dateTime(f:start/@value) <= xs:dateTime(f:end/@value))
+# Constraint:start.hasValue().not() or end.hasValue().not() or (start <= end)
+# ShEx:
+
+ NOT { fhir:start  . } OR  NOT { fhir:end  . } OR ({ fhir:start { fhir:v MaxInclusive { fhir:end } }  })
+
+)
+ 
+
+# A measured or measurable amount
+<Quantity> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Quantity];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:value @<decimal>?;                 # Numerical value (with implicit 
+                                            # precision) 
+    fhir:comparator @<code> AND
+    	{fhir:value @fhirvs:quantity-comparator}?;  # < | <= | >= | > | ad - how to 
+                                            # understand the value 
+    fhir:unit @<string>?;                   # Unit representation
+    fhir:system @<uri>?;                    # System that defines coded unit form
+    fhir:code @<code>?;                     # Coded form of the unit
+} AND (
+
+# Constraint: UniqueKey:qty-3
+# Human readable:If a code for the unit is present, the system SHALL also be present
+# XPath:not(exists(f:code)) or exists(f:system)
+# Constraint:code.empty() or system.exists()
+# ShEx:
+
+ NOT { fhir:code {fhir:v .} }  OR { fhir:system . }
+
+)
+ 
+
+# A length of time
+<Duration> EXTENDS @<Quantity> CLOSED {   
+
+    a [fhir:Duration];
+    fhir:nodeRole [fhir:treeRoot]?;
+} AND (
+
+# Constraint: UniqueKey:drt-1
+# Human readable:There SHALL be a code if there is a value and it SHALL be an expression of time.  If system is present, it SHALL be UCUM.
+# XPath:(f:code or not(f:value)) and (not(exists(f:system)) or f:system/@value='http://unitsofmeasure.org')
+# Constraint:code.exists() implies ((system = %ucum) and value.exists())
+# ShEx:
+
+{ fhir:code . } SHEX_Implies_SHEX (({ fhir:system { fhir:v ['%ucum'] }  }) AND { fhir:value . })
+
+)
+ 
+
+# Primitive Type canonical
+<canonical> EXTENDS @<uri> CLOSED {   
+
+    a [fhir:canonical];
+    fhir:nodeRole [fhir:treeRoot]?;
+}  
+
+# Primitive Type integer
+<integer> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:integer];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v xsd:int MININCLUSIVE -2147483648 MAXINCLUSIVE 2147483647?;  # Primitive value for integer
+}  
+
+# Set of values bounded by low and high
+<Range> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Range];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:low @<SimpleQuantity>?;            # Low limit
+    fhir:high @<SimpleQuantity>?;           # High limit
+} AND (
+
+# Constraint: UniqueKey:rng-2
+# Human readable:If present, low SHALL have a lower value than high
+# XPath:not(exists(f:low/f:value/@value)) or not(exists(f:high/f:value/@value)) or (number(f:low/f:value/@value) <= number(f:high/f:value/@value))
+# Constraint:low.value.empty() or high.value.empty() or (low <= high)
+# ShEx:
+
+ NOT { fhir:low fhir:value {fhir:v .} }  OR  NOT { fhir:high fhir:value {fhir:v .} }  OR ({ fhir:low { fhir:v MaxInclusive { fhir:high } }  })
+
+)
+ 
+
+# An identifier intended for computation
+<Identifier> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Identifier];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:use @<code> AND
+    	{fhir:value @fhirvs:identifier-use}?;  # usual | official | temp | 
+                                            # secondary | old (If known) 
+    fhir:type @<CodeableConcept>?;          # Description of identifier
+    fhir:system @<uri>?;                    # The namespace for the identifier 
+                                            # value 
+    fhir:value @<string>?;                  # The value that is unique
+    fhir:period @<Period>?;                 # Time period when id is/was valid 
+                                            # for use 
+    fhir:assigner @<Reference> AND {fhir:link 
+    			@<Organization> }?;  # Organization that issued id (may 
+                                            # be just text) 
+}  
+
+# Primitive Type boolean
+<boolean> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:boolean];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v xsd:boolean?;                    # Primitive value for boolean
+}  
+
+# Concept - reference to a terminology or just  text
+<CodeableConcept> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:CodeableConcept];
+    fhir:nodeRole [fhir:treeRoot]?;
+    a NONLITERAL*;
+    fhir:coding @<OneOrMore_Coding>?;       # Code defined by a terminology 
+                                            # system 
+    fhir:text @<string>?;                   # Plain text representation of the 
+                                            # concept 
+}  
+
+# Primitive Type string
+<string> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:string];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v xsd:string MAXLENGTH 1048576?;   # Primitive value for string
+}  
+
+# A fixed quantity (no comparator)
+<SimpleQuantity> EXTENDS @<Quantity> CLOSED {   
+
+    a [fhir:SimpleQuantity];
+    fhir:nodeRole [fhir:treeRoot]?;
+} AND (
+
+# Constraint: UniqueKey:sqty-1
+# Human readable:The comparator is not used on a SimpleQuantity
+# XPath:not(exists(f:comparator))
+# Constraint:comparator.empty()
+# ShEx:
+
+ NOT { fhir:comparator {fhir:v .} } 
+
+)
+ 
+
+# Primitive Type uri
+<uri> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:uri];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v xsd:anyURI?;                     # Primitive value for uri
+}  
+
+# A reference to a code defined by a terminology system
+<Coding> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Coding];
+    fhir:nodeRole [fhir:treeRoot]?;
+    a NONLITERAL?;
+    fhir:system @<uri>?;                    # Identity of the terminology system
+    fhir:version @<string>?;                # Version of the system - if relevant
+    fhir:code @<code>?;                     # Symbol in syntax defined by the 
+                                            # system 
+    fhir:display @<string>?;                # Representation defined by the 
+                                            # system 
+    fhir:userSelected @<boolean>?;          # If this coding was chosen directly 
+                                            # by the user 
+}  
+
+# Primitive Type decimal
+<decimal> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:decimal];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v xsd:decimal OR xsd:double?;      # Primitive value for decimal
+}  
+
+#---------------------- Cardinality Types (OneOrMore) -------------------
+
+<OneOrMore_Identifier> CLOSED {
+    rdf:first @<Identifier>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Identifier> 
+}
+
+<OneOrMore_MeasureReport.group> CLOSED {
+    rdf:first @<MeasureReport.group>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_MeasureReport.group> 
+}
+
+<OneOrMore_Reference_Resource> CLOSED {
+    rdf:first @<Reference> AND {fhir:link 
+			@<Resource> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Reference_Resource> 
+}
+
+<OneOrMore_MeasureReport.group.stratifier.stratum.component> CLOSED {
+    rdf:first @<MeasureReport.group.stratifier.stratum.component>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_MeasureReport.group.stratifier.stratum.component> 
+}
+
+<OneOrMore_MeasureReport.group.stratifier.stratum.population> CLOSED {
+    rdf:first @<MeasureReport.group.stratifier.stratum.population>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_MeasureReport.group.stratifier.stratum.population> 
+}
+
+<OneOrMore_MeasureReport.group.population> CLOSED {
+    rdf:first @<MeasureReport.group.population>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_MeasureReport.group.population> 
+}
+
+<OneOrMore_MeasureReport.group.stratifier> CLOSED {
+    rdf:first @<MeasureReport.group.stratifier>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_MeasureReport.group.stratifier> 
+}
+
+<OneOrMore_CodeableConcept> CLOSED {
+    rdf:first @<CodeableConcept>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_CodeableConcept> 
+}
+
+<OneOrMore_MeasureReport.group.stratifier.stratum> CLOSED {
+    rdf:first @<MeasureReport.group.stratifier.stratum>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_MeasureReport.group.stratifier.stratum> 
+}
+
+<OneOrMore_Coding> CLOSED {
+    rdf:first @<Coding>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Coding> 
+}
+
+#---------------------- Reference Types -------------------
+
+#---------------------- Value Sets ------------------------
+
+# Identifies the purpose for this identifier, if known .
+fhirvs:identifier-use ["usual" "official" "temp" "secondary" "old"]
+
+# The status of the measure report.
+fhirvs:measure-report-status ["complete" "pending" "error"]
+
+# Concepts for how a measure report consumer and receiver coordinate data exchange updates. The choices are snapshot or incremental updates
+fhirvs:submit-data-update-type ["incremental" "snapshot"]
+
+# The type of the measure report.
+fhirvs:measure-report-type ["individual" "subject-list" "summary" "data-collection"]
+
+# How the Quantity should be understood and represented.
+fhirvs:quantity-comparator ["<" "<=" ">=" ">" "ad"]

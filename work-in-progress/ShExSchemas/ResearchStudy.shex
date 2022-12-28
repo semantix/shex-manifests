@@ -1,0 +1,398 @@
+﻿PREFIX fhir: <http://hl7.org/fhir/> 
+PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+BASE <http://hl7.org/fhir/shape/>
+
+
+start=@<ResearchStudy> AND {fhir:nodeRole [fhir:treeRoot]}
+
+
+# Investigation to increase healthcare-related patient-independent knowledge
+<ResearchStudy> EXTENDS @<DomainResource> CLOSED {   
+
+    a [fhir:ResearchStudy];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:url @<ResearchStudy.url>?;         # Canonical identifier for this 
+                                            # study resource 
+    fhir:identifier @<OneOrMore_ResearchStudy.identifier>?;  # Business Identifier for study
+    fhir:version @<ResearchStudy.version>?;  # Business identifier for the study 
+                                            # record 
+    fhir:name @<ResearchStudy.name>?;       # Name for this study (computer 
+                                            # friendly) 
+    fhir:title @<ResearchStudy.title>?;     # Human readable name of the study
+    fhir:label @<OneOrMore_ResearchStudy.label>?;  # Additional names for the study
+    fhir:protocol @<OneOrMore_ResearchStudy.protocol_PlanDefinition>?;  # Steps followed in executing study
+    fhir:partOf @<OneOrMore_ResearchStudy.partOf_ResearchStudy>?;  # Part of larger study
+    fhir:relatedArtifact @<OneOrMore_ResearchStudy.relatedArtifact>?;  # References and dependencies
+    fhir:date @<ResearchStudy.date>?;       # Date the resource last changed
+    fhir:status @<ResearchStudy.status>;    # draft | active | retired | unknown
+    fhir:primaryPurposeType @<ResearchStudy.primaryPurposeType>?;  # treatment | prevention | 
+                                            # diagnostic | supportive-care | 
+                                            # screening | 
+                                            # health-services-research | 
+                                            # basic-science | device-feasibility 
+    fhir:phase @<ResearchStudy.phase>?;     # n-a | early-phase-1 | phase-1 | 
+                                            # phase-1-phase-2 | phase-2 | 
+                                            # phase-2-phase-3 | phase-3 | 
+                                            # phase-4 
+    fhir:category @<OneOrMore_ResearchStudy.category>?;  # Classifications for the study
+    fhir:focus @<OneOrMore_ResearchStudy.focus>?;  # Drugs, devices, etc. under study
+    fhir:condition @<OneOrMore_ResearchStudy.condition>?;  # Condition being studied
+    fhir:keyword @<OneOrMore_ResearchStudy.keyword>?;  # Used to search for the study
+    fhir:location @<OneOrMore_ResearchStudy.location>?;  # Geographic region(s) for study
+    fhir:descriptionSummary @<ResearchStudy.descriptionSummary>?;  # A brief summary of the study 
+                                            # description 
+    fhir:description @<ResearchStudy.description>?;  # What this is study doing
+    fhir:period @<ResearchStudy.period>?;   # When the study began and ended
+    fhir:contact @<OneOrMore_ResearchStudy.contact>?;  # Contact details for the study
+    fhir:sponsor @<ResearchStudy.sponsor> AND {fhir:link 
+    			@<Organization> }?;  # Organization that initiates and is 
+                                            # legally responsible for the study 
+    fhir:principalInvestigator @<ResearchStudy.principalInvestigator> AND {fhir:link 
+    			@<Practitioner> OR 
+    			@<PractitionerRole> }?;  # Researcher who oversees multiple 
+                                            # aspects of the study 
+    fhir:site @<OneOrMore_ResearchStudy.site_Location_OR_Organization_OR_ResearchStudy>?;  # Facility where study activities 
+                                            # are conducted 
+    fhir:note @<OneOrMore_ResearchStudy.note>?;  # Comments made about the study
+    fhir:classification @<OneOrMore_ResearchStudy.classification>?;  # Classification for the study
+    fhir:associatedParty @<OneOrMore_ResearchStudy.associatedParty>?;  # Sponsors, collaborators, and other 
+                                            # parties 
+    fhir:currentState @<OneOrMore_ResearchStudy.currentState>?;  # active | active-but-not-recruiting 
+                                            # | administratively-completed | 
+                                            # approved | closed-to-accrual | 
+                                            # closed-to-accrual-and-intervention 
+                                            # | completed | disapproved | 
+                                            # enrolling-by-invitation | 
+                                            # in-review | not-yet-recruiting | 
+                                            # recruiting | 
+                                            # temporarily-closed-to-accrual | 
+                                            # temporarily-closed-to-accrual-an-
+                                            # d-intervention | terminated | 
+                                            # withdrawn 
+    fhir:statusDate @<OneOrMore_ResearchStudy.statusDate>?;  # Status of study with time for that 
+                                            # status 
+    fhir:whyStopped @<ResearchStudy.whyStopped>?;  # accrual-goal-met | 
+                                            # closed-due-to-toxicity | 
+                                            # closed-due-to-lack-of-study-prog-
+                                            # ress | 
+                                            # temporarily-closed-per-study-des-
+                                            # ign 
+    fhir:recruitment @<ResearchStudy.recruitment>?;  # Target or actual group of 
+                                            # participants enrolled in study 
+    fhir:comparisonGroup @<OneOrMore_ResearchStudy.comparisonGroup>?;  # Defined path through the study for 
+                                            # a subject 
+    fhir:objective @<OneOrMore_ResearchStudy.objective>?;  # A goal for the study
+    fhir:outcomeMeasure @<OneOrMore_ResearchStudy.outcomeMeasure>?;  # An outcome or planned variable to 
+                                            # measure during the study 
+    fhir:result @<OneOrMore_ResearchStudy.result_Citation_OR_DiagnosticReport_OR_EvidenceReport>?;  # Link to results generated during 
+                                            # the study 
+    fhir:webLocation @<OneOrMore_ResearchStudy.webLocation>?;  # Archive location for the study
+}  
+
+# An outcome or planned variable to measure during the study
+<ResearchStudy.outcomeMeasure> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:name @<ResearchStudy.outcomeMeasure.name>?;  # Label for the outcome
+    fhir:type @<OneOrMore_ResearchStudy.outcomeMeasure.type>?;  # primary | secondary | exploratory
+    fhir:description @<ResearchStudy.outcomeMeasure.description>?;  # Description of the outcome
+    fhir:reference @<ResearchStudy.outcomeMeasure.reference> AND {fhir:link 
+    			@<EvidenceVariable> }?;  # Structured outcome definition
+}  
+
+# Drugs, devices, etc. under study
+<ResearchStudy.focus> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:productCode @<ResearchStudy.focus.productCode>?;  # Identification of product under 
+                                            # study 
+    fhir:focusType @<OneOrMore_ResearchStudy.focus.focusType>?;  # medication | device | intervention 
+                                            # | factor 
+    fhir:factor @<ResearchStudy.focus.factor>?;  # An independent variable 
+                                            # manipulated by the experimentalist 
+}  
+
+# Classification for the study
+<ResearchStudy.classification> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:type @<ResearchStudy.classification.type>?;  # phase | category | keyword 
+    fhir:classifier @<OneOrMore_ResearchStudy.classification.classifier>?;  # n-a | early-phase-1 | phase-1 | 
+                                            # phase-1-phase-2 | phase-2 | 
+                                            # phase-2-phase-3 | phase-3 | 
+                                            # phase-4 
+}  
+
+# Defined path through the study for a subject
+<ResearchStudy.comparisonGroup> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:identifier (@<uri>  OR 
+    			@<Identifier> )  AND { rdf:type IRI } ?;  # Allows the comparisonGroup for the 
+                                            # study and the comparisonGroup for 
+                                            # the subject to be linked easily 
+    fhir:name @<ResearchStudy.comparisonGroup.name>;  # Label for study comparisonGroup
+    fhir:type @<ResearchStudy.comparisonGroup.type>?;  # Categorization of study 
+                                            # comparisonGroup 
+    fhir:description @<ResearchStudy.comparisonGroup.description>?;  # Short explanation of study path
+    fhir:intendedExposure @<OneOrMore_ResearchStudy.comparisonGroup.intendedExposure_EvidenceVariable>?;  # Interventions or exposures in this 
+                                            # comparisonGroup or cohort 
+    fhir:observedGroup @<ResearchStudy.comparisonGroup.observedGroup> AND {fhir:link 
+    			@<Group> }?;  # Group of participants who were 
+                                            # enrolled in study comparisonGroup 
+}  
+
+# Sponsors, collaborators, and other parties
+<ResearchStudy.associatedParty> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:name @<ResearchStudy.associatedParty.name>?;  # Name of associated party
+    fhir:role @<ResearchStudy.associatedParty.role>;  # sponsor | lead-sponsor | 
+                                            # sponsor-investigator | 
+                                            # primary-investigator | 
+                                            # collaborator | funding-source | 
+                                            # recruitment-contact | 
+                                            # sub-investigator | study-director 
+                                            # | study-chair 
+    fhir:period @<OneOrMore_ResearchStudy.associatedParty.period>?;  # When active in the role
+    fhir:classifier @<OneOrMore_ResearchStudy.associatedParty.classifier>?;  # nih | fda
+    fhir:party @<ResearchStudy.associatedParty.party> AND {fhir:link 
+    			@<Organization> OR 
+    			@<Practitioner> OR 
+    			@<PractitionerRole> }?;  # Individual or organization 
+                                            # associated with study (use 
+                                            # practitionerRole to specify their 
+                                            # organisation) 
+}  
+
+# Additional names for the study
+<ResearchStudy.label> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:type @<ResearchStudy.label.type>?;  # primary | official | scientific | 
+                                            # plain-language | subtitle | 
+                                            # short-title | acronym | 
+                                            # earlier-title | language | 
+                                            # auto-translated | human-use | 
+                                            # machine-use | duplicate-uid 
+    fhir:value @<ResearchStudy.label.value>?;  # The name
+}  
+
+# Status of study with time for that status
+<ResearchStudy.statusDate> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:activity @<ResearchStudy.statusDate.activity>;  # Record-Verification | 
+                                            # Overall-Study | 
+                                            # Primary-Outcome-Data-Collection | 
+                                            # Registration-Submission | 
+                                            # Registration-Submission-QC | 
+                                            # Registration-Posting | 
+                                            # Results-Submission | 
+                                            # Results-Submission-QC | 
+                                            # Results-Posting | 
+                                            # Disposition-Submission | 
+                                            # Disposition-Submission-QC | 
+                                            # Disposition-Posting | 
+                                            # Update-Submission | Update-Posting 
+    fhir:actual @<ResearchStudy.statusDate.actual>?;  # Actual if true else anticipated
+    fhir:period @<ResearchStudy.statusDate.period>;  # Date range
+}  
+
+# Archive location for the study
+<ResearchStudy.webLocation> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:classifier @<ResearchStudy.webLocation.classifier>?;  # registry-page|recruitment-page|c-
+                                            # ontact-page 
+    fhir:url @<ResearchStudy.webLocation.url>;  # The location address
+}  
+
+# Target or actual group of participants enrolled in study
+<ResearchStudy.recruitment> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:targetNumber @<ResearchStudy.recruitment.targetNumber>?;  # Estimated total number of 
+                                            # participants to be enrolled 
+    fhir:actualNumber @<ResearchStudy.recruitment.actualNumber>?;  # Actual total number of 
+                                            # participants enrolled in study 
+    fhir:eligibility @<ResearchStudy.recruitment.eligibility> AND {fhir:link 
+    			@<EvidenceVariable> OR 
+    			@<Group> }?;  # Inclusion and exclusion criteria
+    fhir:actualGroup @<ResearchStudy.recruitment.actualGroup> AND {fhir:link 
+    			@<Group> }?;  # Group of participants who were 
+                                            # enrolled in study 
+}  
+
+# A goal for the study
+<ResearchStudy.objective> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:name @<ResearchStudy.objective.name>?;  # Label for the objective
+    fhir:type @<ResearchStudy.objective.type>?;  # primary | secondary | exploratory
+    fhir:description @<ResearchStudy.objective.description>?;  # Description of the objective
+}  
+
+#---------------------- Data Types -------------------
+
+# An identifier intended for computation
+<Identifier> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Identifier];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:use @<Identifier.use>?;            # usual | official | temp | 
+                                            # secondary | old (If known) 
+    fhir:type @<Identifier.type>?;          # Description of identifier
+    fhir:system @<Identifier.system>?;      # The namespace for the identifier 
+                                            # value 
+    fhir:value @<Identifier.value>?;        # The value that is unique
+    fhir:period @<Identifier.period>?;      # Time period when id is/was valid 
+                                            # for use 
+    fhir:assigner @<Identifier.assigner> AND {fhir:link 
+    			@<Organization> }?;  # Organization that issued id (may 
+                                            # be just text) 
+}  
+
+# Primitive Type uri
+<uri> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:uri];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v @<uri.value>?;                   # Primitive value for uri
+}  
+
+#---------------------- Cardinality Types (OneOrMore) -------------------
+
+<OneOrMore_ResearchStudy.identifier> CLOSED {
+    rdf:first @<ResearchStudy.identifier>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ResearchStudy.identifier> 
+}
+
+<OneOrMore_ResearchStudy.label> CLOSED {
+    rdf:first @<ResearchStudy.label>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ResearchStudy.label> 
+}
+
+<OneOrMore_ResearchStudy.protocol_PlanDefinition> CLOSED {
+    rdf:first @<ResearchStudy.protocol> AND {fhir:link 
+			@<PlanDefinition> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ResearchStudy.protocol_PlanDefinition> 
+}
+
+<OneOrMore_ResearchStudy.partOf_ResearchStudy> CLOSED {
+    rdf:first @<ResearchStudy.partOf> AND {fhir:link 
+			@<ResearchStudy> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ResearchStudy.partOf_ResearchStudy> 
+}
+
+<OneOrMore_ResearchStudy.relatedArtifact> CLOSED {
+    rdf:first @<ResearchStudy.relatedArtifact>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ResearchStudy.relatedArtifact> 
+}
+
+<OneOrMore_ResearchStudy.category> CLOSED {
+    rdf:first @<ResearchStudy.category>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ResearchStudy.category> 
+}
+
+<OneOrMore_ResearchStudy.focus> CLOSED {
+    rdf:first @<ResearchStudy.focus>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ResearchStudy.focus> 
+}
+
+<OneOrMore_ResearchStudy.condition> CLOSED {
+    rdf:first @<ResearchStudy.condition>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ResearchStudy.condition> 
+}
+
+<OneOrMore_ResearchStudy.keyword> CLOSED {
+    rdf:first @<ResearchStudy.keyword>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ResearchStudy.keyword> 
+}
+
+<OneOrMore_ResearchStudy.location> CLOSED {
+    rdf:first @<ResearchStudy.location>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ResearchStudy.location> 
+}
+
+<OneOrMore_ResearchStudy.contact> CLOSED {
+    rdf:first @<ResearchStudy.contact>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ResearchStudy.contact> 
+}
+
+<OneOrMore_ResearchStudy.site_Location_OR_Organization_OR_ResearchStudy> CLOSED {
+    rdf:first @<ResearchStudy.site> AND {fhir:link 
+			@<Location> OR 
+			@<Organization> OR 
+			@<ResearchStudy> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ResearchStudy.site_Location_OR_Organization_OR_ResearchStudy> 
+}
+
+<OneOrMore_ResearchStudy.note> CLOSED {
+    rdf:first @<ResearchStudy.note>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ResearchStudy.note> 
+}
+
+<OneOrMore_ResearchStudy.classification> CLOSED {
+    rdf:first @<ResearchStudy.classification>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ResearchStudy.classification> 
+}
+
+<OneOrMore_ResearchStudy.associatedParty> CLOSED {
+    rdf:first @<ResearchStudy.associatedParty>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ResearchStudy.associatedParty> 
+}
+
+<OneOrMore_ResearchStudy.currentState> CLOSED {
+    rdf:first @<ResearchStudy.currentState>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ResearchStudy.currentState> 
+}
+
+<OneOrMore_ResearchStudy.statusDate> CLOSED {
+    rdf:first @<ResearchStudy.statusDate>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ResearchStudy.statusDate> 
+}
+
+<OneOrMore_ResearchStudy.comparisonGroup> CLOSED {
+    rdf:first @<ResearchStudy.comparisonGroup>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ResearchStudy.comparisonGroup> 
+}
+
+<OneOrMore_ResearchStudy.objective> CLOSED {
+    rdf:first @<ResearchStudy.objective>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ResearchStudy.objective> 
+}
+
+<OneOrMore_ResearchStudy.outcomeMeasure> CLOSED {
+    rdf:first @<ResearchStudy.outcomeMeasure>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ResearchStudy.outcomeMeasure> 
+}
+
+<OneOrMore_ResearchStudy.result_Citation_OR_DiagnosticReport_OR_EvidenceReport> CLOSED {
+    rdf:first @<ResearchStudy.result> AND {fhir:link 
+			@<Citation> OR 
+			@<DiagnosticReport> OR 
+			@<EvidenceReport> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ResearchStudy.result_Citation_OR_DiagnosticReport_OR_EvidenceReport> 
+}
+
+<OneOrMore_ResearchStudy.webLocation> CLOSED {
+    rdf:first @<ResearchStudy.webLocation>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ResearchStudy.webLocation> 
+}
+
+<OneOrMore_ResearchStudy.outcomeMeasure.type> CLOSED {
+    rdf:first @<ResearchStudy.outcomeMeasure.type>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ResearchStudy.outcomeMeasure.type> 
+}
+
+<OneOrMore_ResearchStudy.focus.focusType> CLOSED {
+    rdf:first @<ResearchStudy.focus.focusType>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ResearchStudy.focus.focusType> 
+}
+
+<OneOrMore_ResearchStudy.classification.classifier> CLOSED {
+    rdf:first @<ResearchStudy.classification.classifier>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ResearchStudy.classification.classifier> 
+}
+
+<OneOrMore_ResearchStudy.comparisonGroup.intendedExposure_EvidenceVariable> CLOSED {
+    rdf:first @<ResearchStudy.comparisonGroup.intendedExposure> AND {fhir:link 
+			@<EvidenceVariable> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ResearchStudy.comparisonGroup.intendedExposure_EvidenceVariable> 
+}
+
+<OneOrMore_ResearchStudy.associatedParty.period> CLOSED {
+    rdf:first @<ResearchStudy.associatedParty.period>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ResearchStudy.associatedParty.period> 
+}
+
+<OneOrMore_ResearchStudy.associatedParty.classifier> CLOSED {
+    rdf:first @<ResearchStudy.associatedParty.classifier>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ResearchStudy.associatedParty.classifier> 
+}
+
+#---------------------- Reference Types -------------------
+
+#---------------------- Value Sets ------------------------

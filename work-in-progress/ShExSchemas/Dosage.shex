@@ -1,0 +1,147 @@
+﻿PREFIX fhir: <http://hl7.org/fhir/> 
+PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+BASE <http://hl7.org/fhir/shape/>
+
+
+# How the medication is/was taken or should be taken
+<Dosage> EXTENDS @<BackboneType> CLOSED {   
+
+    a [fhir:Dosage];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:sequence @<Dosage.sequence>?;      # The order of the dosage 
+                                            # instructions 
+    fhir:text @<Dosage.text>?;              # Free text dosage instructions e.g. 
+                                            # SIG 
+    fhir:additionalInstruction @<OneOrMore_Dosage.additionalInstruction>?;  # Supplemental instruction or 
+                                            # warnings to the patient - e.g. 
+                                            # "with meals", "may cause 
+                                            # drowsiness" 
+    fhir:patientInstruction @<Dosage.patientInstruction>?;  # Patient or consumer oriented 
+                                            # instructions 
+    fhir:timing @<Dosage.timing>?;          # When medication should be 
+                                            # administered 
+    fhir:asNeeded @<Dosage.asNeeded>?;      # Take "as needed"
+    fhir:asNeededFor @<OneOrMore_Dosage.asNeededFor>?;  # Take "as needed" (for x)
+    fhir:site @<Dosage.site>?;              # Body site to administer to
+    fhir:route @<Dosage.route>?;            # How drug should enter body
+    fhir:method @<Dosage.method>?;          # Technique for administering 
+                                            # medication 
+    fhir:doseAndRate @<OneOrMore_Dosage.doseAndRate>?;  # Amount of medication administered, 
+                                            # to be administered or typical 
+                                            # amount to be administered 
+    fhir:maxDosePerPeriod @<OneOrMore_Dosage.maxDosePerPeriod>?;  # Upper limit on medication per unit 
+                                            # of time 
+    fhir:maxDosePerAdministration @<Dosage.maxDosePerAdministration>?;  # Upper limit on medication per 
+                                            # administration 
+    fhir:maxDosePerLifetime @<Dosage.maxDosePerLifetime>?;  # Upper limit on medication per 
+                                            # lifetime of the patient 
+} AND (
+
+# Constraint: UniqueKey:dosage-1
+# Human readable:AsNeededFor can only be set if AsNeeded is empty or true
+# XPath:not(exists(f:asneededfor)) or (not(exists(f:asneeded)) or (f:asneeded/@value = 'true')
+# Constraint:asNeededFor.empty() or asNeeded.empty() or asNeeded
+# ShEx:
+
+ NOT { fhir:asNeededFor {fhir:v .} }  OR  NOT { fhir:asNeeded {fhir:v .} }  OR { fhir:asNeeded }
+
+)
+ 
+
+# Amount of medication administered, to be administered or typical amount to be administered
+<Dosage.doseAndRate> EXTENDS @<Element> CLOSED {   
+    fhir:type @<Dosage.doseAndRate.type>?;  # The kind of dose or rate specified
+    fhir:dose (@<Range>  OR 
+    			@<SimpleQuantity> )  AND { rdf:type IRI } ?;  # Amount of medication per dose
+    fhir:rate (@<Ratio>  OR 
+    			@<Range>  OR 
+    			@<SimpleQuantity> )  AND { rdf:type IRI } ?;  # Amount of medication per unit of 
+                                            # time 
+}  
+
+#---------------------- Data Types -------------------
+
+# A fixed quantity (no comparator)
+<SimpleQuantity> EXTENDS @<Quantity> CLOSED {   
+
+    a [fhir:SimpleQuantity];
+    fhir:nodeRole [fhir:treeRoot]?;
+} AND (
+
+# Constraint: UniqueKey:sqty-1
+# Human readable:The comparator is not used on a SimpleQuantity
+# XPath:not(exists(f:comparator))
+# Constraint:comparator.empty()
+# ShEx:
+
+ NOT { fhir:comparator {fhir:v .} } 
+
+)
+ 
+
+# A ratio of two Quantity values - a numerator and a denominator
+<Ratio> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Ratio];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:numerator @<Ratio.numerator>?;     # Numerator value
+    fhir:denominator @<Ratio.denominator>?;  # Denominator value
+} AND (
+
+# Constraint: UniqueKey:rat-1
+# Human readable:Numerator and denominator SHALL both be present, or both are absent. If both are absent, there SHALL be some extension present
+# XPath:(count(f:numerator) = count(f:denominator)) and ((count(f:numerator) > 0) or (count(f:extension) > 0))
+# Constraint:(numerator.empty() xor denominator.exists()) and (numerator.exists() or extension.exists())
+# ShEx:
+
+(( NOT { fhir:numerator {fhir:v .} }  AND NOT  { fhir:denominator . }) OR ( NOT  NOT { fhir:numerator {fhir:v .} }  AND  { fhir:denominator . })) AND ({ fhir:numerator . } OR { fhir:extension . })
+
+)
+ 
+
+# Set of values bounded by low and high
+<Range> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Range];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:low @<Range.low>?;                 # Low limit
+    fhir:high @<Range.high>?;               # High limit
+} AND (
+
+# Constraint: UniqueKey:rng-2
+# Human readable:If present, low SHALL have a lower value than high
+# XPath:not(exists(f:low/f:value/@value)) or not(exists(f:high/f:value/@value)) or (number(f:low/f:value/@value) <= number(f:high/f:value/@value))
+# Constraint:low.value.empty() or high.value.empty() or (low <= high)
+# ShEx:
+
+ NOT { fhir:low fhir:value {fhir:v .} }  OR  NOT { fhir:high fhir:value {fhir:v .} }  OR ({ fhir:low { fhir:v MaxInclusive { fhir:high } }  })
+
+)
+ 
+
+#---------------------- Cardinality Types (OneOrMore) -------------------
+
+<OneOrMore_Dosage.additionalInstruction> CLOSED {
+    rdf:first @<Dosage.additionalInstruction>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Dosage.additionalInstruction> 
+}
+
+<OneOrMore_Dosage.asNeededFor> CLOSED {
+    rdf:first @<Dosage.asNeededFor>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Dosage.asNeededFor> 
+}
+
+<OneOrMore_Dosage.doseAndRate> CLOSED {
+    rdf:first @<Dosage.doseAndRate>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Dosage.doseAndRate> 
+}
+
+<OneOrMore_Dosage.maxDosePerPeriod> CLOSED {
+    rdf:first @<Dosage.maxDosePerPeriod>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Dosage.maxDosePerPeriod> 
+}
+
+#---------------------- Reference Types -------------------
+
+#---------------------- Value Sets ------------------------

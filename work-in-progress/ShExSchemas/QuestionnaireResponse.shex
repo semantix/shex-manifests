@@ -1,0 +1,303 @@
+﻿PREFIX fhir: <http://hl7.org/fhir/> 
+PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+BASE <http://hl7.org/fhir/shape/>
+
+
+start=@<QuestionnaireResponse> AND {fhir:nodeRole [fhir:treeRoot]}
+
+
+# A structured set of questions and their answers
+<QuestionnaireResponse> EXTENDS @<DomainResource> CLOSED {   
+
+    a [fhir:QuestionnaireResponse];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:identifier @<OneOrMore_QuestionnaireResponse.identifier>?;  # Unique id for this set of answers
+    fhir:basedOn @<OneOrMore_QuestionnaireResponse.basedOn_CarePlan_OR_ServiceRequest>?;  # Request fulfilled by this 
+                                            # QuestionnaireResponse 
+    fhir:partOf @<OneOrMore_QuestionnaireResponse.partOf_Observation_OR_Procedure>?;  # Part of this action
+    fhir:questionnaire @<QuestionnaireResponse.questionnaire>?;  # Form being answered
+    fhir:status @<QuestionnaireResponse.status>;  # in-progress | completed | amended 
+                                            # | entered-in-error | stopped 
+    fhir:subject @<QuestionnaireResponse.subject> AND {fhir:link 
+    			@<Resource> }?;  # The subject of the questions
+    fhir:encounter @<QuestionnaireResponse.encounter> AND {fhir:link 
+    			@<Encounter> }?;  # Encounter created as part of
+    fhir:authored @<QuestionnaireResponse.authored>?;  # Date the answers were gathered
+    fhir:author @<QuestionnaireResponse.author> AND {fhir:link 
+    			@<Device> OR 
+    			@<Organization> OR 
+    			@<Patient> OR 
+    			@<Practitioner> OR 
+    			@<PractitionerRole> OR 
+    			@<RelatedPerson> }?;  # The individual or device that 
+                                            # received and recorded the answers 
+    fhir:source @<QuestionnaireResponse.source> AND {fhir:link 
+    			@<Device> OR 
+    			@<Organization> OR 
+    			@<Patient> OR 
+    			@<Practitioner> OR 
+    			@<PractitionerRole> OR 
+    			@<RelatedPerson> }?;  # The individual or device that 
+                                            # answered the questions 
+    fhir:item @<OneOrMore_QuestionnaireResponse.item>?;  # Groups and questions
+} AND (
+
+# Constraint: UniqueKey:qrs-1
+# Human readable:Item cannot contain both item and answer
+# XPath:not(exists(f:answer) and exists(f:item))
+# Constraint:(answer.exists() and item.exists()).not()
+# ShEx:
+
+ NOT { { fhir:answer . } AND { fhir:item . } }
+
+)
+ 
+
+# The response(s) to the question
+<QuestionnaireResponse.item.answer> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:value (@<boolean>  OR 
+    			@<decimal>  OR 
+    			@<integer>  OR 
+    			@<date>  OR 
+    			@<dateTime>  OR 
+    			@<time>  OR 
+    			@<string>  OR 
+    			@<uri>  OR 
+    			@<Attachment>  OR 
+    			@<Coding>  OR 
+    			@<Quantity>  OR 
+    			(@<Reference>  AND {fhir:link @<Resource> }) )  AND { rdf:type IRI } ;  # Single-valued answer to the 
+                                            # question 
+    fhir:item @<OneOrMore_QuestionnaireResponse.item>?;  # Child items of question
+}  
+
+# Groups and questions
+<QuestionnaireResponse.item> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:linkId @<QuestionnaireResponse.item.linkId>;  # Pointer to specific item from 
+                                            # Questionnaire 
+    fhir:definition @<QuestionnaireResponse.item.definition>?;  # ElementDefinition - details for 
+                                            # the item 
+    fhir:text @<QuestionnaireResponse.item.text>?;  # Name for group or question text
+    fhir:answer @<OneOrMore_QuestionnaireResponse.item.answer>?;  # The response(s) to the question
+    fhir:item @<OneOrMore_QuestionnaireResponse.item>?;  # Child items of group item
+} AND (
+
+# Constraint: UniqueKey:qrs-1
+# Human readable:Item cannot contain both item and answer
+# XPath:not(exists(f:answer) and exists(f:item))
+# Constraint:(answer.exists() and item.exists()).not()
+# ShEx:
+
+ NOT { { fhir:answer . } AND { fhir:item . } }
+
+)
+ 
+
+# Child items of group item
+<QuestionnaireResponse.item.item> CLOSED {   
+}  
+
+#---------------------- Data Types -------------------
+
+# Primitive Type date
+<date> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:date];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v @<date.value>?;                  # Primitive value for date
+}  
+
+# Primitive Type dateTime
+<dateTime> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:dateTime];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v @<dateTime.value>?;              # Primitive value for dateTime
+}  
+
+# Primitive Type string
+<string> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:string];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v @<string.value>?;                # Primitive value for string
+}  
+
+# A reference from one resource to another
+<Reference> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Reference];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:link IRI?;
+    fhir:reference @<Reference.reference>?;  # Literal reference, Relative, 
+                                            # internal or absolute URL 
+    fhir:type @<Reference.type>?;           # Type the reference refers to (e.g. 
+                                            # "Patient") 
+    fhir:identifier @<Reference.identifier>?;  # Logical reference, when literal 
+                                            # reference is not known 
+    fhir:display @<Reference.display>?;     # Text alternative for the resource
+} AND (
+
+# Constraint: UniqueKey:ref-1
+# Human readable:SHALL have a contained resource if a local reference is provided
+# XPath:not(starts-with(f:reference/@value, '#')) or exists(ancestor::*[self::f:entry or self::f:parameter]/f:resource/f:*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')]|/*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')])
+# Constraint:reference.startsWith('#').not() or (reference.substring(1).trace('url') in %rootResource.contained.id.trace('ids')) or (reference='#' and %rootResource!=%resource)
+# ShEx:
+
+
+)
+ 
+
+# A measured or measurable amount
+<Quantity> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Quantity];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:value @<Quantity.value>?;          # Numerical value (with implicit 
+                                            # precision) 
+    fhir:comparator @<Quantity.comparator>?;  # < | <= | >= | > | ad - how to 
+                                            # understand the value 
+    fhir:unit @<Quantity.unit>?;            # Unit representation
+    fhir:system @<Quantity.system>?;        # System that defines coded unit form
+    fhir:code @<Quantity.code>?;            # Coded form of the unit
+} AND (
+
+# Constraint: UniqueKey:qty-3
+# Human readable:If a code for the unit is present, the system SHALL also be present
+# XPath:not(exists(f:code)) or exists(f:system)
+# Constraint:code.empty() or system.exists()
+# ShEx:
+
+ NOT { fhir:code {fhir:v .} }  OR { fhir:system . }
+
+)
+ 
+
+# Content in a format defined elsewhere
+<Attachment> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Attachment];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:contentType @<Attachment.contentType>?;  # Mime type of the content, with 
+                                            # charset etc. 
+    fhir:language @<Attachment.language>?;  # Human language of the content 
+                                            # (BCP-47) 
+    fhir:data @<Attachment.data>?;          # Data inline, base64ed
+    fhir:url @<Attachment.url>?;            # Uri where the data can be found
+    fhir:size @<Attachment.size>?;          # Number of bytes of content (if url 
+                                            # provided) 
+    fhir:hash @<Attachment.hash>?;          # Hash of the data (sha-1, base64ed)
+    fhir:title @<Attachment.title>?;        # Label to display in place of the 
+                                            # data 
+    fhir:creation @<Attachment.creation>?;  # Date attachment was first created
+    fhir:height @<Attachment.height>?;      # Height of the image in pixels 
+                                            # (photo/video) 
+    fhir:width @<Attachment.width>?;        # Width of the image in pixels 
+                                            # (photo/video) 
+    fhir:frames @<Attachment.frames>?;      # Number of frames if > 1 (photo)
+    fhir:duration @<Attachment.duration>?;  # Length in seconds (audio / video)
+    fhir:pages @<Attachment.pages>?;        # Number of printed pages
+} AND (
+
+# Constraint: UniqueKey:att-1
+# Human readable:If the Attachment has data, it SHALL have a contentType
+# XPath:not(exists(f:data)) or exists(f:contentType)
+# Constraint:data.empty() or contentType.exists()
+# ShEx:
+
+ NOT { fhir:data {fhir:v .} }  OR { fhir:contentType . }
+
+)
+ 
+
+# Primitive Type integer
+<integer> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:integer];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v @<integer.value>?;               # Primitive value for integer
+}  
+
+# Primitive Type uri
+<uri> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:uri];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v @<uri.value>?;                   # Primitive value for uri
+}  
+
+# Primitive Type boolean
+<boolean> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:boolean];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v @<boolean.value>?;               # Primitive value for boolean
+}  
+
+# A reference to a code defined by a terminology system
+<Coding> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Coding];
+    fhir:nodeRole [fhir:treeRoot]?;
+    a NONLITERAL?;
+    fhir:system @<Coding.system>?;          # Identity of the terminology system
+    fhir:version @<Coding.version>?;        # Version of the system - if relevant
+    fhir:code @<Coding.code>?;              # Symbol in syntax defined by the 
+                                            # system 
+    fhir:display @<Coding.display>?;        # Representation defined by the 
+                                            # system 
+    fhir:userSelected @<Coding.userSelected>?;  # If this coding was chosen directly 
+                                            # by the user 
+}  
+
+# Primitive Type time
+<time> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:time];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v @<time.value>?;                  # Primitive value for time
+}  
+
+# Primitive Type decimal
+<decimal> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:decimal];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v @<decimal.value>?;               # Primitive value for decimal
+}  
+
+#---------------------- Cardinality Types (OneOrMore) -------------------
+
+<OneOrMore_QuestionnaireResponse.identifier> CLOSED {
+    rdf:first @<QuestionnaireResponse.identifier>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_QuestionnaireResponse.identifier> 
+}
+
+<OneOrMore_QuestionnaireResponse.basedOn_CarePlan_OR_ServiceRequest> CLOSED {
+    rdf:first @<QuestionnaireResponse.basedOn> AND {fhir:link 
+			@<CarePlan> OR 
+			@<ServiceRequest> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_QuestionnaireResponse.basedOn_CarePlan_OR_ServiceRequest> 
+}
+
+<OneOrMore_QuestionnaireResponse.partOf_Observation_OR_Procedure> CLOSED {
+    rdf:first @<QuestionnaireResponse.partOf> AND {fhir:link 
+			@<Observation> OR 
+			@<Procedure> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_QuestionnaireResponse.partOf_Observation_OR_Procedure> 
+}
+
+<OneOrMore_QuestionnaireResponse.item> CLOSED {
+    rdf:first @<QuestionnaireResponse.item>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_QuestionnaireResponse.item> 
+}
+
+<OneOrMore_QuestionnaireResponse.item.answer> CLOSED {
+    rdf:first @<QuestionnaireResponse.item.answer>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_QuestionnaireResponse.item.answer> 
+}
+
+#---------------------- Reference Types -------------------
+
+#---------------------- Value Sets ------------------------

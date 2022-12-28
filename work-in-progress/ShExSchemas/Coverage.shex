@@ -1,0 +1,138 @@
+﻿PREFIX fhir: <http://hl7.org/fhir/> 
+PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+BASE <http://hl7.org/fhir/shape/>
+
+
+start=@<Coverage> AND {fhir:nodeRole [fhir:treeRoot]}
+
+
+# Insurance or medical plan or a payment agreement
+<Coverage> EXTENDS @<DomainResource> CLOSED {   
+
+    a [fhir:Coverage];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:identifier @<OneOrMore_Coverage.identifier>?;  # Business Identifier for the 
+                                            # coverage 
+    fhir:status @<Coverage.status>;         # active | cancelled | draft | 
+                                            # entered-in-error 
+    fhir:type @<Coverage.type>?;            # Coverage category such as medical 
+                                            # or accident 
+    fhir:policyHolder @<Coverage.policyHolder> AND {fhir:link 
+    			@<Organization> OR 
+    			@<Patient> OR 
+    			@<RelatedPerson> }?;  # Owner of the policy
+    fhir:subscriber @<Coverage.subscriber> AND {fhir:link 
+    			@<Patient> OR 
+    			@<RelatedPerson> }?;  # Subscriber to the policy
+    fhir:subscriberId @<Coverage.subscriberId>?;  # ID assigned to the subscriber
+    fhir:beneficiary @<Coverage.beneficiary> AND {fhir:link 
+    			@<Patient> };  # Plan beneficiary
+    fhir:dependent @<Coverage.dependent>?;  # Dependent number
+    fhir:relationship @<Coverage.relationship>?;  # Beneficiary relationship to the 
+                                            # subscriber 
+    fhir:period @<Coverage.period>?;        # Coverage start and end dates
+    fhir:payor @<OneOrMore_Coverage.payor_Organization_OR_Patient_OR_RelatedPerson>;  # Issuer of the policy
+    fhir:class @<OneOrMore_Coverage.class>?;  # Additional coverage classifications
+    fhir:order @<Coverage.order>?;          # Relative order of the coverage
+    fhir:network @<Coverage.network>?;      # Insurer network
+    fhir:costToBeneficiary @<OneOrMore_Coverage.costToBeneficiary>?;  # Patient payments for 
+                                            # services/products 
+    fhir:subrogation @<Coverage.subrogation>?;  # Reimbursement to insurer
+    fhir:contract @<OneOrMore_Coverage.contract_Contract>?;  # Contract details
+}  
+
+# Patient payments for services/products
+<Coverage.costToBeneficiary> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:type @<Coverage.costToBeneficiary.type>?;  # Cost category
+    fhir:value (@<SimpleQuantity>  OR 
+    			@<Money> )  AND { rdf:type IRI } ;  # The amount or percentage due from 
+                                            # the beneficiary 
+    fhir:exception @<OneOrMore_Coverage.costToBeneficiary.exception>?;  # Exceptions for patient payments
+}  
+
+# Additional coverage classifications
+<Coverage.class> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:type @<Coverage.class.type>;       # Type of class such as 'group' or 
+                                            # 'plan' 
+    fhir:value @<Coverage.class.value>;     # Value associated with the type
+    fhir:name @<Coverage.class.name>?;      # Human readable description of the 
+                                            # type and value 
+}  
+
+# Exceptions for patient payments
+<Coverage.costToBeneficiary.exception> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:type @<Coverage.costToBeneficiary.exception.type>;  # Exception category
+    fhir:period @<Coverage.costToBeneficiary.exception.period>?;  # The effective period of the 
+                                            # exception 
+}  
+
+#---------------------- Data Types -------------------
+
+# An amount of economic utility in some recognized currency
+<Money> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Money];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:value @<Money.value>?;             # Numerical value (with implicit 
+                                            # precision) 
+    fhir:currency @<Money.currency>?;       # ISO 4217 Currency Code
+}  
+
+# A fixed quantity (no comparator)
+<SimpleQuantity> EXTENDS @<Quantity> CLOSED {   
+
+    a [fhir:SimpleQuantity];
+    fhir:nodeRole [fhir:treeRoot]?;
+} AND (
+
+# Constraint: UniqueKey:sqty-1
+# Human readable:The comparator is not used on a SimpleQuantity
+# XPath:not(exists(f:comparator))
+# Constraint:comparator.empty()
+# ShEx:
+
+ NOT { fhir:comparator {fhir:v .} } 
+
+)
+ 
+
+#---------------------- Cardinality Types (OneOrMore) -------------------
+
+<OneOrMore_Coverage.identifier> CLOSED {
+    rdf:first @<Coverage.identifier>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Coverage.identifier> 
+}
+
+<OneOrMore_Coverage.payor_Organization_OR_Patient_OR_RelatedPerson> CLOSED {
+    rdf:first @<Coverage.payor> AND {fhir:link 
+			@<Organization> OR 
+			@<Patient> OR 
+			@<RelatedPerson> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Coverage.payor_Organization_OR_Patient_OR_RelatedPerson> 
+}
+
+<OneOrMore_Coverage.class> CLOSED {
+    rdf:first @<Coverage.class>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Coverage.class> 
+}
+
+<OneOrMore_Coverage.costToBeneficiary> CLOSED {
+    rdf:first @<Coverage.costToBeneficiary>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Coverage.costToBeneficiary> 
+}
+
+<OneOrMore_Coverage.contract_Contract> CLOSED {
+    rdf:first @<Coverage.contract> AND {fhir:link 
+			@<Contract> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Coverage.contract_Contract> 
+}
+
+<OneOrMore_Coverage.costToBeneficiary.exception> CLOSED {
+    rdf:first @<Coverage.costToBeneficiary.exception>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Coverage.costToBeneficiary.exception> 
+}
+
+#---------------------- Reference Types -------------------
+
+#---------------------- Value Sets ------------------------

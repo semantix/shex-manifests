@@ -1,0 +1,198 @@
+﻿PREFIX fhir: <http://hl7.org/fhir/> 
+PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+BASE <http://hl7.org/fhir/shape/>
+
+
+start=@<SubscriptionTopic> AND {fhir:nodeRole [fhir:treeRoot]}
+
+
+# The definition of a specific topic for triggering events within the Subscriptions framework
+<SubscriptionTopic> EXTENDS @<CanonicalResource> CLOSED {   
+
+    a [fhir:SubscriptionTopic];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:url @<SubscriptionTopic.url>;      # Canonical identifier for this 
+                                            # subscription topic definition, 
+                                            # represented as a URI (globally 
+                                            # unique) 
+    fhir:identifier @<OneOrMore_SubscriptionTopic.identifier>?;  # Business Identifier for this 
+                                            # subscription topic 
+    fhir:version @<SubscriptionTopic.version>?;  # Business version of the 
+                                            # subscription topic 
+    fhir:title @<SubscriptionTopic.title>?;  # Name for this subscription topic 
+                                            # (Human friendly) 
+    fhir:derivedFrom @<OneOrMore_SubscriptionTopic.derivedFrom>?;  # Based on FHIR protocol or 
+                                            # definition 
+    fhir:status @<SubscriptionTopic.status>;  # draft | active | retired | unknown
+    fhir:experimental @<SubscriptionTopic.experimental>?;  # If for testing purposes, not real 
+                                            # usage 
+    fhir:date @<SubscriptionTopic.date>?;   # Date status first applied
+    fhir:publisher @<SubscriptionTopic.publisher>?;  # The name of the individual or 
+                                            # organization that published the 
+                                            # SubscriptionTopic 
+    fhir:contact @<OneOrMore_SubscriptionTopic.contact>?;  # Contact details for the publisher
+    fhir:description @<SubscriptionTopic.description>?;  # Natural language description of 
+                                            # the SubscriptionTopic 
+    fhir:useContext @<OneOrMore_SubscriptionTopic.useContext>?;  # Content intends to support these 
+                                            # contexts 
+    fhir:jurisdiction @<OneOrMore_SubscriptionTopic.jurisdiction>?;  # Intended jurisdiction of the 
+                                            # SubscriptionTopic (if applicable) 
+    fhir:purpose @<SubscriptionTopic.purpose>?;  # Why this SubscriptionTopic is 
+                                            # defined 
+    fhir:copyright @<SubscriptionTopic.copyright>?;  # Use and/or publishing restrictions
+    fhir:approvalDate @<SubscriptionTopic.approvalDate>?;  # When SubscriptionTopic is/was 
+                                            # approved by publisher 
+    fhir:lastReviewDate @<SubscriptionTopic.lastReviewDate>?;  # Date the Subscription Topic was 
+                                            # last reviewed by the publisher 
+    fhir:effectivePeriod @<SubscriptionTopic.effectivePeriod>?;  # The effective date range for the 
+                                            # SubscriptionTopic 
+    fhir:resourceTrigger @<OneOrMore_SubscriptionTopic.resourceTrigger>?;  # Definition of a resource-based 
+                                            # trigger for the subscription topic 
+    fhir:eventTrigger @<OneOrMore_SubscriptionTopic.eventTrigger>?;  # Event definitions the 
+                                            # SubscriptionTopic 
+    fhir:canFilterBy @<OneOrMore_SubscriptionTopic.canFilterBy>?;  # Properties by which a Subscription 
+                                            # can filter notifications from the 
+                                            # SubscriptionTopic 
+    fhir:notificationShape @<OneOrMore_SubscriptionTopic.notificationShape>?;  # Properties for describing the 
+                                            # shape of notifications generated 
+                                            # by this topic 
+}  
+
+# Definition of a resource-based trigger for the subscription topic
+<SubscriptionTopic.resourceTrigger> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:description @<SubscriptionTopic.resourceTrigger.description>?;  # Text representation of the 
+                                            # resource trigger 
+    fhir:resource @<SubscriptionTopic.resourceTrigger.resource>;  # Data Type or Resource (reference 
+                                            # to definition) for this trigger 
+                                            # definition 
+    fhir:supportedInteraction @<OneOrMore_SubscriptionTopic.resourceTrigger.supportedInteraction>?;  # create | update | delete
+    fhir:queryCriteria @<SubscriptionTopic.resourceTrigger.queryCriteria>?;  # Query based trigger rule
+    fhir:fhirPathCriteria @<SubscriptionTopic.resourceTrigger.fhirPathCriteria>?;  # FHIRPath based trigger rule
+}  
+
+# Event definitions the SubscriptionTopic
+<SubscriptionTopic.eventTrigger> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:description @<SubscriptionTopic.eventTrigger.description>?;  # Text representation of the event 
+                                            # trigger 
+    fhir:event @<SubscriptionTopic.eventTrigger.event>;  # Event which can trigger a 
+                                            # notification from the 
+                                            # SubscriptionTopic 
+    fhir:resource @<SubscriptionTopic.eventTrigger.resource>;  # Data Type or Resource (reference 
+                                            # to definition) for this trigger 
+                                            # definition 
+}  
+
+# Properties by which a Subscription can filter notifications from the SubscriptionTopic
+<SubscriptionTopic.canFilterBy> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:description @<SubscriptionTopic.canFilterBy.description>?;  # Description of this filter 
+                                            # parameter 
+    fhir:resource @<SubscriptionTopic.canFilterBy.resource>?;  # URL of the triggering Resource 
+                                            # that this filter applies to 
+    fhir:filterParameter @<SubscriptionTopic.canFilterBy.filterParameter>;  # Human-readable and 
+                                            # computation-friendly name for a 
+                                            # filter parameter usable by 
+                                            # subscriptions on this topic, via 
+                                            # Subscription.filterBy.filterPara-
+                                            # meter 
+    fhir:filterDefinition @<SubscriptionTopic.canFilterBy.filterDefinition>?;  # Canonical URL for a 
+                                            # filterParameter definition 
+    fhir:modifier @<OneOrMore_SubscriptionTopic.canFilterBy.modifier>?;  # = | eq | ne | gt | lt | ge | le | 
+                                            # sa | eb | ap | above | below | in 
+                                            # | not-in | of-type 
+}  
+
+# Query based trigger rule
+<SubscriptionTopic.resourceTrigger.queryCriteria> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:previous @<SubscriptionTopic.resourceTrigger.queryCriteria.previous>?;  # Rule applied to previous resource 
+                                            # state 
+    fhir:resultForCreate @<SubscriptionTopic.resourceTrigger.queryCriteria.resultForCreate>?;  # test-passes | test-fails
+    fhir:current @<SubscriptionTopic.resourceTrigger.queryCriteria.current>?;  # Rule applied to current resource 
+                                            # state 
+    fhir:resultForDelete @<SubscriptionTopic.resourceTrigger.queryCriteria.resultForDelete>?;  # test-passes | test-fails
+    fhir:requireBoth @<SubscriptionTopic.resourceTrigger.queryCriteria.requireBoth>?;  # Both must be true flag
+}  
+
+# Properties for describing the shape of notifications generated by this topic
+<SubscriptionTopic.notificationShape> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:resource @<SubscriptionTopic.notificationShape.resource>;  # URL of the Resource that is the 
+                                            # focus (main) resource in a 
+                                            # notification shape 
+    fhir:include @<OneOrMore_SubscriptionTopic.notificationShape.include>?;  # Include directives, rooted in the 
+                                            # resource for this shape 
+    fhir:revInclude @<OneOrMore_SubscriptionTopic.notificationShape.revInclude>?;  # Reverse include directives, rooted 
+                                            # in the resource for this shape 
+}  
+
+#---------------------- Data Types -------------------
+
+#---------------------- Cardinality Types (OneOrMore) -------------------
+
+<OneOrMore_SubscriptionTopic.identifier> CLOSED {
+    rdf:first @<SubscriptionTopic.identifier>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_SubscriptionTopic.identifier> 
+}
+
+<OneOrMore_SubscriptionTopic.derivedFrom> CLOSED {
+    rdf:first @<SubscriptionTopic.derivedFrom>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_SubscriptionTopic.derivedFrom> 
+}
+
+<OneOrMore_SubscriptionTopic.contact> CLOSED {
+    rdf:first @<SubscriptionTopic.contact>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_SubscriptionTopic.contact> 
+}
+
+<OneOrMore_SubscriptionTopic.useContext> CLOSED {
+    rdf:first @<SubscriptionTopic.useContext>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_SubscriptionTopic.useContext> 
+}
+
+<OneOrMore_SubscriptionTopic.jurisdiction> CLOSED {
+    rdf:first @<SubscriptionTopic.jurisdiction>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_SubscriptionTopic.jurisdiction> 
+}
+
+<OneOrMore_SubscriptionTopic.resourceTrigger> CLOSED {
+    rdf:first @<SubscriptionTopic.resourceTrigger>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_SubscriptionTopic.resourceTrigger> 
+}
+
+<OneOrMore_SubscriptionTopic.eventTrigger> CLOSED {
+    rdf:first @<SubscriptionTopic.eventTrigger>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_SubscriptionTopic.eventTrigger> 
+}
+
+<OneOrMore_SubscriptionTopic.canFilterBy> CLOSED {
+    rdf:first @<SubscriptionTopic.canFilterBy>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_SubscriptionTopic.canFilterBy> 
+}
+
+<OneOrMore_SubscriptionTopic.notificationShape> CLOSED {
+    rdf:first @<SubscriptionTopic.notificationShape>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_SubscriptionTopic.notificationShape> 
+}
+
+<OneOrMore_SubscriptionTopic.resourceTrigger.supportedInteraction> CLOSED {
+    rdf:first @<SubscriptionTopic.resourceTrigger.supportedInteraction>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_SubscriptionTopic.resourceTrigger.supportedInteraction> 
+}
+
+<OneOrMore_SubscriptionTopic.canFilterBy.modifier> CLOSED {
+    rdf:first @<SubscriptionTopic.canFilterBy.modifier>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_SubscriptionTopic.canFilterBy.modifier> 
+}
+
+<OneOrMore_SubscriptionTopic.notificationShape.include> CLOSED {
+    rdf:first @<SubscriptionTopic.notificationShape.include>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_SubscriptionTopic.notificationShape.include> 
+}
+
+<OneOrMore_SubscriptionTopic.notificationShape.revInclude> CLOSED {
+    rdf:first @<SubscriptionTopic.notificationShape.revInclude>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_SubscriptionTopic.notificationShape.revInclude> 
+}
+
+#---------------------- Reference Types -------------------
+
+#---------------------- Value Sets ------------------------

@@ -1,0 +1,44 @@
+﻿PREFIX fhir: <http://hl7.org/fhir/> 
+PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+BASE <http://hl7.org/fhir/shape/>
+
+
+# Range of ratio values
+<RatioRange> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:RatioRange];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:lowNumerator @<RatioRange.lowNumerator>?;  # Low Numerator limit
+    fhir:highNumerator @<RatioRange.highNumerator>?;  # High Numerator limit
+    fhir:denominator @<RatioRange.denominator>?;  # Denominator value
+} AND (
+
+# Constraint: UniqueKey:inv-2
+# Human readable:If present, lowNumerator SHALL have a lower value than highNumerator
+# XPath:not(exists(f:lowNumerator/f:value/@value)) or not(exists(f:highNumerator/f:value/@value)) or (number(f:lowNumerator/f:value/@value) <= number(f:highNumerator/f:value/@value))
+# Constraint:lowNumerator.empty() or highNumerator.empty() or (lowNumerator <= highNumerator)
+# ShEx:
+
+ NOT { fhir:lowNumerator {fhir:v .} }  OR  NOT { fhir:highNumerator {fhir:v .} }  OR ({ fhir:lowNumerator { fhir:v MaxInclusive { fhir:highNumerator } }  })
+
+) AND (
+
+# Constraint: UniqueKey:inv-1
+# Human readable:One of lowNumerator or highNumerator and denominator SHALL be present, or all are absent. If all are absent, there SHALL be some extension present
+# XPath:(count(f:numerator) = count(f:denominator)) and ((count(f:numerator) > 0) or (count(f:extension) > 0))
+# Constraint:((lowNumerator.empty() and highNumerator.empty()) xor denominator.exists()) and (lowNumerator.exists() or extension.exists())
+# ShEx:
+
+((( NOT { fhir:lowNumerator {fhir:v .} }  AND  NOT { fhir:highNumerator {fhir:v .} } ) AND NOT  { fhir:denominator . }) OR ( NOT ( NOT { fhir:lowNumerator {fhir:v .} }  AND  NOT { fhir:highNumerator {fhir:v .} } ) AND  { fhir:denominator . })) AND ({ fhir:lowNumerator . } OR { fhir:extension . })
+
+)
+ 
+
+#---------------------- Data Types -------------------
+
+#---------------------- Cardinality Types (OneOrMore) -------------------
+
+#---------------------- Reference Types -------------------
+
+#---------------------- Value Sets ------------------------

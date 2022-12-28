@@ -1,0 +1,214 @@
+﻿PREFIX fhir: <http://hl7.org/fhir/> 
+PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+BASE <http://hl7.org/fhir/shape/>
+
+
+start=@<ExampleScenario> AND {fhir:nodeRole [fhir:treeRoot]}
+
+
+# Example of workflow instance
+<ExampleScenario> EXTENDS @<CanonicalResource> CLOSED {   
+
+    a [fhir:ExampleScenario];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:url @<ExampleScenario.url>?;       # Canonical identifier for this 
+                                            # example scenario, represented as a 
+                                            # URI (globally unique) 
+    fhir:identifier @<OneOrMore_ExampleScenario.identifier>?;  # Additional identifier for the 
+                                            # example scenario 
+    fhir:version @<ExampleScenario.version>?;  # Business version of the example 
+                                            # scenario 
+    fhir:name @<ExampleScenario.name>?;     # Name for this example scenario 
+                                            # (computer friendly) 
+    fhir:status @<ExampleScenario.status>;  # draft | active | retired | unknown
+    fhir:experimental @<ExampleScenario.experimental>?;  # For testing purposes, not real 
+                                            # usage 
+    fhir:date @<ExampleScenario.date>?;     # Date last changed
+    fhir:publisher @<ExampleScenario.publisher>?;  # Name of the publisher 
+                                            # (organization or individual) 
+    fhir:contact @<OneOrMore_ExampleScenario.contact>?;  # Contact details for the publisher
+    fhir:useContext @<OneOrMore_ExampleScenario.useContext>?;  # The context that the content is 
+                                            # intended to support 
+    fhir:jurisdiction @<OneOrMore_ExampleScenario.jurisdiction>?;  # Intended jurisdiction for example 
+                                            # scenario (if applicable) 
+    fhir:purpose @<ExampleScenario.purpose>?;  # The purpose of the example, e.g. 
+                                            # to illustrate a scenario 
+    fhir:copyright @<ExampleScenario.copyright>?;  # Use and/or publishing restrictions
+    fhir:actor @<OneOrMore_ExampleScenario.actor>?;  # Actor participating in the resource
+    fhir:instance @<OneOrMore_ExampleScenario.instance>?;  # Each resource and each version 
+                                            # that is present in the workflow 
+    fhir:process @<OneOrMore_ExampleScenario.process>?;  # Each major process - a group of 
+                                            # operations 
+    fhir:workflow @<OneOrMore_ExampleScenario.workflow>?;  # Another nested workflow
+} AND (
+
+# Constraint: UniqueKey:cnl-0
+# Human readable:Name should be usable as an identifier for the module by machine processing applications such as code generation
+# XPath:not(exists(f:name/@value)) or matches(f:name/@value, '[A-Z]([A-Za-z0-9_]){0,254}')
+# Constraint:name.exists() implies name.matches('[A-Z]([A-Za-z0-9_]){0,254}')
+# ShEx:
+
+{ fhir:name . } AND { fhir:name { fhir:v /'[A-Z]([A-Za-z0-9_]){0,254}'/ }  }
+
+)
+ 
+
+# Each interaction or action
+<ExampleScenario.process.step.operation> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:number @<ExampleScenario.process.step.operation.number>;  # The sequential number of the 
+                                            # interaction 
+    fhir:type @<ExampleScenario.process.step.operation.type>?;  # The type of operation - CRUD
+    fhir:name @<ExampleScenario.process.step.operation.name>?;  # The human-friendly name of the 
+                                            # interaction 
+    fhir:initiator @<ExampleScenario.process.step.operation.initiator>?;  # Who starts the transaction
+    fhir:receiver @<ExampleScenario.process.step.operation.receiver>?;  # Who receives the transaction
+    fhir:description @<ExampleScenario.process.step.operation.description>?;  # A comment to be inserted in the 
+                                            # diagram 
+    fhir:initiatorActive @<ExampleScenario.process.step.operation.initiatorActive>?;  # Whether the initiator is 
+                                            # deactivated right after the 
+                                            # transaction 
+    fhir:receiverActive @<ExampleScenario.process.step.operation.receiverActive>?;  # Whether the receiver is 
+                                            # deactivated right after the 
+                                            # transaction 
+    fhir:request @<ExampleScenario.instance.containedInstance>?;  # Each resource instance used by the 
+                                            # initiator 
+    fhir:response @<ExampleScenario.instance.containedInstance>?;  # Each resource instance used by the 
+                                            # responder 
+}  
+
+# Each major process - a group of operations
+<ExampleScenario.process> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:title @<ExampleScenario.process.title>;  # The diagram title of the group of 
+                                            # operations 
+    fhir:description @<ExampleScenario.process.description>?;  # A longer description of the group 
+                                            # of operations 
+    fhir:preConditions @<ExampleScenario.process.preConditions>?;  # Description of initial status 
+                                            # before the process starts 
+    fhir:postConditions @<ExampleScenario.process.postConditions>?;  # Description of final status after 
+                                            # the process ends 
+    fhir:step @<OneOrMore_ExampleScenario.process.step>?;  # Each step of the process
+}  
+
+# A specific version of the resource
+<ExampleScenario.instance.version> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:versionId @<ExampleScenario.instance.version.versionId>;  # The identifier of a specific 
+                                            # version of a resource 
+    fhir:description @<ExampleScenario.instance.version.description>;  # The description of the resource 
+                                            # version 
+}  
+
+# Alternate non-typical step action
+<ExampleScenario.process.step.alternative> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:title @<ExampleScenario.process.step.alternative.title>;  # Label for alternative
+    fhir:description @<ExampleScenario.process.step.alternative.description>?;  # A human-readable description of 
+                                            # each option 
+    fhir:step @<OneOrMore_ExampleScenario.process.step>?;  # What happens in each alternative 
+                                            # option 
+}  
+
+# Resources contained in the instance
+<ExampleScenario.instance.containedInstance> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:resourceId @<ExampleScenario.instance.containedInstance.resourceId>;  # Each resource contained in the 
+                                            # instance 
+    fhir:versionId @<ExampleScenario.instance.containedInstance.versionId>?;  # A specific version of a resource 
+                                            # contained in the instance 
+}  
+
+# Actor participating in the resource
+<ExampleScenario.actor> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:actorId @<ExampleScenario.actor.actorId>;  # ID or acronym of the actor
+    fhir:type @<ExampleScenario.actor.type>;  # person | entity
+    fhir:name @<ExampleScenario.actor.name>?;  # The name of the actor as shown in 
+                                            # the page 
+    fhir:description @<ExampleScenario.actor.description>?;  # The description of the actor
+}  
+
+# Each resource and each version that is present in the workflow
+<ExampleScenario.instance> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:resourceId @<ExampleScenario.instance.resourceId>;  # The id of the resource for 
+                                            # referencing 
+    fhir:type @<ExampleScenario.instance.type>;  # The type of the resource
+    fhir:name @<ExampleScenario.instance.name>?;  # A short name for the resource 
+                                            # instance 
+    fhir:description @<ExampleScenario.instance.description>?;  # Human-friendly description of the 
+                                            # resource instance 
+    fhir:version @<OneOrMore_ExampleScenario.instance.version>?;  # A specific version of the resource
+    fhir:containedInstance @<OneOrMore_ExampleScenario.instance.containedInstance>?;  # Resources contained in the instance
+}  
+
+# Each step of the process
+<ExampleScenario.process.step> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:process @<OneOrMore_ExampleScenario.process>?;  # Nested process
+    fhir:pause @<ExampleScenario.process.step.pause>?;  # If there is a pause in the flow
+    fhir:operation @<ExampleScenario.process.step.operation>?;  # Each interaction or action
+    fhir:alternative @<OneOrMore_ExampleScenario.process.step.alternative>?;  # Alternate non-typical step action
+}  
+
+#---------------------- Data Types -------------------
+
+#---------------------- Cardinality Types (OneOrMore) -------------------
+
+<OneOrMore_ExampleScenario.identifier> CLOSED {
+    rdf:first @<ExampleScenario.identifier>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ExampleScenario.identifier> 
+}
+
+<OneOrMore_ExampleScenario.contact> CLOSED {
+    rdf:first @<ExampleScenario.contact>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ExampleScenario.contact> 
+}
+
+<OneOrMore_ExampleScenario.useContext> CLOSED {
+    rdf:first @<ExampleScenario.useContext>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ExampleScenario.useContext> 
+}
+
+<OneOrMore_ExampleScenario.jurisdiction> CLOSED {
+    rdf:first @<ExampleScenario.jurisdiction>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ExampleScenario.jurisdiction> 
+}
+
+<OneOrMore_ExampleScenario.actor> CLOSED {
+    rdf:first @<ExampleScenario.actor>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ExampleScenario.actor> 
+}
+
+<OneOrMore_ExampleScenario.instance> CLOSED {
+    rdf:first @<ExampleScenario.instance>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ExampleScenario.instance> 
+}
+
+<OneOrMore_ExampleScenario.process> CLOSED {
+    rdf:first @<ExampleScenario.process>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ExampleScenario.process> 
+}
+
+<OneOrMore_ExampleScenario.workflow> CLOSED {
+    rdf:first @<ExampleScenario.workflow>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ExampleScenario.workflow> 
+}
+
+<OneOrMore_ExampleScenario.process.step> CLOSED {
+    rdf:first @<ExampleScenario.process.step>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ExampleScenario.process.step> 
+}
+
+<OneOrMore_ExampleScenario.instance.version> CLOSED {
+    rdf:first @<ExampleScenario.instance.version>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ExampleScenario.instance.version> 
+}
+
+<OneOrMore_ExampleScenario.instance.containedInstance> CLOSED {
+    rdf:first @<ExampleScenario.instance.containedInstance>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ExampleScenario.instance.containedInstance> 
+}
+
+<OneOrMore_ExampleScenario.process.step.alternative> CLOSED {
+    rdf:first @<ExampleScenario.process.step.alternative>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ExampleScenario.process.step.alternative> 
+}
+
+#---------------------- Reference Types -------------------
+
+#---------------------- Value Sets ------------------------

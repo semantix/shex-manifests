@@ -1,0 +1,91 @@
+﻿PREFIX fhir: <http://hl7.org/fhir/> 
+PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+BASE <http://hl7.org/fhir/shape/>
+
+
+start=@<PaymentReconciliation> AND {fhir:nodeRole [fhir:treeRoot]}
+
+
+# PaymentReconciliation resource
+<PaymentReconciliation> EXTENDS @<DomainResource> CLOSED {   
+
+    a [fhir:PaymentReconciliation];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:identifier @<OneOrMore_PaymentReconciliation.identifier>?;  # Business Identifier for a payment 
+                                            # reconciliation 
+    fhir:status @<PaymentReconciliation.status>;  # active | cancelled | draft | 
+                                            # entered-in-error 
+    fhir:period @<PaymentReconciliation.period>?;  # Period covered
+    fhir:created @<PaymentReconciliation.created>;  # Creation date
+    fhir:paymentIssuer @<PaymentReconciliation.paymentIssuer> AND {fhir:link 
+    			@<Organization> }?;  # Party generating payment
+    fhir:request @<PaymentReconciliation.request> AND {fhir:link 
+    			@<Task> }?;  # Reference to requesting resource
+    fhir:requestor @<PaymentReconciliation.requestor> AND {fhir:link 
+    			@<Organization> OR 
+    			@<Practitioner> OR 
+    			@<PractitionerRole> }?;  # Responsible practitioner
+    fhir:outcome @<PaymentReconciliation.outcome>?;  # queued | complete | error | partial
+    fhir:disposition @<PaymentReconciliation.disposition>?;  # Disposition message
+    fhir:paymentDate @<PaymentReconciliation.paymentDate>;  # When payment issued
+    fhir:paymentAmount @<PaymentReconciliation.paymentAmount>;  # Total amount of Payment
+    fhir:paymentIdentifier @<PaymentReconciliation.paymentIdentifier>?;  # Business identifier for the payment
+    fhir:detail @<OneOrMore_PaymentReconciliation.detail>?;  # Settlement particulars
+    fhir:formCode @<PaymentReconciliation.formCode>?;  # Printed form identifier
+    fhir:processNote @<OneOrMore_PaymentReconciliation.processNote>?;  # Note concerning processing
+}  
+
+# Note concerning processing
+<PaymentReconciliation.processNote> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:type @<PaymentReconciliation.processNote.type>?;  # display | print | printoper
+    fhir:text @<PaymentReconciliation.processNote.text>?;  # Note explanatory text
+}  
+
+# Settlement particulars
+<PaymentReconciliation.detail> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:identifier @<PaymentReconciliation.detail.identifier>?;  # Business identifier of the payment 
+                                            # detail 
+    fhir:predecessor @<PaymentReconciliation.detail.predecessor>?;  # Business identifier of the prior 
+                                            # payment detail 
+    fhir:type @<PaymentReconciliation.detail.type>;  # Category of payment
+    fhir:request @<PaymentReconciliation.detail.request> AND {fhir:link 
+    			@<Resource> }?;  # Request giving rise to the payment
+    fhir:submitter @<PaymentReconciliation.detail.submitter> AND {fhir:link 
+    			@<Organization> OR 
+    			@<Practitioner> OR 
+    			@<PractitionerRole> }?;  # Submitter of the request
+    fhir:response @<PaymentReconciliation.detail.response> AND {fhir:link 
+    			@<Resource> }?;  # Response committing to a payment
+    fhir:date @<PaymentReconciliation.detail.date>?;  # Date of commitment to pay
+    fhir:responsible @<PaymentReconciliation.detail.responsible> AND {fhir:link 
+    			@<PractitionerRole> }?;  # Contact for the response
+    fhir:payee @<PaymentReconciliation.detail.payee> AND {fhir:link 
+    			@<Organization> OR 
+    			@<Practitioner> OR 
+    			@<PractitionerRole> }?;  # Recipient of the payment
+    fhir:amount @<PaymentReconciliation.detail.amount>?;  # Amount allocated to this payable
+}  
+
+#---------------------- Data Types -------------------
+
+#---------------------- Cardinality Types (OneOrMore) -------------------
+
+<OneOrMore_PaymentReconciliation.identifier> CLOSED {
+    rdf:first @<PaymentReconciliation.identifier>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_PaymentReconciliation.identifier> 
+}
+
+<OneOrMore_PaymentReconciliation.detail> CLOSED {
+    rdf:first @<PaymentReconciliation.detail>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_PaymentReconciliation.detail> 
+}
+
+<OneOrMore_PaymentReconciliation.processNote> CLOSED {
+    rdf:first @<PaymentReconciliation.processNote>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_PaymentReconciliation.processNote> 
+}
+
+#---------------------- Reference Types -------------------
+
+#---------------------- Value Sets ------------------------

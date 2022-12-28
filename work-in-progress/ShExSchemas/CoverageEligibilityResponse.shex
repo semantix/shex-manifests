@@ -1,0 +1,206 @@
+﻿PREFIX fhir: <http://hl7.org/fhir/> 
+PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+BASE <http://hl7.org/fhir/shape/>
+
+
+start=@<CoverageEligibilityResponse> AND {fhir:nodeRole [fhir:treeRoot]}
+
+
+# CoverageEligibilityResponse resource
+<CoverageEligibilityResponse> EXTENDS @<DomainResource> CLOSED {   
+
+    a [fhir:CoverageEligibilityResponse];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:identifier @<OneOrMore_CoverageEligibilityResponse.identifier>?;  # Business Identifier for coverage 
+                                            # eligiblity request 
+    fhir:status @<CoverageEligibilityResponse.status>;  # active | cancelled | draft | 
+                                            # entered-in-error 
+    fhir:purpose @<OneOrMore_CoverageEligibilityResponse.purpose>;  # auth-requirements | benefits | 
+                                            # discovery | validation 
+    fhir:patient @<CoverageEligibilityResponse.patient> AND {fhir:link 
+    			@<Patient> };  # Intended recipient of products and 
+                                            # services 
+    fhir:serviced (@<date>  OR 
+    			@<Period> )  AND { rdf:type IRI } ?;  # Estimated date or dates of service
+    fhir:created @<CoverageEligibilityResponse.created>;  # Response creation date
+    fhir:requestor @<CoverageEligibilityResponse.requestor> AND {fhir:link 
+    			@<Organization> OR 
+    			@<Practitioner> OR 
+    			@<PractitionerRole> }?;  # Party responsible for the request
+    fhir:request @<CoverageEligibilityResponse.request> AND {fhir:link 
+    			@<CoverageEligibilityRequest> };  # Eligibility request reference
+    fhir:outcome @<CoverageEligibilityResponse.outcome>;  # queued | complete | error | partial
+    fhir:disposition @<CoverageEligibilityResponse.disposition>?;  # Disposition Message
+    fhir:insurer @<CoverageEligibilityResponse.insurer> AND {fhir:link 
+    			@<Organization> };  # Coverage issuer
+    fhir:insurance @<OneOrMore_CoverageEligibilityResponse.insurance>?;  # Patient insurance information
+    fhir:preAuthRef @<CoverageEligibilityResponse.preAuthRef>?;  # Preauthorization reference
+    fhir:form @<CoverageEligibilityResponse.form>?;  # Printed form identifier
+    fhir:error @<OneOrMore_CoverageEligibilityResponse.error>?;  # Processing errors
+} AND (
+
+# Constraint: UniqueKey:ces-1
+# Human readable:SHALL contain a category or a billcode but not both.
+# XPath:exists(f:category) or exists(f:productOrService)
+# Constraint:category.exists() xor productOrService.exists()
+# ShEx:
+
+({ fhir:category . } AND NOT  { fhir:productOrService . }) OR ( NOT { fhir:category . } AND  { fhir:productOrService . })
+
+)
+ 
+
+# Benefits and authorization details
+<CoverageEligibilityResponse.insurance.item> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:category @<CoverageEligibilityResponse.insurance.item.category>?;  # Benefit classification
+    fhir:productOrService @<CoverageEligibilityResponse.insurance.item.productOrService>?;  # Billing, service, product, or drug 
+                                            # code 
+    fhir:modifier @<OneOrMore_CoverageEligibilityResponse.insurance.item.modifier>?;  # Product or service billing 
+                                            # modifiers 
+    fhir:provider @<CoverageEligibilityResponse.insurance.item.provider> AND {fhir:link 
+    			@<Practitioner> OR 
+    			@<PractitionerRole> }?;  # Performing practitioner
+    fhir:excluded @<CoverageEligibilityResponse.insurance.item.excluded>?;  # Excluded from the plan
+    fhir:name @<CoverageEligibilityResponse.insurance.item.name>?;  # Short name for the benefit
+    fhir:description @<CoverageEligibilityResponse.insurance.item.description>?;  # Description of the benefit or 
+                                            # services covered 
+    fhir:network @<CoverageEligibilityResponse.insurance.item.network>?;  # In or out of network
+    fhir:unit @<CoverageEligibilityResponse.insurance.item.unit>?;  # Individual or family
+    fhir:term @<CoverageEligibilityResponse.insurance.item.term>?;  # Annual or lifetime
+    fhir:benefit @<OneOrMore_CoverageEligibilityResponse.insurance.item.benefit>?;  # Benefit Summary
+    fhir:authorizationRequired @<CoverageEligibilityResponse.insurance.item.authorizationRequired>?;  # Authorization required flag
+    fhir:authorizationSupporting @<OneOrMore_CoverageEligibilityResponse.insurance.item.authorizationSupporting>?;  # Type of required supporting 
+                                            # materials 
+    fhir:authorizationUrl @<CoverageEligibilityResponse.insurance.item.authorizationUrl>?;  # Preauthorization requirements 
+                                            # endpoint 
+}  
+
+# Processing errors
+<CoverageEligibilityResponse.error> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:code @<CoverageEligibilityResponse.error.code>;  # Error code detailing processing 
+                                            # issues 
+}  
+
+# Patient insurance information
+<CoverageEligibilityResponse.insurance> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:coverage @<CoverageEligibilityResponse.insurance.coverage> AND {fhir:link 
+    			@<Coverage> };  # Insurance information
+    fhir:inforce @<CoverageEligibilityResponse.insurance.inforce>?;  # Coverage inforce indicator
+    fhir:benefitPeriod @<CoverageEligibilityResponse.insurance.benefitPeriod>?;  # When the benefits are applicable
+    fhir:item @<OneOrMore_CoverageEligibilityResponse.insurance.item>?;  # Benefits and authorization details
+}  
+
+# Benefit Summary
+<CoverageEligibilityResponse.insurance.item.benefit> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:type @<CoverageEligibilityResponse.insurance.item.benefit.type>;  # Benefit classification
+    fhir:allowed (@<unsignedInt>  OR 
+    			@<string>  OR 
+    			@<Money> )  AND { rdf:type IRI } ?;  # Benefits allowed
+    fhir:used (@<unsignedInt>  OR 
+    			@<string>  OR 
+    			@<Money> )  AND { rdf:type IRI } ?;  # Benefits used
+}  
+
+#---------------------- Data Types -------------------
+
+# Primitive Type date
+<date> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:date];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v @<date.value>?;                  # Primitive value for date
+}  
+
+# An amount of economic utility in some recognized currency
+<Money> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Money];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:value @<Money.value>?;             # Numerical value (with implicit 
+                                            # precision) 
+    fhir:currency @<Money.currency>?;       # ISO 4217 Currency Code
+}  
+
+# Primitive Type string
+<string> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:string];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v @<string.value>?;                # Primitive value for string
+}  
+
+# Primitive Type unsignedInt
+<unsignedInt> EXTENDS @<integer> CLOSED {   
+
+    a [fhir:unsignedInt];
+    fhir:nodeRole [fhir:treeRoot]?;
+}  
+
+# Time range defined by start and end date/time
+<Period> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Period];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:start @<Period.start>?;            # Starting time with inclusive 
+                                            # boundary 
+    fhir:end @<Period.end>?;                # End time with inclusive boundary, 
+                                            # if not ongoing 
+} AND (
+
+# Constraint: UniqueKey:per-1
+# Human readable:If present, start SHALL have a lower or equal value than end
+# XPath:not(exists(f:start/@value)) or not(exists(f:end/@value)) or (xs:dateTime(f:start/@value) <= xs:dateTime(f:end/@value))
+# Constraint:start.hasValue().not() or end.hasValue().not() or (start <= end)
+# ShEx:
+
+ NOT { fhir:start  . } OR  NOT { fhir:end  . } OR ({ fhir:start { fhir:v MaxInclusive { fhir:end } }  })
+
+)
+ 
+
+#---------------------- Cardinality Types (OneOrMore) -------------------
+
+<OneOrMore_CoverageEligibilityResponse.identifier> CLOSED {
+    rdf:first @<CoverageEligibilityResponse.identifier>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_CoverageEligibilityResponse.identifier> 
+}
+
+<OneOrMore_CoverageEligibilityResponse.purpose> CLOSED {
+    rdf:first @<CoverageEligibilityResponse.purpose>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_CoverageEligibilityResponse.purpose> 
+}
+
+<OneOrMore_CoverageEligibilityResponse.insurance> CLOSED {
+    rdf:first @<CoverageEligibilityResponse.insurance>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_CoverageEligibilityResponse.insurance> 
+}
+
+<OneOrMore_CoverageEligibilityResponse.error> CLOSED {
+    rdf:first @<CoverageEligibilityResponse.error>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_CoverageEligibilityResponse.error> 
+}
+
+<OneOrMore_CoverageEligibilityResponse.insurance.item.modifier> CLOSED {
+    rdf:first @<CoverageEligibilityResponse.insurance.item.modifier>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_CoverageEligibilityResponse.insurance.item.modifier> 
+}
+
+<OneOrMore_CoverageEligibilityResponse.insurance.item.benefit> CLOSED {
+    rdf:first @<CoverageEligibilityResponse.insurance.item.benefit>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_CoverageEligibilityResponse.insurance.item.benefit> 
+}
+
+<OneOrMore_CoverageEligibilityResponse.insurance.item.authorizationSupporting> CLOSED {
+    rdf:first @<CoverageEligibilityResponse.insurance.item.authorizationSupporting>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_CoverageEligibilityResponse.insurance.item.authorizationSupporting> 
+}
+
+<OneOrMore_CoverageEligibilityResponse.insurance.item> CLOSED {
+    rdf:first @<CoverageEligibilityResponse.insurance.item>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_CoverageEligibilityResponse.insurance.item> 
+}
+
+#---------------------- Reference Types -------------------
+
+#---------------------- Value Sets ------------------------

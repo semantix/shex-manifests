@@ -1,0 +1,40 @@
+﻿PREFIX fhir: <http://hl7.org/fhir/> 
+PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+BASE <http://hl7.org/fhir/shape/>
+
+
+# References a location within a set of source text from which the discrete information described by this Resource/Element was extracted.
+<derivation-reference> EXTENDS @<Extension> CLOSED {   
+
+    a [fhir:derivation-reference];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:reference @<Extension>?; 
+    fhir:path @<Extension>?; 
+    fhir:offset @<Extension>?; 
+    fhir:length @<Extension>?; 
+    fhir:v @<Extension.url> AND
+    	{fhir:value ["http://hl7.org/fhir/StructureDefinition/derivation-reference"]}; 
+    ^fhir:extension { a [fhir:Resource] OR 
+    				a [fhir:Element]
+    		}
+} AND (
+
+# Constraint: UniqueKey:der-1
+# Human readable:Cannot have length if offset is missing.
+# XPath:todo-remove-this-line-when-build-process-allows-that
+# Constraint:extension.where(url='length').exists() implies extension.where(url='offset').exists()
+# ShEx:
+
+{ fhir:extension SHEX_where_SHEX (fhir:url { fhir:v ['length'] } ) . } AND { fhir:extension SHEX_where_SHEX (fhir:url { fhir:v ['offset'] } ) . }
+
+)
+ 
+
+#---------------------- Data Types -------------------
+
+#---------------------- Cardinality Types (OneOrMore) -------------------
+
+#---------------------- Reference Types -------------------
+
+#---------------------- Value Sets ------------------------

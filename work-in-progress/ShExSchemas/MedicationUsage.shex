@@ -1,0 +1,146 @@
+﻿PREFIX fhir: <http://hl7.org/fhir/> 
+PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+BASE <http://hl7.org/fhir/shape/>
+
+
+start=@<MedicationUsage> AND {fhir:nodeRole [fhir:treeRoot]}
+
+
+# Record of medication being taken by a patient
+<MedicationUsage> EXTENDS @<DomainResource> CLOSED {   
+
+    a [fhir:MedicationUsage];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:identifier @<OneOrMore_MedicationUsage.identifier>?;  # External identifier
+    fhir:partOf @<OneOrMore_MedicationUsage.partOf_Procedure>?;  # Part of referenced event
+    fhir:status @<MedicationUsage.status>;  # recorded | entered-in-error | draft
+    fhir:category @<OneOrMore_MedicationUsage.category>?;  # Type of medication usage
+    fhir:medication @<MedicationUsage.medication>;  # What medication was taken
+    fhir:subject @<MedicationUsage.subject> AND {fhir:link 
+    			@<Group> OR 
+    			@<Patient> };  # Who is/was taking  the medication
+    fhir:encounter @<MedicationUsage.encounter> AND {fhir:link 
+    			@<Encounter> }?;  # Encounter associated with 
+                                            # MedicationUsage 
+    fhir:effective (@<dateTime>  OR 
+    			@<Period> )  AND { rdf:type IRI } ?;  # The date/time or interval when the 
+                                            # medication is/was/will be taken 
+    fhir:dateAsserted @<MedicationUsage.dateAsserted>?;  # When the usage was asserted?
+    fhir:informationSource @<OneOrMore_MedicationUsage.informationSource_Organization_OR_Patient_OR_Practitioner_OR_PractitionerRole_OR_RelatedPerson>?;  # Person or organization that 
+                                            # provided the information about the 
+                                            # taking of this medication 
+    fhir:derivedFrom @<OneOrMore_MedicationUsage.derivedFrom_Resource>?;  # Link to information used to derive 
+                                            # the MedicationUsage 
+    fhir:reason @<OneOrMore_MedicationUsage.reason>?;  # Reason for why the medication is 
+                                            # being/was taken 
+    fhir:note @<OneOrMore_MedicationUsage.note>?;  # Further information about the usage
+    fhir:relatedClinicalInformation @<OneOrMore_MedicationUsage.relatedClinicalInformation_Condition_OR_Observation>?;  # Link to information relevant to 
+                                            # the usage of a medication 
+    fhir:renderedDosageInstruction @<MedicationUsage.renderedDosageInstruction>?;  # Full representation of the dosage 
+                                            # instructions 
+    fhir:dosage @<OneOrMore_MedicationUsage.dosage>?;  # Details of how medication is/was 
+                                            # taken or should be taken 
+    fhir:adherence @<MedicationUsage.adherence>?;  # Indicates if the medication is 
+                                            # being consumed or administered as 
+                                            # instructed 
+}  
+
+# Indicates if the medication is being consumed or administered as instructed
+<MedicationUsage.adherence> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:code @<MedicationUsage.adherence.code>;  # Type of adherence
+    fhir:reason @<MedicationUsage.adherence.reason>?;  # Details of the reason for the 
+                                            # current use of the medication 
+}  
+
+#---------------------- Data Types -------------------
+
+# Primitive Type dateTime
+<dateTime> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:dateTime];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v @<dateTime.value>?;              # Primitive value for dateTime
+}  
+
+# Time range defined by start and end date/time
+<Period> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Period];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:start @<Period.start>?;            # Starting time with inclusive 
+                                            # boundary 
+    fhir:end @<Period.end>?;                # End time with inclusive boundary, 
+                                            # if not ongoing 
+} AND (
+
+# Constraint: UniqueKey:per-1
+# Human readable:If present, start SHALL have a lower or equal value than end
+# XPath:not(exists(f:start/@value)) or not(exists(f:end/@value)) or (xs:dateTime(f:start/@value) <= xs:dateTime(f:end/@value))
+# Constraint:start.hasValue().not() or end.hasValue().not() or (start <= end)
+# ShEx:
+
+ NOT { fhir:start  . } OR  NOT { fhir:end  . } OR ({ fhir:start { fhir:v MaxInclusive { fhir:end } }  })
+
+)
+ 
+
+#---------------------- Cardinality Types (OneOrMore) -------------------
+
+<OneOrMore_MedicationUsage.identifier> CLOSED {
+    rdf:first @<MedicationUsage.identifier>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_MedicationUsage.identifier> 
+}
+
+<OneOrMore_MedicationUsage.partOf_Procedure> CLOSED {
+    rdf:first @<MedicationUsage.partOf> AND {fhir:link 
+			@<Procedure> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_MedicationUsage.partOf_Procedure> 
+}
+
+<OneOrMore_MedicationUsage.category> CLOSED {
+    rdf:first @<MedicationUsage.category>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_MedicationUsage.category> 
+}
+
+<OneOrMore_MedicationUsage.informationSource_Organization_OR_Patient_OR_Practitioner_OR_PractitionerRole_OR_RelatedPerson> CLOSED {
+    rdf:first @<MedicationUsage.informationSource> AND {fhir:link 
+			@<Organization> OR 
+			@<Patient> OR 
+			@<Practitioner> OR 
+			@<PractitionerRole> OR 
+			@<RelatedPerson> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_MedicationUsage.informationSource_Organization_OR_Patient_OR_Practitioner_OR_PractitionerRole_OR_RelatedPerson> 
+}
+
+<OneOrMore_MedicationUsage.derivedFrom_Resource> CLOSED {
+    rdf:first @<MedicationUsage.derivedFrom> AND {fhir:link 
+			@<Resource> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_MedicationUsage.derivedFrom_Resource> 
+}
+
+<OneOrMore_MedicationUsage.reason> CLOSED {
+    rdf:first @<MedicationUsage.reason>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_MedicationUsage.reason> 
+}
+
+<OneOrMore_MedicationUsage.note> CLOSED {
+    rdf:first @<MedicationUsage.note>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_MedicationUsage.note> 
+}
+
+<OneOrMore_MedicationUsage.relatedClinicalInformation_Condition_OR_Observation> CLOSED {
+    rdf:first @<MedicationUsage.relatedClinicalInformation> AND {fhir:link 
+			@<Condition> OR 
+			@<Observation> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_MedicationUsage.relatedClinicalInformation_Condition_OR_Observation> 
+}
+
+<OneOrMore_MedicationUsage.dosage> CLOSED {
+    rdf:first @<MedicationUsage.dosage>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_MedicationUsage.dosage> 
+}
+
+#---------------------- Reference Types -------------------
+
+#---------------------- Value Sets ------------------------

@@ -1,0 +1,353 @@
+﻿PREFIX fhir: <http://hl7.org/fhir/> 
+PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+BASE <http://hl7.org/fhir/shape/>
+
+
+start=@<ImplementationGuide> AND {fhir:nodeRole [fhir:treeRoot]}
+
+
+# A set of rules about how FHIR is used
+<ImplementationGuide> EXTENDS @<CanonicalResource> CLOSED {   
+
+    a [fhir:ImplementationGuide];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:url @<ImplementationGuide.url>;    # Canonical identifier for this 
+                                            # implementation guide, represented 
+                                            # as a URI (globally unique) 
+    fhir:version @<ImplementationGuide.version>?;  # Business version of the 
+                                            # implementation guide 
+    fhir:name @<ImplementationGuide.name>;  # Name for this implementation guide 
+                                            # (computer friendly) 
+    fhir:title @<ImplementationGuide.title>?;  # Name for this implementation guide 
+                                            # (human friendly) 
+    fhir:status @<ImplementationGuide.status>;  # draft | active | retired | unknown
+    fhir:experimental @<ImplementationGuide.experimental>?;  # For testing purposes, not real 
+                                            # usage 
+    fhir:date @<ImplementationGuide.date>?;  # Date last changed
+    fhir:publisher @<ImplementationGuide.publisher>?;  # Name of the publisher 
+                                            # (organization or individual) 
+    fhir:contact @<OneOrMore_ImplementationGuide.contact>?;  # Contact details for the publisher
+    fhir:description @<ImplementationGuide.description>?;  # Natural language description of 
+                                            # the implementation guide 
+    fhir:useContext @<OneOrMore_ImplementationGuide.useContext>?;  # The context that the content is 
+                                            # intended to support 
+    fhir:jurisdiction @<OneOrMore_ImplementationGuide.jurisdiction>?;  # Intended jurisdiction for 
+                                            # implementation guide (if 
+                                            # applicable) 
+    fhir:copyright @<ImplementationGuide.copyright>?;  # Use and/or publishing restrictions
+    fhir:packageId @<ImplementationGuide.packageId>;  # NPM Package name for IG
+    fhir:license @<ImplementationGuide.license>?;  # SPDX license code for this IG (or 
+                                            # not-open-source) 
+    fhir:fhirVersion @<OneOrMore_ImplementationGuide.fhirVersion>;  # FHIR Version(s) this 
+                                            # Implementation Guide targets 
+    fhir:dependsOn @<OneOrMore_ImplementationGuide.dependsOn>?;  # Another Implementation guide this 
+                                            # depends on 
+    fhir:global @<OneOrMore_ImplementationGuide.global>?;  # Profiles that apply globally
+    fhir:definition @<ImplementationGuide.definition>?;  # Information needed to build the IG
+    fhir:manifest @<ImplementationGuide.manifest>?;  # Information about an assembled IG
+} AND (
+
+# Constraint: UniqueKey:cnl-0
+# Human readable:Name should be usable as an identifier for the module by machine processing applications such as code generation
+# XPath:not(exists(f:name/@value)) or matches(f:name/@value, '[A-Z]([A-Za-z0-9_]){0,254}')
+# Constraint:name.exists() implies name.matches('[A-Z]([A-Za-z0-9_]){0,254}')
+# ShEx:
+
+{ fhir:name . } AND { fhir:name { fhir:v /'[A-Z]([A-Za-z0-9_]){0,254}'/ }  }
+
+) AND (
+
+# Constraint: UniqueKey:ig-2
+# Human readable:If a resource has a fhirVersion, it must be one of the versions defined for the Implementation Guide
+# XPath:count(for $id in (f:resource/f:fhirVersion) return $id[not(ancestor::f:fhirVersion/@value=$id/@value)])=0
+# Constraint:definition.resource.fhirVersion.all(%context.fhirVersion contains $this)
+# ShEx:
+
+
+) AND (
+
+# Constraint: UniqueKey:ig-1
+# Human readable:If a resource has a groupingId, it must refer to a grouping defined in the Implementation Guide
+# XPath:count(for $id in (f:resource/f:groupingId) return $id[not(ancestor::f:grouping/@id=$id/@value)])=0
+# Constraint:resource.groupingId.all(%context.grouping.id contains $this)
+# ShEx:
+
+
+)
+ 
+
+# Grouping used to present related resources in the IG
+<ImplementationGuide.definition.grouping> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:name @<ImplementationGuide.definition.grouping.name>;  # Descriptive name for the package
+    fhir:description @<ImplementationGuide.definition.grouping.description>?;  # Human readable text describing the 
+                                            # package 
+}  
+
+# Page/Section in the Guide
+<ImplementationGuide.definition.page> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:name (@<url>  OR 
+    			(@<Reference>  AND {fhir:link @<Binary> }) )  AND { rdf:type IRI } ;  # Where to find that page
+    fhir:title @<ImplementationGuide.definition.page.title>;  # Short title shown for navigational 
+                                            # assistance 
+    fhir:generation @<ImplementationGuide.definition.page.generation>;  # html | markdown | xml | generated
+    fhir:page @<OneOrMore_ImplementationGuide.definition.page>?;  # Nested Pages / Sections
+}  
+
+# Information needed to build the IG
+<ImplementationGuide.definition> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:grouping @<OneOrMore_ImplementationGuide.definition.grouping>?;  # Grouping used to present related 
+                                            # resources in the IG 
+    fhir:resource @<OneOrMore_ImplementationGuide.definition.resource>?;  # Resource in the implementation 
+                                            # guide 
+    fhir:page @<ImplementationGuide.definition.page>?;  # Page/Section in the Guide
+    fhir:parameter @<OneOrMore_ImplementationGuide.definition.parameter>?;  # Defines how IG is built by tools
+    fhir:template @<OneOrMore_ImplementationGuide.definition.template>?;  # A template for building resources
+} AND (
+
+# Constraint: UniqueKey:cnl-0
+# Human readable:Name should be usable as an identifier for the module by machine processing applications such as code generation
+# XPath:not(exists(f:name/@value)) or matches(f:name/@value, '[A-Z]([A-Za-z0-9_]){0,254}')
+# Constraint:name.exists() implies name.matches('[A-Z]([A-Za-z0-9_]){0,254}')
+# ShEx:
+
+{ fhir:name . } AND { fhir:name { fhir:v /'[A-Z]([A-Za-z0-9_]){0,254}'/ }  }
+
+) AND (
+
+# Constraint: UniqueKey:ig-2
+# Human readable:If a resource has a fhirVersion, it must be one of the versions defined for the Implementation Guide
+# XPath:count(for $id in (f:resource/f:fhirVersion) return $id[not(ancestor::f:fhirVersion/@value=$id/@value)])=0
+# Constraint:definition.resource.fhirVersion.all(%context.fhirVersion contains $this)
+# ShEx:
+
+
+) AND (
+
+# Constraint: UniqueKey:ig-1
+# Human readable:If a resource has a groupingId, it must refer to a grouping defined in the Implementation Guide
+# XPath:count(for $id in (f:resource/f:groupingId) return $id[not(ancestor::f:grouping/@id=$id/@value)])=0
+# Constraint:resource.groupingId.all(%context.grouping.id contains $this)
+# ShEx:
+
+
+)
+ 
+
+# HTML page within the parent IG
+<ImplementationGuide.manifest.page> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:name @<ImplementationGuide.manifest.page.name>;  # HTML page name
+    fhir:title @<ImplementationGuide.manifest.page.title>?;  # Title of the page, for references
+    fhir:anchor @<OneOrMore_ImplementationGuide.manifest.page.anchor>?;  # Anchor available on the page
+}  
+
+# Another Implementation guide this depends on
+<ImplementationGuide.dependsOn> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:uri @<ImplementationGuide.dependsOn.uri>;  # Identity of the IG that this 
+                                            # depends on 
+    fhir:packageId @<ImplementationGuide.dependsOn.packageId>?;  # NPM Package name for IG this 
+                                            # depends on 
+    fhir:version @<ImplementationGuide.dependsOn.version>?;  # Version of the IG
+}  
+
+# A template for building resources
+<ImplementationGuide.definition.template> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:code @<ImplementationGuide.definition.template.code>;  # Type of template specified
+    fhir:source @<ImplementationGuide.definition.template.source>;  # The source location for the 
+                                            # template 
+    fhir:scope @<ImplementationGuide.definition.template.scope>?;  # The scope in which the template 
+                                            # applies 
+}  
+
+# Resource in the implementation guide
+<ImplementationGuide.manifest.resource> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:reference @<ImplementationGuide.manifest.resource.reference> AND {fhir:link 
+    			@<Resource> };  # Location of the resource
+    fhir:example (@<boolean>  OR 
+    			(@<canonical>  AND {fhir:link @<StructureDefinition> }) )  AND { rdf:type IRI } ?;  # Is an example/What is this an 
+                                            # example of? 
+    fhir:relativePath @<ImplementationGuide.manifest.resource.relativePath>?;  # Relative path for page in IG
+}  
+
+# Defines how IG is built by tools
+<ImplementationGuide.definition.parameter> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:code @<ImplementationGuide.definition.parameter.code>;  # Code that identifies parameter
+    fhir:value @<ImplementationGuide.definition.parameter.value>;  # Value for named type
+}  
+
+# Nested Pages / Sections
+<ImplementationGuide.definition.page.page> CLOSED {   
+}  
+
+# Information about an assembled IG
+<ImplementationGuide.manifest> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:rendering @<ImplementationGuide.manifest.rendering>?;  # Location of rendered 
+                                            # implementation guide 
+    fhir:resource @<OneOrMore_ImplementationGuide.manifest.resource>;  # Resource in the implementation 
+                                            # guide 
+    fhir:page @<OneOrMore_ImplementationGuide.manifest.page>?;  # HTML page within the parent IG
+    fhir:image @<OneOrMore_ImplementationGuide.manifest.image>?;  # Image within the IG
+    fhir:other @<OneOrMore_ImplementationGuide.manifest.other>?;  # Additional linkable file in IG
+}  
+
+# Resource in the implementation guide
+<ImplementationGuide.definition.resource> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:reference @<ImplementationGuide.definition.resource.reference> AND {fhir:link 
+    			@<Resource> };  # Location of the resource
+    fhir:fhirVersion @<OneOrMore_ImplementationGuide.definition.resource.fhirVersion>?;  # Versions this applies to (if 
+                                            # different to IG) 
+    fhir:name @<ImplementationGuide.definition.resource.name>?;  # Human readable name for the 
+                                            # resource 
+    fhir:description @<ImplementationGuide.definition.resource.description>?;  # Reason why included in guide
+    fhir:example (@<boolean>  OR 
+    			(@<canonical>  AND {fhir:link @<StructureDefinition> }) )  AND { rdf:type IRI } ?;  # Is an example/What is this an 
+                                            # example of? 
+    fhir:groupingId @<ImplementationGuide.definition.resource.groupingId>?;  # Grouping this is part of
+}  
+
+# Profiles that apply globally
+<ImplementationGuide.global> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:type @<ImplementationGuide.global.type>;  # Type this profile applies to
+    fhir:profile @<ImplementationGuide.global.profile>;  # Profile that all resources must 
+                                            # conform to 
+}  
+
+#---------------------- Data Types -------------------
+
+# Primitive Type boolean
+<boolean> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:boolean];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v @<boolean.value>?;               # Primitive value for boolean
+}  
+
+# A reference from one resource to another
+<Reference> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Reference];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:link IRI?;
+    fhir:reference @<Reference.reference>?;  # Literal reference, Relative, 
+                                            # internal or absolute URL 
+    fhir:type @<Reference.type>?;           # Type the reference refers to (e.g. 
+                                            # "Patient") 
+    fhir:identifier @<Reference.identifier>?;  # Logical reference, when literal 
+                                            # reference is not known 
+    fhir:display @<Reference.display>?;     # Text alternative for the resource
+} AND (
+
+# Constraint: UniqueKey:ref-1
+# Human readable:SHALL have a contained resource if a local reference is provided
+# XPath:not(starts-with(f:reference/@value, '#')) or exists(ancestor::*[self::f:entry or self::f:parameter]/f:resource/f:*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')]|/*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')])
+# Constraint:reference.startsWith('#').not() or (reference.substring(1).trace('url') in %rootResource.contained.id.trace('ids')) or (reference='#' and %rootResource!=%resource)
+# ShEx:
+
+
+)
+ 
+
+# Primitive Type canonical
+<canonical> EXTENDS @<uri> CLOSED {   
+
+    a [fhir:canonical];
+    fhir:nodeRole [fhir:treeRoot]?;
+}  
+
+# Primitive Type url
+<url> EXTENDS @<uri> CLOSED {   
+
+    a [fhir:url];
+    fhir:nodeRole [fhir:treeRoot]?;
+}  
+
+#---------------------- Cardinality Types (OneOrMore) -------------------
+
+<OneOrMore_ImplementationGuide.contact> CLOSED {
+    rdf:first @<ImplementationGuide.contact>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ImplementationGuide.contact> 
+}
+
+<OneOrMore_ImplementationGuide.useContext> CLOSED {
+    rdf:first @<ImplementationGuide.useContext>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ImplementationGuide.useContext> 
+}
+
+<OneOrMore_ImplementationGuide.jurisdiction> CLOSED {
+    rdf:first @<ImplementationGuide.jurisdiction>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ImplementationGuide.jurisdiction> 
+}
+
+<OneOrMore_ImplementationGuide.fhirVersion> CLOSED {
+    rdf:first @<ImplementationGuide.fhirVersion>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ImplementationGuide.fhirVersion> 
+}
+
+<OneOrMore_ImplementationGuide.dependsOn> CLOSED {
+    rdf:first @<ImplementationGuide.dependsOn>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ImplementationGuide.dependsOn> 
+}
+
+<OneOrMore_ImplementationGuide.global> CLOSED {
+    rdf:first @<ImplementationGuide.global>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ImplementationGuide.global> 
+}
+
+<OneOrMore_ImplementationGuide.definition.page> CLOSED {
+    rdf:first @<ImplementationGuide.definition.page>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ImplementationGuide.definition.page> 
+}
+
+<OneOrMore_ImplementationGuide.definition.grouping> CLOSED {
+    rdf:first @<ImplementationGuide.definition.grouping>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ImplementationGuide.definition.grouping> 
+}
+
+<OneOrMore_ImplementationGuide.definition.resource> CLOSED {
+    rdf:first @<ImplementationGuide.definition.resource>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ImplementationGuide.definition.resource> 
+}
+
+<OneOrMore_ImplementationGuide.definition.parameter> CLOSED {
+    rdf:first @<ImplementationGuide.definition.parameter>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ImplementationGuide.definition.parameter> 
+}
+
+<OneOrMore_ImplementationGuide.definition.template> CLOSED {
+    rdf:first @<ImplementationGuide.definition.template>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ImplementationGuide.definition.template> 
+}
+
+<OneOrMore_ImplementationGuide.manifest.page.anchor> CLOSED {
+    rdf:first @<ImplementationGuide.manifest.page.anchor>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ImplementationGuide.manifest.page.anchor> 
+}
+
+<OneOrMore_ImplementationGuide.manifest.resource> CLOSED {
+    rdf:first @<ImplementationGuide.manifest.resource>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ImplementationGuide.manifest.resource> 
+}
+
+<OneOrMore_ImplementationGuide.manifest.page> CLOSED {
+    rdf:first @<ImplementationGuide.manifest.page>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ImplementationGuide.manifest.page> 
+}
+
+<OneOrMore_ImplementationGuide.manifest.image> CLOSED {
+    rdf:first @<ImplementationGuide.manifest.image>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ImplementationGuide.manifest.image> 
+}
+
+<OneOrMore_ImplementationGuide.manifest.other> CLOSED {
+    rdf:first @<ImplementationGuide.manifest.other>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ImplementationGuide.manifest.other> 
+}
+
+<OneOrMore_ImplementationGuide.definition.resource.fhirVersion> CLOSED {
+    rdf:first @<ImplementationGuide.definition.resource.fhirVersion>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ImplementationGuide.definition.resource.fhirVersion> 
+}
+
+#---------------------- Reference Types -------------------
+
+#---------------------- Value Sets ------------------------

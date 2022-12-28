@@ -1,0 +1,380 @@
+﻿PREFIX fhir: <http://hl7.org/fhir/> 
+PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+BASE <http://hl7.org/fhir/shape/>
+
+
+start=@<AuditEvent> AND {fhir:nodeRole [fhir:treeRoot]}
+
+
+# Record of an event
+<AuditEvent> EXTENDS @<DomainResource> CLOSED {   
+
+    a [fhir:AuditEvent];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:category @<OneOrMore_AuditEvent.category>?;  # Type/identifier of event
+    fhir:code @<AuditEvent.code>;           # Specific type of event
+    fhir:action @<AuditEvent.action>?;      # Type of action performed during 
+                                            # the event 
+    fhir:severity @<AuditEvent.severity>?;  # emergency | alert | critical | 
+                                            # error | warning | notice | 
+                                            # informational | debug 
+    fhir:occurred (@<Period>  OR 
+    			@<dateTime> )  AND { rdf:type IRI } ?;  # When the activity occurred
+    fhir:recorded @<AuditEvent.recorded>;   # Time when the event was recorded
+    fhir:outcome @<AuditEvent.outcome>?;    # Whether the event succeeded or 
+                                            # failed 
+    fhir:authorization @<OneOrMore_AuditEvent.authorization>?;  # Authorization related to the event
+    fhir:basedOn @<OneOrMore_AuditEvent.basedOn_CarePlan_OR_DeviceRequest_OR_ImmunizationRecommendation_OR_MedicationRequest_OR_NutritionOrder_OR_ServiceRequest_OR_Task>?;  # Workflow authorization within 
+                                            # which this event occurred 
+    fhir:patient @<AuditEvent.patient> AND {fhir:link 
+    			@<Patient> }?;  # The patient is the subject of the 
+                                            # data used/created/updated/deleted 
+                                            # during the activity 
+    fhir:encounter @<AuditEvent.encounter> AND {fhir:link 
+    			@<Encounter> }?;  # Encounter within which this event 
+                                            # occurred or which the event is 
+                                            # tightly associated 
+    fhir:agent @<OneOrMore_AuditEvent.agent>;  # Actor involved in the event
+    fhir:source @<AuditEvent.source>;       # Audit Event Reporter
+    fhir:entity @<OneOrMore_AuditEvent.entity>?;  # Data or objects used
+}  
+
+# Whether the event succeeded or failed
+<AuditEvent.outcome> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:code @<AuditEvent.outcome.code>;   # Whether the event succeeded or 
+                                            # failed 
+    fhir:detail @<OneOrMore_AuditEvent.outcome.detail>?;  # Additional outcome detail
+}  
+
+# Additional Information about the entity
+<AuditEvent.entity.detail> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:type @<AuditEvent.entity.detail.type>;  # Name of the property
+    fhir:value (@<Quantity>  OR 
+    			@<CodeableConcept>  OR 
+    			@<string>  OR 
+    			@<boolean>  OR 
+    			@<integer>  OR 
+    			@<Range>  OR 
+    			@<Ratio>  OR 
+    			@<time>  OR 
+    			@<dateTime>  OR 
+    			@<Period>  OR 
+    			@<base64Binary> )  AND { rdf:type IRI } ;  # Property value
+}  
+
+# Actor involved in the event
+<AuditEvent.agent> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:type @<AuditEvent.agent.type>?;    # How agent participated
+    fhir:role @<OneOrMore_AuditEvent.agent.role>?;  # Agent role in the event
+    fhir:who @<AuditEvent.agent.who> AND {fhir:link 
+    			@<CareTeam> OR 
+    			@<Device> OR 
+    			@<Organization> OR 
+    			@<Patient> OR 
+    			@<Practitioner> OR 
+    			@<PractitionerRole> OR 
+    			@<RelatedPerson> };  # Identifier of who
+    fhir:requestor @<AuditEvent.agent.requestor>?;  # Whether user is initiator
+    fhir:location @<AuditEvent.agent.location> AND {fhir:link 
+    			@<Location> }?;  # The agent location when the event 
+                                            # occurred 
+    fhir:policy @<OneOrMore_AuditEvent.agent.policy>?;  # Policy that authorized the agent 
+                                            # participation in the event 
+    fhir:network ((@<Reference>  AND {fhir:link @<Endpoint> })  OR 
+    			@<uri>  OR 
+    			@<string> )  AND { rdf:type IRI } ?;  # This agent network location for 
+                                            # the activity 
+    fhir:authorization @<OneOrMore_AuditEvent.agent.authorization>?;  # Allowable authorization for this 
+                                            # agent 
+}  
+
+# Audit Event Reporter
+<AuditEvent.source> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:site @<AuditEvent.source.site> AND {fhir:link 
+    			@<Location> }?;  # Logical source location within the 
+                                            # enterprise 
+    fhir:observer @<AuditEvent.source.observer> AND {fhir:link 
+    			@<CareTeam> OR 
+    			@<Device> OR 
+    			@<Organization> OR 
+    			@<Patient> OR 
+    			@<Practitioner> OR 
+    			@<PractitionerRole> OR 
+    			@<RelatedPerson> };  # The identity of source detecting 
+                                            # the event 
+    fhir:type @<OneOrMore_AuditEvent.source.type>?;  # The type of source where event 
+                                            # originated 
+}  
+
+# Data or objects used
+<AuditEvent.entity> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:what @<AuditEvent.entity.what> AND {fhir:link 
+    			@<Resource> }?;  # Specific instance of resource
+    fhir:role @<AuditEvent.entity.role>?;   # What role the entity played
+    fhir:securityLabel @<OneOrMore_AuditEvent.entity.securityLabel>?;  # Security labels on the entity
+    fhir:query @<AuditEvent.entity.query>?;  # Query parameters
+    fhir:detail @<OneOrMore_AuditEvent.entity.detail>?;  # Additional Information about the 
+                                            # entity 
+    fhir:agent @<OneOrMore_AuditEvent.agent>?;  # Entity is attributed to this agent
+}  
+
+#---------------------- Data Types -------------------
+
+# Primitive Type dateTime
+<dateTime> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:dateTime];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v @<dateTime.value>?;              # Primitive value for dateTime
+}  
+
+# Primitive Type string
+<string> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:string];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v @<string.value>?;                # Primitive value for string
+}  
+
+# A reference from one resource to another
+<Reference> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Reference];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:link IRI?;
+    fhir:reference @<Reference.reference>?;  # Literal reference, Relative, 
+                                            # internal or absolute URL 
+    fhir:type @<Reference.type>?;           # Type the reference refers to (e.g. 
+                                            # "Patient") 
+    fhir:identifier @<Reference.identifier>?;  # Logical reference, when literal 
+                                            # reference is not known 
+    fhir:display @<Reference.display>?;     # Text alternative for the resource
+} AND (
+
+# Constraint: UniqueKey:ref-1
+# Human readable:SHALL have a contained resource if a local reference is provided
+# XPath:not(starts-with(f:reference/@value, '#')) or exists(ancestor::*[self::f:entry or self::f:parameter]/f:resource/f:*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')]|/*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')])
+# Constraint:reference.startsWith('#').not() or (reference.substring(1).trace('url') in %rootResource.contained.id.trace('ids')) or (reference='#' and %rootResource!=%resource)
+# ShEx:
+
+
+)
+ 
+
+# Time range defined by start and end date/time
+<Period> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Period];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:start @<Period.start>?;            # Starting time with inclusive 
+                                            # boundary 
+    fhir:end @<Period.end>?;                # End time with inclusive boundary, 
+                                            # if not ongoing 
+} AND (
+
+# Constraint: UniqueKey:per-1
+# Human readable:If present, start SHALL have a lower or equal value than end
+# XPath:not(exists(f:start/@value)) or not(exists(f:end/@value)) or (xs:dateTime(f:start/@value) <= xs:dateTime(f:end/@value))
+# Constraint:start.hasValue().not() or end.hasValue().not() or (start <= end)
+# ShEx:
+
+ NOT { fhir:start  . } OR  NOT { fhir:end  . } OR ({ fhir:start { fhir:v MaxInclusive { fhir:end } }  })
+
+)
+ 
+
+# A measured or measurable amount
+<Quantity> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Quantity];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:value @<Quantity.value>?;          # Numerical value (with implicit 
+                                            # precision) 
+    fhir:comparator @<Quantity.comparator>?;  # < | <= | >= | > | ad - how to 
+                                            # understand the value 
+    fhir:unit @<Quantity.unit>?;            # Unit representation
+    fhir:system @<Quantity.system>?;        # System that defines coded unit form
+    fhir:code @<Quantity.code>?;            # Coded form of the unit
+} AND (
+
+# Constraint: UniqueKey:qty-3
+# Human readable:If a code for the unit is present, the system SHALL also be present
+# XPath:not(exists(f:code)) or exists(f:system)
+# Constraint:code.empty() or system.exists()
+# ShEx:
+
+ NOT { fhir:code {fhir:v .} }  OR { fhir:system . }
+
+)
+ 
+
+# Primitive Type integer
+<integer> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:integer];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v @<integer.value>?;               # Primitive value for integer
+}  
+
+# Set of values bounded by low and high
+<Range> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Range];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:low @<Range.low>?;                 # Low limit
+    fhir:high @<Range.high>?;               # High limit
+} AND (
+
+# Constraint: UniqueKey:rng-2
+# Human readable:If present, low SHALL have a lower value than high
+# XPath:not(exists(f:low/f:value/@value)) or not(exists(f:high/f:value/@value)) or (number(f:low/f:value/@value) <= number(f:high/f:value/@value))
+# Constraint:low.value.empty() or high.value.empty() or (low <= high)
+# ShEx:
+
+ NOT { fhir:low fhir:value {fhir:v .} }  OR  NOT { fhir:high fhir:value {fhir:v .} }  OR ({ fhir:low { fhir:v MaxInclusive { fhir:high } }  })
+
+)
+ 
+
+# Primitive Type uri
+<uri> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:uri];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v @<uri.value>?;                   # Primitive value for uri
+}  
+
+# Primitive Type boolean
+<boolean> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:boolean];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v @<boolean.value>?;               # Primitive value for boolean
+}  
+
+# Primitive Type base64Binary
+<base64Binary> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:base64Binary];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v @<base64Binary.value>?;          # Primitive value for base64Binary
+}  
+
+# A ratio of two Quantity values - a numerator and a denominator
+<Ratio> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Ratio];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:numerator @<Ratio.numerator>?;     # Numerator value
+    fhir:denominator @<Ratio.denominator>?;  # Denominator value
+} AND (
+
+# Constraint: UniqueKey:rat-1
+# Human readable:Numerator and denominator SHALL both be present, or both are absent. If both are absent, there SHALL be some extension present
+# XPath:(count(f:numerator) = count(f:denominator)) and ((count(f:numerator) > 0) or (count(f:extension) > 0))
+# Constraint:(numerator.empty() xor denominator.exists()) and (numerator.exists() or extension.exists())
+# ShEx:
+
+(( NOT { fhir:numerator {fhir:v .} }  AND NOT  { fhir:denominator . }) OR ( NOT  NOT { fhir:numerator {fhir:v .} }  AND  { fhir:denominator . })) AND ({ fhir:numerator . } OR { fhir:extension . })
+
+)
+ 
+
+# Primitive Type time
+<time> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:time];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v @<time.value>?;                  # Primitive value for time
+}  
+
+# Concept - reference to a terminology or just  text
+<CodeableConcept> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:CodeableConcept];
+    fhir:nodeRole [fhir:treeRoot]?;
+    a NONLITERAL*;
+    fhir:coding @<OneOrMore_CodeableConcept.coding>?;  # Code defined by a terminology 
+                                            # system 
+    fhir:text @<CodeableConcept.text>?;     # Plain text representation of the 
+                                            # concept 
+}  
+
+#---------------------- Cardinality Types (OneOrMore) -------------------
+
+<OneOrMore_AuditEvent.category> CLOSED {
+    rdf:first @<AuditEvent.category>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_AuditEvent.category> 
+}
+
+<OneOrMore_AuditEvent.authorization> CLOSED {
+    rdf:first @<AuditEvent.authorization>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_AuditEvent.authorization> 
+}
+
+<OneOrMore_AuditEvent.basedOn_CarePlan_OR_DeviceRequest_OR_ImmunizationRecommendation_OR_MedicationRequest_OR_NutritionOrder_OR_ServiceRequest_OR_Task> CLOSED {
+    rdf:first @<AuditEvent.basedOn> AND {fhir:link 
+			@<CarePlan> OR 
+			@<DeviceRequest> OR 
+			@<ImmunizationRecommendation> OR 
+			@<MedicationRequest> OR 
+			@<NutritionOrder> OR 
+			@<ServiceRequest> OR 
+			@<Task> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_AuditEvent.basedOn_CarePlan_OR_DeviceRequest_OR_ImmunizationRecommendation_OR_MedicationRequest_OR_NutritionOrder_OR_ServiceRequest_OR_Task> 
+}
+
+<OneOrMore_AuditEvent.agent> CLOSED {
+    rdf:first @<AuditEvent.agent>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_AuditEvent.agent> 
+}
+
+<OneOrMore_AuditEvent.entity> CLOSED {
+    rdf:first @<AuditEvent.entity>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_AuditEvent.entity> 
+}
+
+<OneOrMore_AuditEvent.outcome.detail> CLOSED {
+    rdf:first @<AuditEvent.outcome.detail>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_AuditEvent.outcome.detail> 
+}
+
+<OneOrMore_AuditEvent.agent.role> CLOSED {
+    rdf:first @<AuditEvent.agent.role>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_AuditEvent.agent.role> 
+}
+
+<OneOrMore_AuditEvent.agent.policy> CLOSED {
+    rdf:first @<AuditEvent.agent.policy>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_AuditEvent.agent.policy> 
+}
+
+<OneOrMore_AuditEvent.agent.authorization> CLOSED {
+    rdf:first @<AuditEvent.agent.authorization>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_AuditEvent.agent.authorization> 
+}
+
+<OneOrMore_AuditEvent.source.type> CLOSED {
+    rdf:first @<AuditEvent.source.type>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_AuditEvent.source.type> 
+}
+
+<OneOrMore_AuditEvent.entity.securityLabel> CLOSED {
+    rdf:first @<AuditEvent.entity.securityLabel>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_AuditEvent.entity.securityLabel> 
+}
+
+<OneOrMore_AuditEvent.entity.detail> CLOSED {
+    rdf:first @<AuditEvent.entity.detail>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_AuditEvent.entity.detail> 
+}
+
+<OneOrMore_CodeableConcept.coding> CLOSED {
+    rdf:first @<CodeableConcept.coding>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_CodeableConcept.coding> 
+}
+
+#---------------------- Reference Types -------------------
+
+#---------------------- Value Sets ------------------------

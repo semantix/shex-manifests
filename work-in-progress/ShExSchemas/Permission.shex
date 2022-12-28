@@ -1,0 +1,135 @@
+﻿PREFIX fhir: <http://hl7.org/fhir/> 
+PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+BASE <http://hl7.org/fhir/shape/>
+
+
+start=@<Permission> AND {fhir:nodeRole [fhir:treeRoot]}
+
+
+# Permission
+<Permission> EXTENDS @<DomainResource> CLOSED {   
+
+    a [fhir:Permission];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:status @<Permission.status>;       # active | entered-in-error | draft 
+                                            # | rejected 
+    fhir:intent @<Permission.intent>?;      # grant|refuse
+    fhir:asserter @<Permission.asserter> AND {fhir:link 
+    			@<CareTeam> OR 
+    			@<Device> OR 
+    			@<Organization> OR 
+    			@<Patient> OR 
+    			@<Practitioner> OR 
+    			@<PractitionerRole> OR 
+    			@<RelatedPerson> }?;  # The person or entity that asserts 
+                                            # the permission 
+    fhir:assertionDate @<OneOrMore_Permission.assertionDate>?;  # The date that permission was 
+                                            # asserted 
+    fhir:validity @<Permission.validity>?;  # The period in which the permission 
+                                            # is active 
+    fhir:purpose @<OneOrMore_Permission.purpose>?;  # The purpose for which the 
+                                            # permission is given 
+    fhir:dataScope @<OneOrMore_Permission.dataScope>?;  # This can be 1) the definition of 
+                                            # data elements, or 2) a category or 
+                                            # label) e.g. “sensitive”. It could 
+                                            # also be a c) graph-like definition 
+                                            # of a set of data elements 
+    fhir:processingActivity @<OneOrMore_Permission.processingActivity>?;  # A description or definition of 
+                                            # which activities are allowed to be 
+                                            # done on the data 
+    fhir:justification @<Permission.justification>?;  # The asserted justification for 
+                                            # using the data 
+    fhir:usageLimitations @<OneOrMore_Permission.usageLimitations>?;  # What limits apply to the use of 
+                                            # the data 
+}  
+
+# A description or definition of which activities are allowed to be done on the data
+<Permission.processingActivity> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:partyReference @<OneOrMore_Permission.processingActivity.partyReference_Organization>?;  # If the processing is a transfer, 
+                                            # we must capture where it the data 
+                                            # allowed or expected to be shared - 
+                                            # with a party or person 
+    fhir:partyCodeableConcept @<OneOrMore_Permission.processingActivity.partyCodeableConcept>?;  # If the processing is a transfer, 
+                                            # or involves another party, we must 
+                                            # capture where it the data allowed 
+                                            # or expected to be shared - with a 
+                                            # party or person. This can be a 
+                                            # party instance or party type § 
+                                            # Purpose – a specific purpose of 
+                                            # the data 
+    fhir:purpose @<OneOrMore_Permission.processingActivity.purpose>?;  # The purpose for which the 
+                                            # permission is given 
+}  
+
+# The asserted justification for using the data
+<Permission.justification> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:evidence @<OneOrMore_Permission.justification.evidence_Consent>?;  # Evidence – reference to consent, 
+                                            # or a contract, or a policy, or a 
+                                            # regulation, or an attachment that 
+                                            # contains a screenshot 
+    fhir:grounds @<OneOrMore_Permission.justification.grounds>?;  # This would be a codeableconcept, 
+                                            # or a coding, which can be 
+                                            # constrained to , for example, the 
+                                            # 6 grounds for processing in GDPR 
+}  
+
+#---------------------- Data Types -------------------
+
+#---------------------- Cardinality Types (OneOrMore) -------------------
+
+<OneOrMore_Permission.assertionDate> CLOSED {
+    rdf:first @<Permission.assertionDate>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Permission.assertionDate> 
+}
+
+<OneOrMore_Permission.purpose> CLOSED {
+    rdf:first @<Permission.purpose>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Permission.purpose> 
+}
+
+<OneOrMore_Permission.dataScope> CLOSED {
+    rdf:first @<Permission.dataScope>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Permission.dataScope> 
+}
+
+<OneOrMore_Permission.processingActivity> CLOSED {
+    rdf:first @<Permission.processingActivity>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Permission.processingActivity> 
+}
+
+<OneOrMore_Permission.usageLimitations> CLOSED {
+    rdf:first @<Permission.usageLimitations>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Permission.usageLimitations> 
+}
+
+<OneOrMore_Permission.processingActivity.partyReference_Organization> CLOSED {
+    rdf:first @<Permission.processingActivity.partyReference> AND {fhir:link 
+			@<Organization> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Permission.processingActivity.partyReference_Organization> 
+}
+
+<OneOrMore_Permission.processingActivity.partyCodeableConcept> CLOSED {
+    rdf:first @<Permission.processingActivity.partyCodeableConcept>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Permission.processingActivity.partyCodeableConcept> 
+}
+
+<OneOrMore_Permission.processingActivity.purpose> CLOSED {
+    rdf:first @<Permission.processingActivity.purpose>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Permission.processingActivity.purpose> 
+}
+
+<OneOrMore_Permission.justification.evidence_Consent> CLOSED {
+    rdf:first @<Permission.justification.evidence> AND {fhir:link 
+			@<Consent> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Permission.justification.evidence_Consent> 
+}
+
+<OneOrMore_Permission.justification.grounds> CLOSED {
+    rdf:first @<Permission.justification.grounds>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Permission.justification.grounds> 
+}
+
+#---------------------- Reference Types -------------------
+
+#---------------------- Value Sets ------------------------

@@ -1,0 +1,532 @@
+﻿PREFIX fhir: <http://hl7.org/fhir/> 
+PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+BASE <http://hl7.org/fhir/shape/>
+
+
+start=@<CapabilityStatement> AND {fhir:nodeRole [fhir:treeRoot]}
+
+
+# A statement of system capabilities
+<CapabilityStatement> EXTENDS @<CanonicalResource> CLOSED {   
+
+    a [fhir:CapabilityStatement];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:url @<CapabilityStatement.url>?;   # Canonical identifier for this 
+                                            # capability statement, represented 
+                                            # as a URI (globally unique) 
+    fhir:version @<CapabilityStatement.version>?;  # Business version of the capability 
+                                            # statement 
+    fhir:name @<CapabilityStatement.name>?;  # Name for this capability statement 
+                                            # (computer friendly) 
+    fhir:title @<CapabilityStatement.title>?;  # Name for this capability statement 
+                                            # (human friendly) 
+    fhir:status @<CapabilityStatement.status>;  # draft | active | retired | unknown
+    fhir:experimental @<CapabilityStatement.experimental>?;  # For testing purposes, not real 
+                                            # usage 
+    fhir:date @<CapabilityStatement.date>;  # Date last changed
+    fhir:publisher @<CapabilityStatement.publisher>?;  # Name of the publisher 
+                                            # (organization or individual) 
+    fhir:contact @<OneOrMore_CapabilityStatement.contact>?;  # Contact details for the publisher
+    fhir:description @<CapabilityStatement.description>?;  # Natural language description of 
+                                            # the capability statement 
+    fhir:useContext @<OneOrMore_CapabilityStatement.useContext>?;  # The context that the content is 
+                                            # intended to support 
+    fhir:jurisdiction @<OneOrMore_CapabilityStatement.jurisdiction>?;  # Intended jurisdiction for 
+                                            # capability statement (if 
+                                            # applicable) 
+    fhir:purpose @<CapabilityStatement.purpose>?;  # Why this capability statement is 
+                                            # defined 
+    fhir:copyright @<CapabilityStatement.copyright>?;  # Use and/or publishing restrictions
+    fhir:kind @<CapabilityStatement.kind>;  # instance | capability | 
+                                            # requirements 
+    fhir:instantiates @<OneOrMore_CapabilityStatement.instantiates>?;  # Canonical URL of another 
+                                            # capability statement this 
+                                            # implements 
+    fhir:imports @<OneOrMore_CapabilityStatement.imports>?;  # Canonical URL of another 
+                                            # capability statement this adds to 
+    fhir:software @<CapabilityStatement.software>?;  # Software that is covered by this 
+                                            # capability statement 
+    fhir:implementation @<CapabilityStatement.implementation>?;  # If this describes a specific 
+                                            # instance 
+    fhir:fhirVersion @<CapabilityStatement.fhirVersion>;  # FHIR Version the system supports
+    fhir:format @<OneOrMore_CapabilityStatement.format>;  # formats supported (xml | json | 
+                                            # ttl | mime type) 
+    fhir:patchFormat @<OneOrMore_CapabilityStatement.patchFormat>?;  # Patch formats supported
+    fhir:implementationGuide @<OneOrMore_CapabilityStatement.implementationGuide>?;  # Implementation guides supported
+    fhir:rest @<OneOrMore_CapabilityStatement.rest>?;  # If the endpoint is a RESTful one
+    fhir:messaging @<OneOrMore_CapabilityStatement.messaging>?;  # If messaging is supported
+    fhir:document @<OneOrMore_CapabilityStatement.document>?;  # Document definition
+} AND (
+
+# Constraint: UniqueKey:cnl-0
+# Human readable:Name should be usable as an identifier for the module by machine processing applications such as code generation
+# XPath:not(exists(f:name/@value)) or matches(f:name/@value, '[A-Z]([A-Za-z0-9_]){0,254}')
+# Constraint:name.exists() implies name.matches('[A-Z]([A-Za-z0-9_]){0,254}')
+# ShEx:
+
+{ fhir:name . } AND { fhir:name { fhir:v /'[A-Z]([A-Za-z0-9_]){0,254}'/ }  }
+
+) AND (
+
+# Constraint: UniqueKey:cpb-7
+# Human readable:The set of documents must be unique by the combination of profile and mode.
+# XPath:count(f:document[f:mode/@value='producer'])=count(distinct-values(f:document[f:mode/@value='producer']/f:profile/f:reference/@value)) and count(f:document[f:mode/@value='consumer'])=count(distinct-values(f:document[f:mode/@value='consumer']/f:profile/f:reference/@value))
+# Constraint:document.select(profile&mode).isDistinct()
+# ShEx:
+
+ isDistinct( fhir:document  SHEX_select_SHEX (fhir:profile SHEX_Concatenate_SHEX fhir:mode) )
+
+) AND (
+
+# Constraint: UniqueKey:cpb-16
+# Human readable:If kind = requirements, implementation and software must be absent
+# XPath:not(f:kind/@value='instance') or (not(exists(f:implementation)) and not(exists(f:software)))
+# Constraint:(kind!='requirements') or (implementation.exists().not() and software.exists().not())
+# ShEx:
+
+({ fhir:kind { fhir:v [ . -'requirements'] } }) OR ( NOT { fhir:implementation  . } AND  NOT { fhir:software  . })
+
+) AND (
+
+# Constraint: UniqueKey:cpb-15
+# Human readable:If kind = capability, implementation must be absent, software must be present
+# XPath: not(f:kind/@value='instance') or (not(exists(f:implementation)) and exists(f:software))
+# Constraint:(kind != 'capability') or (implementation.exists().not() and software.exists())
+# ShEx:
+
+({ fhir:kind { fhir:v [ . -'capability'] } }) OR ( NOT { fhir:implementation  . } AND { fhir:software . })
+
+) AND (
+
+# Constraint: UniqueKey:cpb-3
+# Human readable:Messaging end-point is required (and is only permitted) when a statement is for an implementation.
+# XPath:not(exists(f:messaging/f:endpoint)) or f:kind/@value = 'instance'
+# Constraint:messaging.endpoint.empty() or kind = 'instance'
+# ShEx:
+
+ NOT { fhir:messaging fhir:endpoint {fhir:v .} }  OR ({ fhir:kind { fhir:v ['instance'] }  })
+
+) AND (
+
+# Constraint: UniqueKey:cpb-14
+# Human readable:If kind = instance, implementation must be present and software may be present
+# XPath:not(f:kind/@value='instance') or exists(f:implementation)
+# Constraint:(kind != 'instance') or implementation.exists()
+# ShEx:
+
+({ fhir:kind { fhir:v [ . -'instance'] } }) OR { fhir:implementation . }
+
+) AND (
+
+# Constraint: UniqueKey:cpb-2
+# Human readable:A Capability Statement SHALL have at least one of description, software, or implementation element.
+# XPath:count(f:software | f:implementation | f:description) > 0
+# Constraint:(description.count() + software.count() + implementation.count()) > 0
+# ShEx:
+
+( count( fhir:description ) SHEX_Plus_SHEX  count( fhir:software ) SHEX_Plus_SHEX  count( fhir:implementation )) { fhir:v MinExclusive 0 } 
+
+) AND (
+
+# Constraint: UniqueKey:cpb-1
+# Human readable:A Capability Statement SHALL have at least one of REST, messaging or document element.
+# XPath:exists(f:rest) or exists(f:messaging) or exists(f:document)
+# Constraint:rest.exists() or messaging.exists() or document.exists()
+# ShEx:
+
+{ fhir:rest . } OR { fhir:messaging . } OR { fhir:document . }
+
+) AND (
+
+# Constraint: UniqueKey:cpb-9
+# Human readable:A given resource can only be described once per RESTful mode.
+# XPath:count(f:resource)=count(distinct-values(f:resource/f:type/@value))
+# Constraint:resource.select(type).isDistinct()
+# ShEx:
+
+ isDistinct( fhir:resource  SHEX_select_SHEX (fhir:type) )
+
+) AND (
+
+# Constraint: UniqueKey:cpb-12
+# Human readable:Search parameter names must be unique in the context of a resource.
+# XPath:count(f:searchParam)=count(distinct-values(f:searchParam/f:name/@value))
+# Constraint:searchParam.select(name).isDistinct()
+# ShEx:
+
+ isDistinct( fhir:searchParam  SHEX_select_SHEX (fhir:name) )
+
+)
+ 
+
+# Definition of a resource operation
+<CapabilityStatement.rest.resource.operation> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:name @<CapabilityStatement.rest.resource.operation.name>;  # Name by which the operation/query 
+                                            # is invoked 
+    fhir:definition @<CapabilityStatement.rest.resource.operation.definition>;  # The defined operation/query
+    fhir:documentation @<CapabilityStatement.rest.resource.operation.documentation>?;  # Specific details about operation 
+                                            # behavior 
+}  
+
+# Information about security of implementation
+<CapabilityStatement.rest.security> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:cors @<CapabilityStatement.rest.security.cors>?;  # Adds CORS Headers 
+                                            # (http://enable-cors.org/) 
+    fhir:service @<OneOrMore_CapabilityStatement.rest.security.service>?;  # OAuth | SMART-on-FHIR | NTLM | 
+                                            # Basic | Kerberos | Certificates 
+    fhir:description @<CapabilityStatement.rest.security.description>?;  # General description of how 
+                                            # security works 
+}  
+
+# What operations are supported?
+<CapabilityStatement.rest.interaction> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:code @<CapabilityStatement.rest.interaction.code>;  # transaction | batch | 
+                                            # search-system | history-system 
+    fhir:documentation @<CapabilityStatement.rest.interaction.documentation>?;  # Anything special about operation 
+                                            # behavior 
+}  
+
+# If the endpoint is a RESTful one
+<CapabilityStatement.rest> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:mode @<CapabilityStatement.rest.mode>;  # client | server
+    fhir:documentation @<CapabilityStatement.rest.documentation>?;  # General description of 
+                                            # implementation 
+    fhir:security @<CapabilityStatement.rest.security>?;  # Information about security of 
+                                            # implementation 
+    fhir:resource @<OneOrMore_CapabilityStatement.rest.resource>?;  # Resource served on the REST 
+                                            # interface 
+    fhir:interaction @<OneOrMore_CapabilityStatement.rest.interaction>?;  # What operations are supported?
+    fhir:searchParam @<OneOrMore_CapabilityStatement.rest.resource.searchParam>?;  # Search parameters for searching 
+                                            # all resources 
+    fhir:operation @<OneOrMore_CapabilityStatement.rest.resource.operation>?;  # Definition of a system level 
+                                            # operation 
+    fhir:compartment @<OneOrMore_CapabilityStatement.rest.compartment>?;  # Compartments served/used by system
+} AND (
+
+# Constraint: UniqueKey:cnl-0
+# Human readable:Name should be usable as an identifier for the module by machine processing applications such as code generation
+# XPath:not(exists(f:name/@value)) or matches(f:name/@value, '[A-Z]([A-Za-z0-9_]){0,254}')
+# Constraint:name.exists() implies name.matches('[A-Z]([A-Za-z0-9_]){0,254}')
+# ShEx:
+
+{ fhir:name . } AND { fhir:name { fhir:v /'[A-Z]([A-Za-z0-9_]){0,254}'/ }  }
+
+) AND (
+
+# Constraint: UniqueKey:cpb-7
+# Human readable:The set of documents must be unique by the combination of profile and mode.
+# XPath:count(f:document[f:mode/@value='producer'])=count(distinct-values(f:document[f:mode/@value='producer']/f:profile/f:reference/@value)) and count(f:document[f:mode/@value='consumer'])=count(distinct-values(f:document[f:mode/@value='consumer']/f:profile/f:reference/@value))
+# Constraint:document.select(profile&mode).isDistinct()
+# ShEx:
+
+ isDistinct( fhir:document  SHEX_select_SHEX (fhir:profile SHEX_Concatenate_SHEX fhir:mode) )
+
+) AND (
+
+# Constraint: UniqueKey:cpb-16
+# Human readable:If kind = requirements, implementation and software must be absent
+# XPath:not(f:kind/@value='instance') or (not(exists(f:implementation)) and not(exists(f:software)))
+# Constraint:(kind!='requirements') or (implementation.exists().not() and software.exists().not())
+# ShEx:
+
+({ fhir:kind { fhir:v [ . -'requirements'] } }) OR ( NOT { fhir:implementation  . } AND  NOT { fhir:software  . })
+
+) AND (
+
+# Constraint: UniqueKey:cpb-15
+# Human readable:If kind = capability, implementation must be absent, software must be present
+# XPath: not(f:kind/@value='instance') or (not(exists(f:implementation)) and exists(f:software))
+# Constraint:(kind != 'capability') or (implementation.exists().not() and software.exists())
+# ShEx:
+
+({ fhir:kind { fhir:v [ . -'capability'] } }) OR ( NOT { fhir:implementation  . } AND { fhir:software . })
+
+) AND (
+
+# Constraint: UniqueKey:cpb-3
+# Human readable:Messaging end-point is required (and is only permitted) when a statement is for an implementation.
+# XPath:not(exists(f:messaging/f:endpoint)) or f:kind/@value = 'instance'
+# Constraint:messaging.endpoint.empty() or kind = 'instance'
+# ShEx:
+
+ NOT { fhir:messaging fhir:endpoint {fhir:v .} }  OR ({ fhir:kind { fhir:v ['instance'] }  })
+
+) AND (
+
+# Constraint: UniqueKey:cpb-14
+# Human readable:If kind = instance, implementation must be present and software may be present
+# XPath:not(f:kind/@value='instance') or exists(f:implementation)
+# Constraint:(kind != 'instance') or implementation.exists()
+# ShEx:
+
+({ fhir:kind { fhir:v [ . -'instance'] } }) OR { fhir:implementation . }
+
+) AND (
+
+# Constraint: UniqueKey:cpb-2
+# Human readable:A Capability Statement SHALL have at least one of description, software, or implementation element.
+# XPath:count(f:software | f:implementation | f:description) > 0
+# Constraint:(description.count() + software.count() + implementation.count()) > 0
+# ShEx:
+
+( count( fhir:description ) SHEX_Plus_SHEX  count( fhir:software ) SHEX_Plus_SHEX  count( fhir:implementation )) { fhir:v MinExclusive 0 } 
+
+) AND (
+
+# Constraint: UniqueKey:cpb-1
+# Human readable:A Capability Statement SHALL have at least one of REST, messaging or document element.
+# XPath:exists(f:rest) or exists(f:messaging) or exists(f:document)
+# Constraint:rest.exists() or messaging.exists() or document.exists()
+# ShEx:
+
+{ fhir:rest . } OR { fhir:messaging . } OR { fhir:document . }
+
+) AND (
+
+# Constraint: UniqueKey:cpb-9
+# Human readable:A given resource can only be described once per RESTful mode.
+# XPath:count(f:resource)=count(distinct-values(f:resource/f:type/@value))
+# Constraint:resource.select(type).isDistinct()
+# ShEx:
+
+ isDistinct( fhir:resource  SHEX_select_SHEX (fhir:type) )
+
+) AND (
+
+# Constraint: UniqueKey:cpb-12
+# Human readable:Search parameter names must be unique in the context of a resource.
+# XPath:count(f:searchParam)=count(distinct-values(f:searchParam/f:name/@value))
+# Constraint:searchParam.select(name).isDistinct()
+# ShEx:
+
+ isDistinct( fhir:searchParam  SHEX_select_SHEX (fhir:name) )
+
+)
+ 
+
+# If this describes a specific instance
+<CapabilityStatement.implementation> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:description @<CapabilityStatement.implementation.description>;  # Describes this specific instance
+    fhir:url @<CapabilityStatement.implementation.url>?;  # Base URL for the installation
+    fhir:custodian @<CapabilityStatement.implementation.custodian> AND {fhir:link 
+    			@<Organization> }?;  # Organization that manages the data
+}  
+
+# Search parameters supported by implementation
+<CapabilityStatement.rest.resource.searchParam> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:name @<CapabilityStatement.rest.resource.searchParam.name>;  # Name of search parameter
+    fhir:definition @<CapabilityStatement.rest.resource.searchParam.definition>?;  # Source of definition for parameter
+    fhir:type @<CapabilityStatement.rest.resource.searchParam.type>;  # number | date | string | token | 
+                                            # reference | composite | quantity | 
+                                            # uri | special 
+    fhir:documentation @<CapabilityStatement.rest.resource.searchParam.documentation>?;  # Server-specific usage
+}  
+
+# Document definition
+<CapabilityStatement.document> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:mode @<CapabilityStatement.document.mode>;  # producer | consumer
+    fhir:documentation @<CapabilityStatement.document.documentation>?;  # Description of document support
+    fhir:profile @<CapabilityStatement.document.profile>;  # Constraint on the resources used 
+                                            # in the document 
+}  
+
+# Resource served on the REST interface
+<CapabilityStatement.rest.resource> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:type @<CapabilityStatement.rest.resource.type>;  # A resource type that is supported
+    fhir:profile @<CapabilityStatement.rest.resource.profile>?;  # Base System profile for all uses 
+                                            # of resource 
+    fhir:supportedProfile @<OneOrMore_CapabilityStatement.rest.resource.supportedProfile>?;  # Profiles for use cases supported
+    fhir:documentation @<CapabilityStatement.rest.resource.documentation>?;  # Additional information about the 
+                                            # use of the resource type 
+    fhir:interaction @<OneOrMore_CapabilityStatement.rest.resource.interaction>?;  # What operations are supported?
+    fhir:versioning @<CapabilityStatement.rest.resource.versioning>?;  # no-version | versioned | 
+                                            # versioned-update 
+    fhir:readHistory @<CapabilityStatement.rest.resource.readHistory>?;  # Whether vRead can return past 
+                                            # versions 
+    fhir:updateCreate @<CapabilityStatement.rest.resource.updateCreate>?;  # If update can commit to a new 
+                                            # identity 
+    fhir:conditionalCreate @<CapabilityStatement.rest.resource.conditionalCreate>?;  # If allows/uses conditional create
+    fhir:conditionalRead @<CapabilityStatement.rest.resource.conditionalRead>?;  # not-supported | modified-since | 
+                                            # not-match | full-support 
+    fhir:conditionalUpdate @<CapabilityStatement.rest.resource.conditionalUpdate>?;  # If allows/uses conditional update
+    fhir:conditionalDelete @<CapabilityStatement.rest.resource.conditionalDelete>?;  # not-supported | single | multiple 
+                                            # - how conditional delete is 
+                                            # supported 
+    fhir:referencePolicy @<OneOrMore_CapabilityStatement.rest.resource.referencePolicy>?;  # literal | logical | resolves | 
+                                            # enforced | local 
+    fhir:searchInclude @<OneOrMore_CapabilityStatement.rest.resource.searchInclude>?;  # _include values supported by the 
+                                            # server 
+    fhir:searchRevInclude @<OneOrMore_CapabilityStatement.rest.resource.searchRevInclude>?;  # _revinclude values supported by 
+                                            # the server 
+    fhir:searchParam @<OneOrMore_CapabilityStatement.rest.resource.searchParam>?;  # Search parameters supported by 
+                                            # implementation 
+    fhir:operation @<OneOrMore_CapabilityStatement.rest.resource.operation>?;  # Definition of a resource operation
+}  
+
+# Messages supported by this system
+<CapabilityStatement.messaging.supportedMessage> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:mode @<CapabilityStatement.messaging.supportedMessage.mode>;  # sender | receiver
+    fhir:definition @<CapabilityStatement.messaging.supportedMessage.definition>;  # Message supported by this system
+}  
+
+# Software that is covered by this capability statement
+<CapabilityStatement.software> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:name @<CapabilityStatement.software.name>;  # A name the software is known by
+    fhir:version @<CapabilityStatement.software.version>?;  # Version covered by this statement
+    fhir:releaseDate @<CapabilityStatement.software.releaseDate>?;  # Date this version was released
+}  
+
+# What operations are supported?
+<CapabilityStatement.rest.resource.interaction> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:code @<CapabilityStatement.rest.resource.interaction.code>;  # read | vread | update | patch | 
+                                            # delete | history-instance | 
+                                            # history-type | create | 
+                                            # search-type 
+    fhir:documentation @<CapabilityStatement.rest.resource.interaction.documentation>?;  # Anything special about operation 
+                                            # behavior 
+}  
+
+# Where messages should be sent
+<CapabilityStatement.messaging.endpoint> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:protocol @<CapabilityStatement.messaging.endpoint.protocol>;  # http | ftp | mllp +
+    fhir:address @<CapabilityStatement.messaging.endpoint.address>;  # Network address or identifier of 
+                                            # the end-point 
+}  
+
+# If messaging is supported
+<CapabilityStatement.messaging> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:endpoint @<OneOrMore_CapabilityStatement.messaging.endpoint>?;  # Where messages should be sent
+    fhir:reliableCache @<CapabilityStatement.messaging.reliableCache>?;  # Reliable Message Cache Length (min)
+    fhir:documentation @<CapabilityStatement.messaging.documentation>?;  # Messaging interface behavior 
+                                            # details 
+    fhir:supportedMessage @<OneOrMore_CapabilityStatement.messaging.supportedMessage>?;  # Messages supported by this system
+}  
+
+#---------------------- Data Types -------------------
+
+#---------------------- Cardinality Types (OneOrMore) -------------------
+
+<OneOrMore_CapabilityStatement.contact> CLOSED {
+    rdf:first @<CapabilityStatement.contact>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_CapabilityStatement.contact> 
+}
+
+<OneOrMore_CapabilityStatement.useContext> CLOSED {
+    rdf:first @<CapabilityStatement.useContext>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_CapabilityStatement.useContext> 
+}
+
+<OneOrMore_CapabilityStatement.jurisdiction> CLOSED {
+    rdf:first @<CapabilityStatement.jurisdiction>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_CapabilityStatement.jurisdiction> 
+}
+
+<OneOrMore_CapabilityStatement.instantiates> CLOSED {
+    rdf:first @<CapabilityStatement.instantiates>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_CapabilityStatement.instantiates> 
+}
+
+<OneOrMore_CapabilityStatement.imports> CLOSED {
+    rdf:first @<CapabilityStatement.imports>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_CapabilityStatement.imports> 
+}
+
+<OneOrMore_CapabilityStatement.format> CLOSED {
+    rdf:first @<CapabilityStatement.format>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_CapabilityStatement.format> 
+}
+
+<OneOrMore_CapabilityStatement.patchFormat> CLOSED {
+    rdf:first @<CapabilityStatement.patchFormat>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_CapabilityStatement.patchFormat> 
+}
+
+<OneOrMore_CapabilityStatement.implementationGuide> CLOSED {
+    rdf:first @<CapabilityStatement.implementationGuide>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_CapabilityStatement.implementationGuide> 
+}
+
+<OneOrMore_CapabilityStatement.rest> CLOSED {
+    rdf:first @<CapabilityStatement.rest>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_CapabilityStatement.rest> 
+}
+
+<OneOrMore_CapabilityStatement.messaging> CLOSED {
+    rdf:first @<CapabilityStatement.messaging>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_CapabilityStatement.messaging> 
+}
+
+<OneOrMore_CapabilityStatement.document> CLOSED {
+    rdf:first @<CapabilityStatement.document>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_CapabilityStatement.document> 
+}
+
+<OneOrMore_CapabilityStatement.rest.security.service> CLOSED {
+    rdf:first @<CapabilityStatement.rest.security.service>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_CapabilityStatement.rest.security.service> 
+}
+
+<OneOrMore_CapabilityStatement.rest.resource> CLOSED {
+    rdf:first @<CapabilityStatement.rest.resource>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_CapabilityStatement.rest.resource> 
+}
+
+<OneOrMore_CapabilityStatement.rest.interaction> CLOSED {
+    rdf:first @<CapabilityStatement.rest.interaction>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_CapabilityStatement.rest.interaction> 
+}
+
+<OneOrMore_CapabilityStatement.rest.resource.searchParam> CLOSED {
+    rdf:first @<CapabilityStatement.rest.resource.searchParam>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_CapabilityStatement.rest.resource.searchParam> 
+}
+
+<OneOrMore_CapabilityStatement.rest.resource.operation> CLOSED {
+    rdf:first @<CapabilityStatement.rest.resource.operation>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_CapabilityStatement.rest.resource.operation> 
+}
+
+<OneOrMore_CapabilityStatement.rest.compartment> CLOSED {
+    rdf:first @<CapabilityStatement.rest.compartment>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_CapabilityStatement.rest.compartment> 
+}
+
+<OneOrMore_CapabilityStatement.rest.resource.supportedProfile> CLOSED {
+    rdf:first @<CapabilityStatement.rest.resource.supportedProfile>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_CapabilityStatement.rest.resource.supportedProfile> 
+}
+
+<OneOrMore_CapabilityStatement.rest.resource.interaction> CLOSED {
+    rdf:first @<CapabilityStatement.rest.resource.interaction>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_CapabilityStatement.rest.resource.interaction> 
+}
+
+<OneOrMore_CapabilityStatement.rest.resource.referencePolicy> CLOSED {
+    rdf:first @<CapabilityStatement.rest.resource.referencePolicy>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_CapabilityStatement.rest.resource.referencePolicy> 
+}
+
+<OneOrMore_CapabilityStatement.rest.resource.searchInclude> CLOSED {
+    rdf:first @<CapabilityStatement.rest.resource.searchInclude>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_CapabilityStatement.rest.resource.searchInclude> 
+}
+
+<OneOrMore_CapabilityStatement.rest.resource.searchRevInclude> CLOSED {
+    rdf:first @<CapabilityStatement.rest.resource.searchRevInclude>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_CapabilityStatement.rest.resource.searchRevInclude> 
+}
+
+<OneOrMore_CapabilityStatement.messaging.endpoint> CLOSED {
+    rdf:first @<CapabilityStatement.messaging.endpoint>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_CapabilityStatement.messaging.endpoint> 
+}
+
+<OneOrMore_CapabilityStatement.messaging.supportedMessage> CLOSED {
+    rdf:first @<CapabilityStatement.messaging.supportedMessage>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_CapabilityStatement.messaging.supportedMessage> 
+}
+
+#---------------------- Reference Types -------------------
+
+#---------------------- Value Sets ------------------------

@@ -1,0 +1,151 @@
+﻿PREFIX fhir: <http://hl7.org/fhir/> 
+PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+BASE <http://hl7.org/fhir/shape/>
+
+
+start=@<Invoice> AND {fhir:nodeRole [fhir:treeRoot]}
+
+
+# Invoice containing ChargeItems from an Account
+<Invoice> EXTENDS @<DomainResource> CLOSED {   
+
+    a [fhir:Invoice];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:identifier @<OneOrMore_Invoice.identifier>?;  # Business Identifier for item
+    fhir:status @<Invoice.status>;          # draft | issued | balanced | 
+                                            # cancelled | entered-in-error 
+    fhir:cancelledReason @<Invoice.cancelledReason>?;  # Reason for cancellation of this 
+                                            # Invoice 
+    fhir:type @<Invoice.type>?;             # Type of Invoice
+    fhir:subject @<Invoice.subject> AND {fhir:link 
+    			@<Group> OR 
+    			@<Patient> }?;  # Recipient(s) of goods and services
+    fhir:recipient @<Invoice.recipient> AND {fhir:link 
+    			@<Organization> OR 
+    			@<Patient> OR 
+    			@<RelatedPerson> }?;  # Recipient of this invoice
+    fhir:date @<Invoice.date>?;             # Invoice date / posting date
+    fhir:participant @<OneOrMore_Invoice.participant>?;  # Participant in creation of this 
+                                            # Invoice 
+    fhir:issuer @<Invoice.issuer> AND {fhir:link 
+    			@<Organization> }?;  # Issuing Organization of Invoice
+    fhir:account @<Invoice.account> AND {fhir:link 
+    			@<Account> }?;  # Account that is being balanced
+    fhir:lineItem @<OneOrMore_Invoice.lineItem>?;  # Line items of this Invoice
+    fhir:totalPriceComponent @<OneOrMore_Invoice.lineItem.priceComponent>?;  # Components of Invoice total
+    fhir:totalNet @<Invoice.totalNet>?;     # Net total of this Invoice
+    fhir:totalGross @<Invoice.totalGross>?;  # Gross total of this Invoice
+    fhir:paymentTerms @<Invoice.paymentTerms>?;  # Payment details
+    fhir:note @<OneOrMore_Invoice.note>?;   # Comments made about the invoice
+}  
+
+# Participant in creation of this Invoice
+<Invoice.participant> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:role @<Invoice.participant.role>?;  # Type of involvement in creation of 
+                                            # this Invoice 
+    fhir:actor @<Invoice.participant.actor> AND {fhir:link 
+    			@<Device> OR 
+    			@<Organization> OR 
+    			@<Patient> OR 
+    			@<Practitioner> OR 
+    			@<PractitionerRole> OR 
+    			@<RelatedPerson> };  # Individual who was involved
+}  
+
+# Line items of this Invoice
+<Invoice.lineItem> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:sequence @<Invoice.lineItem.sequence>?;  # Sequence number of line item
+    fhir:chargeItem ((@<Reference>  AND {fhir:link @<ChargeItem> })  OR 
+    			@<CodeableConcept> )  AND { rdf:type IRI } ;  # Reference to ChargeItem containing 
+                                            # details of this line item or an 
+                                            # inline billing code 
+    fhir:priceComponent @<OneOrMore_Invoice.lineItem.priceComponent>?;  # Components of total line item price
+}  
+
+# Components of total line item price
+<Invoice.lineItem.priceComponent> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:type @<Invoice.lineItem.priceComponent.type>;  # base | surcharge | deduction | 
+                                            # discount | tax | informational 
+    fhir:code @<Invoice.lineItem.priceComponent.code>?;  # Code identifying the specific 
+                                            # component 
+    fhir:factor @<Invoice.lineItem.priceComponent.factor>?;  # Factor used for calculating this 
+                                            # component 
+    fhir:amount @<Invoice.lineItem.priceComponent.amount>?;  # Monetary amount associated with 
+                                            # this component 
+}  
+
+#---------------------- Data Types -------------------
+
+# A reference from one resource to another
+<Reference> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Reference];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:link IRI?;
+    fhir:reference @<Reference.reference>?;  # Literal reference, Relative, 
+                                            # internal or absolute URL 
+    fhir:type @<Reference.type>?;           # Type the reference refers to (e.g. 
+                                            # "Patient") 
+    fhir:identifier @<Reference.identifier>?;  # Logical reference, when literal 
+                                            # reference is not known 
+    fhir:display @<Reference.display>?;     # Text alternative for the resource
+} AND (
+
+# Constraint: UniqueKey:ref-1
+# Human readable:SHALL have a contained resource if a local reference is provided
+# XPath:not(starts-with(f:reference/@value, '#')) or exists(ancestor::*[self::f:entry or self::f:parameter]/f:resource/f:*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')]|/*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')])
+# Constraint:reference.startsWith('#').not() or (reference.substring(1).trace('url') in %rootResource.contained.id.trace('ids')) or (reference='#' and %rootResource!=%resource)
+# ShEx:
+
+
+)
+ 
+
+# Concept - reference to a terminology or just  text
+<CodeableConcept> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:CodeableConcept];
+    fhir:nodeRole [fhir:treeRoot]?;
+    a NONLITERAL*;
+    fhir:coding @<OneOrMore_CodeableConcept.coding>?;  # Code defined by a terminology 
+                                            # system 
+    fhir:text @<CodeableConcept.text>?;     # Plain text representation of the 
+                                            # concept 
+}  
+
+#---------------------- Cardinality Types (OneOrMore) -------------------
+
+<OneOrMore_Invoice.identifier> CLOSED {
+    rdf:first @<Invoice.identifier>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Invoice.identifier> 
+}
+
+<OneOrMore_Invoice.participant> CLOSED {
+    rdf:first @<Invoice.participant>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Invoice.participant> 
+}
+
+<OneOrMore_Invoice.lineItem> CLOSED {
+    rdf:first @<Invoice.lineItem>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Invoice.lineItem> 
+}
+
+<OneOrMore_Invoice.lineItem.priceComponent> CLOSED {
+    rdf:first @<Invoice.lineItem.priceComponent>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Invoice.lineItem.priceComponent> 
+}
+
+<OneOrMore_Invoice.note> CLOSED {
+    rdf:first @<Invoice.note>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Invoice.note> 
+}
+
+<OneOrMore_CodeableConcept.coding> CLOSED {
+    rdf:first @<CodeableConcept.coding>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_CodeableConcept.coding> 
+}
+
+#---------------------- Reference Types -------------------
+
+#---------------------- Value Sets ------------------------

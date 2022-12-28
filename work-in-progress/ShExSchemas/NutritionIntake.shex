@@ -1,0 +1,233 @@
+﻿PREFIX fhir: <http://hl7.org/fhir/> 
+PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+BASE <http://hl7.org/fhir/shape/>
+
+
+start=@<NutritionIntake> AND {fhir:nodeRole [fhir:treeRoot]}
+
+
+# Record of food or fluid being taken by a patient
+<NutritionIntake> EXTENDS @<DomainResource> CLOSED {   
+
+    a [fhir:NutritionIntake];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:identifier @<OneOrMore_NutritionIntake.identifier>?;  # External identifier
+    fhir:instantiatesCanonical @<OneOrMore_NutritionIntake.instantiatesCanonical>?;  # Instantiates FHIR protocol or 
+                                            # definition 
+    fhir:instantiatesUri @<OneOrMore_NutritionIntake.instantiatesUri>?;  # Instantiates external protocol or 
+                                            # definition 
+    fhir:basedOn @<OneOrMore_NutritionIntake.basedOn_CarePlan_OR_NutritionOrder_OR_ServiceRequest>?;  # Fulfils plan, proposal or order
+    fhir:partOf @<OneOrMore_NutritionIntake.partOf_NutritionIntake_OR_Observation_OR_Procedure>?;  # Part of referenced event
+    fhir:status @<NutritionIntake.status>;  # preparation | in-progress | 
+                                            # not-done | on-hold | stopped | 
+                                            # completed | entered-in-error | 
+                                            # unknown 
+    fhir:statusReason @<OneOrMore_NutritionIntake.statusReason>?;  # Reason for current status
+    fhir:code @<NutritionIntake.code>?;     # Code representing an overall type 
+                                            # of nutrition intake 
+    fhir:subject @<NutritionIntake.subject> AND {fhir:link 
+    			@<Group> OR 
+    			@<Patient> };  # Who is/was consuming the food or 
+                                            # fluid 
+    fhir:encounter @<NutritionIntake.encounter> AND {fhir:link 
+    			@<Encounter> }?;  # Encounter associated with 
+                                            # NutritionIntake 
+    fhir:occurrence (@<dateTime>  OR 
+    			@<Period> )  AND { rdf:type IRI } ?;  # The date/time or interval when the 
+                                            # food or fluid is/was consumed 
+    fhir:recorded @<NutritionIntake.recorded>?;  # When the intake was recorded
+    fhir:reported (@<boolean>  OR 
+    			(@<Reference>  AND {fhir:link @<Patient> OR 
+    			 @<RelatedPerson> OR 
+    			 @<Practitioner> OR 
+    			 @<PractitionerRole> OR 
+    			 @<Organization> }) )  AND { rdf:type IRI } ?;  # Person or organization that 
+                                            # provided the information about the 
+                                            # consumption of this food or fluid 
+    fhir:consumedItem @<OneOrMore_NutritionIntake.consumedItem>;  # What food or fluid product or item 
+                                            # was consumed 
+    fhir:ingredientLabel @<OneOrMore_NutritionIntake.ingredientLabel>?;  # Total nutrient for the whole meal, 
+                                            # product, serving 
+    fhir:performer @<OneOrMore_NutritionIntake.performer>?;  # Who was performed in the intake
+    fhir:location @<NutritionIntake.location> AND {fhir:link 
+    			@<Location> }?;  # Where the intake occurred
+    fhir:derivedFrom @<OneOrMore_NutritionIntake.derivedFrom_Resource>?;  # Additional supporting information
+    fhir:reason @<OneOrMore_NutritionIntake.reason>?;  # Reason for why the food or fluid 
+                                            # is /was consumed 
+    fhir:note @<OneOrMore_NutritionIntake.note>?;  # Further information about the 
+                                            # consumption 
+}  
+
+# Total nutrient for the whole meal, product, serving
+<NutritionIntake.ingredientLabel> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:nutrient @<NutritionIntake.ingredientLabel.nutrient>;  # Total nutrient consumed
+    fhir:amount @<NutritionIntake.ingredientLabel.amount>;  # Total amount of nutrient consumed
+}  
+
+# What food or fluid product or item was consumed
+<NutritionIntake.consumedItem> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:type @<NutritionIntake.consumedItem.type>;  # The type of food or fluid product
+    fhir:nutritionProduct @<NutritionIntake.consumedItem.nutritionProduct>;  # Code that identifies the food or 
+                                            # fluid product that was consumed 
+    fhir:schedule @<NutritionIntake.consumedItem.schedule>?;  # Scheduled frequency of consumption
+    fhir:amount @<NutritionIntake.consumedItem.amount>?;  # Quantity of the specified food
+    fhir:rate @<NutritionIntake.consumedItem.rate>?;  # Rate at which enteral feeding was 
+                                            # administered 
+    fhir:notConsumed @<NutritionIntake.consumedItem.notConsumed>?;  # Flag to indicate if the food or 
+                                            # fluid item was refused or 
+                                            # otherwise not consumed 
+    fhir:notConsumedReason @<NutritionIntake.consumedItem.notConsumedReason>?;  # Reason food or fluid was not 
+                                            # consumed 
+}  
+
+# Who was performed in the intake
+<NutritionIntake.performer> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:function @<NutritionIntake.performer.function>?;  # Type of performer
+    fhir:actor @<NutritionIntake.performer.actor> AND {fhir:link 
+    			@<CareTeam> OR 
+    			@<Device> OR 
+    			@<Organization> OR 
+    			@<Patient> OR 
+    			@<Practitioner> OR 
+    			@<PractitionerRole> OR 
+    			@<RelatedPerson> };  # Who performed the intake
+}  
+
+#---------------------- Data Types -------------------
+
+# Primitive Type dateTime
+<dateTime> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:dateTime];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v @<dateTime.value>?;              # Primitive value for dateTime
+}  
+
+# Primitive Type boolean
+<boolean> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:boolean];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v @<boolean.value>?;               # Primitive value for boolean
+}  
+
+# A reference from one resource to another
+<Reference> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Reference];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:link IRI?;
+    fhir:reference @<Reference.reference>?;  # Literal reference, Relative, 
+                                            # internal or absolute URL 
+    fhir:type @<Reference.type>?;           # Type the reference refers to (e.g. 
+                                            # "Patient") 
+    fhir:identifier @<Reference.identifier>?;  # Logical reference, when literal 
+                                            # reference is not known 
+    fhir:display @<Reference.display>?;     # Text alternative for the resource
+} AND (
+
+# Constraint: UniqueKey:ref-1
+# Human readable:SHALL have a contained resource if a local reference is provided
+# XPath:not(starts-with(f:reference/@value, '#')) or exists(ancestor::*[self::f:entry or self::f:parameter]/f:resource/f:*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')]|/*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')])
+# Constraint:reference.startsWith('#').not() or (reference.substring(1).trace('url') in %rootResource.contained.id.trace('ids')) or (reference='#' and %rootResource!=%resource)
+# ShEx:
+
+
+)
+ 
+
+# Time range defined by start and end date/time
+<Period> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Period];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:start @<Period.start>?;            # Starting time with inclusive 
+                                            # boundary 
+    fhir:end @<Period.end>?;                # End time with inclusive boundary, 
+                                            # if not ongoing 
+} AND (
+
+# Constraint: UniqueKey:per-1
+# Human readable:If present, start SHALL have a lower or equal value than end
+# XPath:not(exists(f:start/@value)) or not(exists(f:end/@value)) or (xs:dateTime(f:start/@value) <= xs:dateTime(f:end/@value))
+# Constraint:start.hasValue().not() or end.hasValue().not() or (start <= end)
+# ShEx:
+
+ NOT { fhir:start  . } OR  NOT { fhir:end  . } OR ({ fhir:start { fhir:v MaxInclusive { fhir:end } }  })
+
+)
+ 
+
+#---------------------- Cardinality Types (OneOrMore) -------------------
+
+<OneOrMore_NutritionIntake.identifier> CLOSED {
+    rdf:first @<NutritionIntake.identifier>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_NutritionIntake.identifier> 
+}
+
+<OneOrMore_NutritionIntake.instantiatesCanonical> CLOSED {
+    rdf:first @<NutritionIntake.instantiatesCanonical>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_NutritionIntake.instantiatesCanonical> 
+}
+
+<OneOrMore_NutritionIntake.instantiatesUri> CLOSED {
+    rdf:first @<NutritionIntake.instantiatesUri>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_NutritionIntake.instantiatesUri> 
+}
+
+<OneOrMore_NutritionIntake.basedOn_CarePlan_OR_NutritionOrder_OR_ServiceRequest> CLOSED {
+    rdf:first @<NutritionIntake.basedOn> AND {fhir:link 
+			@<CarePlan> OR 
+			@<NutritionOrder> OR 
+			@<ServiceRequest> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_NutritionIntake.basedOn_CarePlan_OR_NutritionOrder_OR_ServiceRequest> 
+}
+
+<OneOrMore_NutritionIntake.partOf_NutritionIntake_OR_Observation_OR_Procedure> CLOSED {
+    rdf:first @<NutritionIntake.partOf> AND {fhir:link 
+			@<NutritionIntake> OR 
+			@<Observation> OR 
+			@<Procedure> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_NutritionIntake.partOf_NutritionIntake_OR_Observation_OR_Procedure> 
+}
+
+<OneOrMore_NutritionIntake.statusReason> CLOSED {
+    rdf:first @<NutritionIntake.statusReason>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_NutritionIntake.statusReason> 
+}
+
+<OneOrMore_NutritionIntake.consumedItem> CLOSED {
+    rdf:first @<NutritionIntake.consumedItem>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_NutritionIntake.consumedItem> 
+}
+
+<OneOrMore_NutritionIntake.ingredientLabel> CLOSED {
+    rdf:first @<NutritionIntake.ingredientLabel>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_NutritionIntake.ingredientLabel> 
+}
+
+<OneOrMore_NutritionIntake.performer> CLOSED {
+    rdf:first @<NutritionIntake.performer>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_NutritionIntake.performer> 
+}
+
+<OneOrMore_NutritionIntake.derivedFrom_Resource> CLOSED {
+    rdf:first @<NutritionIntake.derivedFrom> AND {fhir:link 
+			@<Resource> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_NutritionIntake.derivedFrom_Resource> 
+}
+
+<OneOrMore_NutritionIntake.reason> CLOSED {
+    rdf:first @<NutritionIntake.reason>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_NutritionIntake.reason> 
+}
+
+<OneOrMore_NutritionIntake.note> CLOSED {
+    rdf:first @<NutritionIntake.note>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_NutritionIntake.note> 
+}
+
+#---------------------- Reference Types -------------------
+
+#---------------------- Value Sets ------------------------

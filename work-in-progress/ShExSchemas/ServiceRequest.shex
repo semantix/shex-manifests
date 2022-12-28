@@ -1,0 +1,507 @@
+﻿PREFIX fhir: <http://hl7.org/fhir/> 
+PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+BASE <http://hl7.org/fhir/shape/>
+
+
+start=@<ServiceRequest> AND {fhir:nodeRole [fhir:treeRoot]}
+
+
+# A request for a service to be performed
+<ServiceRequest> EXTENDS @<DomainResource> CLOSED {   
+
+    a [fhir:ServiceRequest];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:identifier @<OneOrMore_ServiceRequest.identifier>?;  # Identifiers assigned to this order
+    fhir:instantiatesCanonical @<OneOrMore_ServiceRequest.instantiatesCanonical>?;  # Instantiates FHIR protocol or 
+                                            # definition 
+    fhir:instantiatesUri @<OneOrMore_ServiceRequest.instantiatesUri>?;  # Instantiates external protocol or 
+                                            # definition 
+    fhir:basedOn @<OneOrMore_ServiceRequest.basedOn_CarePlan_OR_MedicationRequest_OR_ServiceRequest>?;  # What request fulfills
+    fhir:replaces @<OneOrMore_ServiceRequest.replaces_ServiceRequest>?;  # What request replaces
+    fhir:requisition @<ServiceRequest.requisition>?;  # Composite Request ID
+    fhir:status @<ServiceRequest.status>;   # draft | active | on-hold | revoked 
+                                            # | completed | entered-in-error | 
+                                            # unknown 
+    fhir:intent @<ServiceRequest.intent>;   # proposal | plan | directive | 
+                                            # order + 
+    fhir:category @<OneOrMore_ServiceRequest.category>?;  # Classification of service
+    fhir:priority @<ServiceRequest.priority>?;  # routine | urgent | asap | stat
+    fhir:doNotPerform @<ServiceRequest.doNotPerform>?;  # True if service/procedure should 
+                                            # not be performed 
+    fhir:code @<ServiceRequest.code>?;      # What is being requested/ordered
+    fhir:orderDetail @<OneOrMore_ServiceRequest.orderDetail>?;  # Additional order information
+    fhir:quantity (@<Quantity>  OR 
+    			@<Ratio>  OR 
+    			@<Range> )  AND { rdf:type IRI } ?;  # Service amount
+    fhir:subject @<ServiceRequest.subject> AND {fhir:link 
+    			@<Device> OR 
+    			@<Group> OR 
+    			@<Location> OR 
+    			@<Patient> };  # Individual or Entity the service 
+                                            # is ordered for 
+    fhir:focus @<OneOrMore_ServiceRequest.focus_Resource>?;  # What the service request is about, 
+                                            # when it is not about the subject 
+                                            # of record 
+    fhir:encounter @<ServiceRequest.encounter> AND {fhir:link 
+    			@<Encounter> }?;  # Encounter in which the request was 
+                                            # created 
+    fhir:occurrence (@<dateTime>  OR 
+    			@<Period>  OR 
+    			@<Timing> )  AND { rdf:type IRI } ?;  # When service should occur
+    fhir:asNeeded (@<boolean>  OR 
+    			@<CodeableConcept> )  AND { rdf:type IRI } ?;  # Preconditions for service
+    fhir:authoredOn @<ServiceRequest.authoredOn>?;  # Date request signed
+    fhir:requester @<ServiceRequest.requester> AND {fhir:link 
+    			@<Device> OR 
+    			@<Organization> OR 
+    			@<Patient> OR 
+    			@<Practitioner> OR 
+    			@<PractitionerRole> OR 
+    			@<RelatedPerson> }?;  # Who/what is requesting service
+    fhir:performerType @<ServiceRequest.performerType>?;  # Performer role
+    fhir:performer @<OneOrMore_ServiceRequest.performer_CareTeam_OR_Device_OR_HealthcareService_OR_Organization_OR_Patient_OR_Practitioner_OR_PractitionerRole_OR_RelatedPerson>?;  # Requested performer
+    fhir:location @<OneOrMore_ServiceRequest.location>?;  # Requested location
+    fhir:reason @<OneOrMore_ServiceRequest.reason>?;  # Explanation/Justification for 
+                                            # procedure or service 
+    fhir:insurance @<OneOrMore_ServiceRequest.insurance_ClaimResponse_OR_Coverage>?;  # Associated insurance coverage
+    fhir:supportingInfo @<OneOrMore_ServiceRequest.supportingInfo_Resource>?;  # Additional clinical information
+    fhir:specimen @<OneOrMore_ServiceRequest.specimen_Specimen>?;  # Procedure Samples
+    fhir:bodySite @<OneOrMore_ServiceRequest.bodySite>?;  # Coded location on Body
+    fhir:bodyStructure @<ServiceRequest.bodyStructure> AND {fhir:link 
+    			@<BodyStructure> }?;  # BodyStructure-based location on 
+                                            # the body 
+    fhir:note @<OneOrMore_ServiceRequest.note>?;  # Comments
+    fhir:patientInstruction @<ServiceRequest.patientInstruction>?;  # Patient or consumer-oriented 
+                                            # instructions 
+    fhir:relevantHistory @<OneOrMore_ServiceRequest.relevantHistory_Provenance>?;  # Request provenance
+} AND (
+
+# Constraint: UniqueKey:bdystr-1
+# Human readable:bodyStructure SHALL only be present if bodySite is not present
+# XPath:exists(f:bodySite) or exists(f:bodyStructure)
+# Constraint:bodySite.exists() or bodyStructure.exists()
+# ShEx:
+
+{ fhir:bodySite . } OR { fhir:bodyStructure . }
+
+) AND (
+
+# Constraint: UniqueKey:prr-1
+# Human readable:orderDetail SHALL only be present if code is present
+# XPath:exists(f:code) or not(exists(f:orderDetail))
+# Constraint:orderDetail.empty() or code.exists()
+# ShEx:
+
+ NOT { fhir:orderDetail {fhir:v .} }  OR { fhir:code . }
+
+)
+ 
+
+#---------------------- Data Types -------------------
+
+# Primitive Type dateTime
+<dateTime> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:dateTime];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v @<dateTime.value>?;              # Primitive value for dateTime
+}  
+
+# Primitive Type boolean
+<boolean> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:boolean];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v @<boolean.value>?;               # Primitive value for boolean
+}  
+
+# A measured or measurable amount
+<Quantity> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Quantity];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:value @<Quantity.value>?;          # Numerical value (with implicit 
+                                            # precision) 
+    fhir:comparator @<Quantity.comparator>?;  # < | <= | >= | > | ad - how to 
+                                            # understand the value 
+    fhir:unit @<Quantity.unit>?;            # Unit representation
+    fhir:system @<Quantity.system>?;        # System that defines coded unit form
+    fhir:code @<Quantity.code>?;            # Coded form of the unit
+} AND (
+
+# Constraint: UniqueKey:qty-3
+# Human readable:If a code for the unit is present, the system SHALL also be present
+# XPath:not(exists(f:code)) or exists(f:system)
+# Constraint:code.empty() or system.exists()
+# ShEx:
+
+ NOT { fhir:code {fhir:v .} }  OR { fhir:system . }
+
+)
+ 
+
+# Time range defined by start and end date/time
+<Period> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Period];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:start @<Period.start>?;            # Starting time with inclusive 
+                                            # boundary 
+    fhir:end @<Period.end>?;                # End time with inclusive boundary, 
+                                            # if not ongoing 
+} AND (
+
+# Constraint: UniqueKey:per-1
+# Human readable:If present, start SHALL have a lower or equal value than end
+# XPath:not(exists(f:start/@value)) or not(exists(f:end/@value)) or (xs:dateTime(f:start/@value) <= xs:dateTime(f:end/@value))
+# Constraint:start.hasValue().not() or end.hasValue().not() or (start <= end)
+# ShEx:
+
+ NOT { fhir:start  . } OR  NOT { fhir:end  . } OR ({ fhir:start { fhir:v MaxInclusive { fhir:end } }  })
+
+)
+ 
+
+# A ratio of two Quantity values - a numerator and a denominator
+<Ratio> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Ratio];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:numerator @<Ratio.numerator>?;     # Numerator value
+    fhir:denominator @<Ratio.denominator>?;  # Denominator value
+} AND (
+
+# Constraint: UniqueKey:rat-1
+# Human readable:Numerator and denominator SHALL both be present, or both are absent. If both are absent, there SHALL be some extension present
+# XPath:(count(f:numerator) = count(f:denominator)) and ((count(f:numerator) > 0) or (count(f:extension) > 0))
+# Constraint:(numerator.empty() xor denominator.exists()) and (numerator.exists() or extension.exists())
+# ShEx:
+
+(( NOT { fhir:numerator {fhir:v .} }  AND NOT  { fhir:denominator . }) OR ( NOT  NOT { fhir:numerator {fhir:v .} }  AND  { fhir:denominator . })) AND ({ fhir:numerator . } OR { fhir:extension . })
+
+)
+ 
+
+# A timing schedule that specifies an event that may occur multiple times
+<Timing> EXTENDS @<BackboneType> CLOSED {   
+
+    a [fhir:Timing];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:event @<OneOrMore_Timing.event>?;  # When the event occurs
+    fhir:repeat @<Timing.repeat>?;          # When the event is to occur
+    fhir:code @<Timing.code>?;              # C | BID | TID | QID | AM | PM | QD 
+                                            # | QOD | + 
+} AND (
+
+# Constraint: UniqueKey:tim-9
+# Human readable:If there's an offset, there must be a when (and not C, CM, CD, CV)
+# XPath:not(exists(f:offset)) or exists(f:when)
+# Constraint:offset.empty() or (when.exists() and ((when in ('C' | 'CM' | 'CD' | 'CV')).not()))
+# ShEx:
+
+ NOT { fhir:offset {fhir:v .} }  OR ({ fhir:when . } AND ( NOT { { fhir:when { fhir:v [('C' | 'CM' | 'CD' | 'CV')] }  } }))
+
+) AND (
+
+# Constraint: UniqueKey:tim-5
+# Human readable:period SHALL be a non-negative value
+# XPath:f:period/@value >= 0 or not(f:period/@value)
+# Constraint:period.exists() implies period >= 0
+# ShEx:
+
+{ fhir:period . } AND ({ fhir:period { fhir:v MinInclusive 0 }  })
+
+) AND (
+
+# Constraint: UniqueKey:tim-6
+# Human readable:If there's a periodMax, there must be a period
+# XPath:not(exists(f:periodMax)) or exists(f:period)
+# Constraint:periodMax.empty() or period.exists()
+# ShEx:
+
+ NOT { fhir:periodMax {fhir:v .} }  OR { fhir:period . }
+
+) AND (
+
+# Constraint: UniqueKey:tim-7
+# Human readable:If there's a durationMax, there must be a duration
+# XPath:not(exists(f:durationMax)) or exists(f:duration)
+# Constraint:durationMax.empty() or duration.exists()
+# ShEx:
+
+ NOT { fhir:durationMax {fhir:v .} }  OR { fhir:duration . }
+
+) AND (
+
+# Constraint: UniqueKey:tim-8
+# Human readable:If there's a countMax, there must be a count
+# XPath:not(exists(f:countMax)) or exists(f:count)
+# Constraint:countMax.empty() or count.exists()
+# ShEx:
+
+ NOT { fhir:countMax {fhir:v .} }  OR { fhir:count . }
+
+) AND (
+
+# Constraint: UniqueKey:tim-1
+# Human readable:if there's a duration, there needs to be duration units
+# XPath:not(exists(f:duration)) or exists(f:durationUnit)
+# Constraint:duration.empty() or durationUnit.exists()
+# ShEx:
+
+ NOT { fhir:duration {fhir:v .} }  OR { fhir:durationUnit . }
+
+) AND (
+
+# Constraint: UniqueKey:tim-10
+# Human readable:If there's a timeOfDay, there cannot be a when, or vice versa
+# XPath:not(exists(f:timeOfDay)) or not(exists(f:when))
+# Constraint:timeOfDay.empty() or when.empty()
+# ShEx:
+
+ NOT { fhir:timeOfDay {fhir:v .} }  OR  NOT { fhir:when {fhir:v .} } 
+
+) AND (
+
+# Constraint: UniqueKey:tim-2
+# Human readable:if there's a period, there needs to be period units
+# XPath:not(exists(f:period)) or exists(f:periodUnit)
+# Constraint:period.empty() or periodUnit.exists()
+# ShEx:
+
+ NOT { fhir:period {fhir:v .} }  OR { fhir:periodUnit . }
+
+) AND (
+
+# Constraint: UniqueKey:tim-4
+# Human readable:duration SHALL be a non-negative value
+# XPath:f:duration/@value >= 0 or not(f:duration/@value)
+# Constraint:duration.exists() implies duration >= 0
+# ShEx:
+
+{ fhir:duration . } AND ({ fhir:duration { fhir:v MinInclusive 0 }  })
+
+)
+ 
+
+# Set of values bounded by low and high
+<Range> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Range];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:low @<Range.low>?;                 # Low limit
+    fhir:high @<Range.high>?;               # High limit
+} AND (
+
+# Constraint: UniqueKey:rng-2
+# Human readable:If present, low SHALL have a lower value than high
+# XPath:not(exists(f:low/f:value/@value)) or not(exists(f:high/f:value/@value)) or (number(f:low/f:value/@value) <= number(f:high/f:value/@value))
+# Constraint:low.value.empty() or high.value.empty() or (low <= high)
+# ShEx:
+
+ NOT { fhir:low fhir:value {fhir:v .} }  OR  NOT { fhir:high fhir:value {fhir:v .} }  OR ({ fhir:low { fhir:v MaxInclusive { fhir:high } }  })
+
+)
+ 
+
+# Concept - reference to a terminology or just  text
+<CodeableConcept> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:CodeableConcept];
+    fhir:nodeRole [fhir:treeRoot]?;
+    a NONLITERAL*;
+    fhir:coding @<OneOrMore_CodeableConcept.coding>?;  # Code defined by a terminology 
+                                            # system 
+    fhir:text @<CodeableConcept.text>?;     # Plain text representation of the 
+                                            # concept 
+}  
+
+# When the event is to occur
+<Timing.repeat> EXTENDS @<Element> CLOSED {   
+    fhir:bounds (@<Duration>  OR 
+    			@<Range>  OR 
+    			@<Period> )  AND { rdf:type IRI } ?;  # Length/Range of lengths, or (Start 
+                                            # and/or end) limits 
+    fhir:count @<Timing.repeat.count>?;     # Number of times to repeat
+    fhir:countMax @<Timing.repeat.countMax>?;  # Maximum number of times to repeat
+    fhir:duration @<Timing.repeat.duration>?;  # How long when it happens
+    fhir:durationMax @<Timing.repeat.durationMax>?;  # How long when it happens (Max)
+    fhir:durationUnit @<Timing.repeat.durationUnit>?;  # s | min | h | d | wk | mo | a - 
+                                            # unit of time (UCUM) 
+    fhir:frequency @<Timing.repeat.frequency>?;  # Indicates the number of 
+                                            # repetitions that should occur 
+                                            # within a period. I.e. Event occurs 
+                                            # frequency times per period 
+    fhir:frequencyMax @<Timing.repeat.frequencyMax>?;  # Event occurs up to frequencyMax 
+                                            # times per period 
+    fhir:period @<Timing.repeat.period>?;   # The duration to which the 
+                                            # frequency applies. I.e. Event 
+                                            # occurs frequency times per period 
+    fhir:periodMax @<Timing.repeat.periodMax>?;  # Upper limit of period (3-4 hours)
+    fhir:periodUnit @<Timing.repeat.periodUnit>?;  # s | min | h | d | wk | mo | a - 
+                                            # unit of time (UCUM) 
+    fhir:dayOfWeek @<OneOrMore_Timing.repeat.dayOfWeek>?;  # mon | tue | wed | thu | fri | sat 
+                                            # | sun 
+    fhir:timeOfDay @<OneOrMore_Timing.repeat.timeOfDay>?;  # Time of day for action
+    fhir:when @<OneOrMore_Timing.repeat.when>?;  # Code for time period of occurrence
+    fhir:offset @<Timing.repeat.offset>?;   # Minutes from event (before or 
+                                            # after) 
+} AND (
+
+
+
+)
+ 
+
+# A length of time
+<Duration> EXTENDS @<Quantity> CLOSED {   
+
+    a [fhir:Duration];
+    fhir:nodeRole [fhir:treeRoot]?;
+} AND (
+
+# Constraint: UniqueKey:drt-1
+# Human readable:There SHALL be a code if there is a value and it SHALL be an expression of time.  If system is present, it SHALL be UCUM.
+# XPath:(f:code or not(f:value)) and (not(exists(f:system)) or f:system/@value='http://unitsofmeasure.org')
+# Constraint:code.exists() implies ((system = %ucum) and value.exists())
+# ShEx:
+
+{ fhir:code . } AND (({ fhir:system { fhir:v ['http://unitsofmeasure.org'] }  }) AND { fhir:value . })
+
+)
+ 
+
+#---------------------- Cardinality Types (OneOrMore) -------------------
+
+<OneOrMore_ServiceRequest.identifier> CLOSED {
+    rdf:first @<ServiceRequest.identifier>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ServiceRequest.identifier> 
+}
+
+<OneOrMore_ServiceRequest.instantiatesCanonical> CLOSED {
+    rdf:first @<ServiceRequest.instantiatesCanonical>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ServiceRequest.instantiatesCanonical> 
+}
+
+<OneOrMore_ServiceRequest.instantiatesUri> CLOSED {
+    rdf:first @<ServiceRequest.instantiatesUri>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ServiceRequest.instantiatesUri> 
+}
+
+<OneOrMore_ServiceRequest.basedOn_CarePlan_OR_MedicationRequest_OR_ServiceRequest> CLOSED {
+    rdf:first @<ServiceRequest.basedOn> AND {fhir:link 
+			@<CarePlan> OR 
+			@<MedicationRequest> OR 
+			@<ServiceRequest> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ServiceRequest.basedOn_CarePlan_OR_MedicationRequest_OR_ServiceRequest> 
+}
+
+<OneOrMore_ServiceRequest.replaces_ServiceRequest> CLOSED {
+    rdf:first @<ServiceRequest.replaces> AND {fhir:link 
+			@<ServiceRequest> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ServiceRequest.replaces_ServiceRequest> 
+}
+
+<OneOrMore_ServiceRequest.category> CLOSED {
+    rdf:first @<ServiceRequest.category>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ServiceRequest.category> 
+}
+
+<OneOrMore_ServiceRequest.orderDetail> CLOSED {
+    rdf:first @<ServiceRequest.orderDetail>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ServiceRequest.orderDetail> 
+}
+
+<OneOrMore_ServiceRequest.focus_Resource> CLOSED {
+    rdf:first @<ServiceRequest.focus> AND {fhir:link 
+			@<Resource> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ServiceRequest.focus_Resource> 
+}
+
+<OneOrMore_ServiceRequest.performer_CareTeam_OR_Device_OR_HealthcareService_OR_Organization_OR_Patient_OR_Practitioner_OR_PractitionerRole_OR_RelatedPerson> CLOSED {
+    rdf:first @<ServiceRequest.performer> AND {fhir:link 
+			@<CareTeam> OR 
+			@<Device> OR 
+			@<HealthcareService> OR 
+			@<Organization> OR 
+			@<Patient> OR 
+			@<Practitioner> OR 
+			@<PractitionerRole> OR 
+			@<RelatedPerson> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ServiceRequest.performer_CareTeam_OR_Device_OR_HealthcareService_OR_Organization_OR_Patient_OR_Practitioner_OR_PractitionerRole_OR_RelatedPerson> 
+}
+
+<OneOrMore_ServiceRequest.location> CLOSED {
+    rdf:first @<ServiceRequest.location>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ServiceRequest.location> 
+}
+
+<OneOrMore_ServiceRequest.reason> CLOSED {
+    rdf:first @<ServiceRequest.reason>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ServiceRequest.reason> 
+}
+
+<OneOrMore_ServiceRequest.insurance_ClaimResponse_OR_Coverage> CLOSED {
+    rdf:first @<ServiceRequest.insurance> AND {fhir:link 
+			@<ClaimResponse> OR 
+			@<Coverage> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ServiceRequest.insurance_ClaimResponse_OR_Coverage> 
+}
+
+<OneOrMore_ServiceRequest.supportingInfo_Resource> CLOSED {
+    rdf:first @<ServiceRequest.supportingInfo> AND {fhir:link 
+			@<Resource> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ServiceRequest.supportingInfo_Resource> 
+}
+
+<OneOrMore_ServiceRequest.specimen_Specimen> CLOSED {
+    rdf:first @<ServiceRequest.specimen> AND {fhir:link 
+			@<Specimen> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ServiceRequest.specimen_Specimen> 
+}
+
+<OneOrMore_ServiceRequest.bodySite> CLOSED {
+    rdf:first @<ServiceRequest.bodySite>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ServiceRequest.bodySite> 
+}
+
+<OneOrMore_ServiceRequest.note> CLOSED {
+    rdf:first @<ServiceRequest.note>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ServiceRequest.note> 
+}
+
+<OneOrMore_ServiceRequest.relevantHistory_Provenance> CLOSED {
+    rdf:first @<ServiceRequest.relevantHistory> AND {fhir:link 
+			@<Provenance> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ServiceRequest.relevantHistory_Provenance> 
+}
+
+<OneOrMore_Timing.event> CLOSED {
+    rdf:first @<Timing.event>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Timing.event> 
+}
+
+<OneOrMore_CodeableConcept.coding> CLOSED {
+    rdf:first @<CodeableConcept.coding>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_CodeableConcept.coding> 
+}
+
+<OneOrMore_Timing.repeat.dayOfWeek> CLOSED {
+    rdf:first @<Timing.repeat.dayOfWeek>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Timing.repeat.dayOfWeek> 
+}
+
+<OneOrMore_Timing.repeat.timeOfDay> CLOSED {
+    rdf:first @<Timing.repeat.timeOfDay>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Timing.repeat.timeOfDay> 
+}
+
+<OneOrMore_Timing.repeat.when> CLOSED {
+    rdf:first @<Timing.repeat.when>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Timing.repeat.when> 
+}
+
+#---------------------- Reference Types -------------------
+
+#---------------------- Value Sets ------------------------

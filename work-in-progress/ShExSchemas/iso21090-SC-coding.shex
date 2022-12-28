@@ -1,0 +1,41 @@
+﻿PREFIX fhir: <http://hl7.org/fhir/> 
+PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+BASE <http://hl7.org/fhir/shape/>
+
+
+# code for string
+<iso21090-SC-coding> EXTENDS @<Extension> CLOSED {   
+
+    a [fhir:iso21090-SC-coding];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v @<Extension.url> AND
+    	{fhir:value ["http://hl7.org/fhir/StructureDefinition/iso21090-SC-coding"]}; 
+    fhir:value (@<Coding> )  AND { rdf:type IRI } ; 
+    ^fhir:extension { a [fhir:string]
+    		}
+}  
+
+#---------------------- Data Types -------------------
+
+# A reference to a code defined by a terminology system
+<Coding> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Coding];
+    fhir:nodeRole [fhir:treeRoot]?;
+    a NONLITERAL?;
+    fhir:system @<Coding.system>?;          # Identity of the terminology system
+    fhir:version @<Coding.version>?;        # Version of the system - if relevant
+    fhir:code @<Coding.code>?;              # Symbol in syntax defined by the 
+                                            # system 
+    fhir:display @<Coding.display>?;        # Representation defined by the 
+                                            # system 
+    fhir:userSelected @<Coding.userSelected>?;  # If this coding was chosen directly 
+                                            # by the user 
+}  
+
+#---------------------- Cardinality Types (OneOrMore) -------------------
+
+#---------------------- Reference Types -------------------
+
+#---------------------- Value Sets ------------------------

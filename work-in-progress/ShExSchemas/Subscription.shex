@@ -1,0 +1,85 @@
+﻿PREFIX fhir: <http://hl7.org/fhir/> 
+PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+BASE <http://hl7.org/fhir/shape/>
+
+
+start=@<Subscription> AND {fhir:nodeRole [fhir:treeRoot]}
+
+
+# Notification about a SubscriptionTopic
+<Subscription> EXTENDS @<DomainResource> CLOSED {   
+
+    a [fhir:Subscription];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:identifier @<OneOrMore_Subscription.identifier>?;  # Additional identifiers (business 
+                                            # identifier) 
+    fhir:name @<Subscription.name>?;        # Human readable name for this 
+                                            # subscription 
+    fhir:status @<Subscription.status>;     # requested | active | error | off | 
+                                            # entered-in-error 
+    fhir:topic @<Subscription.topic>;       # Reference to the subscription 
+                                            # topic being subscribed to 
+    fhir:contact @<OneOrMore_Subscription.contact>?;  # Contact details for source (e.g. 
+                                            # troubleshooting) 
+    fhir:end @<Subscription.end>?;          # When to automatically delete the 
+                                            # subscription 
+    fhir:reason @<Subscription.reason>?;    # Description of why this 
+                                            # subscription was created 
+    fhir:filterBy @<OneOrMore_Subscription.filterBy>?;  # Criteria for narrowing the 
+                                            # subscription topic stream 
+    fhir:channelType @<Subscription.channelType>;  # Channel type for notifications
+    fhir:endpoint @<Subscription.endpoint>?;  # Where the channel points to
+    fhir:header @<OneOrMore_Subscription.header>?;  # Usage depends on the channel type
+    fhir:heartbeatPeriod @<Subscription.heartbeatPeriod>?;  # Interval in seconds to send 
+                                            # 'heartbeat' notification 
+    fhir:timeout @<Subscription.timeout>?;  # Timeout in seconds to attempt 
+                                            # notification delivery 
+    fhir:contentType @<Subscription.contentType>?;  # MIME type to send, or omit for no 
+                                            # payload 
+    fhir:content @<Subscription.content>?;  # empty | id-only | full-resource
+    fhir:maxCount @<Subscription.maxCount>?;  # Maximum number of triggering 
+                                            # resources included in notification 
+                                            # bundles 
+}  
+
+# Criteria for narrowing the subscription topic stream
+<Subscription.filterBy> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:resourceType @<Subscription.filterBy.resourceType>?;  # Allowed Data type or Resource 
+                                            # (reference to definition) for this 
+                                            # Subscription 
+    fhir:filterParameter @<Subscription.filterBy.filterParameter>;  # Filter label defined in 
+                                            # SubscriptionTopic 
+    fhir:modifier @<Subscription.filterBy.modifier>?;  # = | eq | ne | gt | lt | ge | le | 
+                                            # sa | eb | ap | above | below | in 
+                                            # | not-in | of-type 
+    fhir:value @<Subscription.filterBy.value>;  # Literal value or resource path
+}  
+
+#---------------------- Data Types -------------------
+
+#---------------------- Cardinality Types (OneOrMore) -------------------
+
+<OneOrMore_Subscription.identifier> CLOSED {
+    rdf:first @<Subscription.identifier>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Subscription.identifier> 
+}
+
+<OneOrMore_Subscription.contact> CLOSED {
+    rdf:first @<Subscription.contact>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Subscription.contact> 
+}
+
+<OneOrMore_Subscription.filterBy> CLOSED {
+    rdf:first @<Subscription.filterBy>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Subscription.filterBy> 
+}
+
+<OneOrMore_Subscription.header> CLOSED {
+    rdf:first @<Subscription.header>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Subscription.header> 
+}
+
+#---------------------- Reference Types -------------------
+
+#---------------------- Value Sets ------------------------

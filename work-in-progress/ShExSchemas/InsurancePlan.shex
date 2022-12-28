@@ -1,0 +1,217 @@
+﻿PREFIX fhir: <http://hl7.org/fhir/> 
+PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+BASE <http://hl7.org/fhir/shape/>
+
+
+start=@<InsurancePlan> AND {fhir:nodeRole [fhir:treeRoot]}
+
+
+# Details of a Health Insurance product/plan provided by an organization
+<InsurancePlan> EXTENDS @<DomainResource> CLOSED {   
+
+    a [fhir:InsurancePlan];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:identifier @<OneOrMore_InsurancePlan.identifier>?;  # Business Identifier for Product
+    fhir:status @<InsurancePlan.status>?;   # draft | active | retired | unknown
+    fhir:type @<OneOrMore_InsurancePlan.type>?;  # Kind of product
+    fhir:name @<InsurancePlan.name>?;       # Official name
+    fhir:alias @<OneOrMore_InsurancePlan.alias>?;  # Alternate names
+    fhir:period @<InsurancePlan.period>?;   # When the product is available
+    fhir:ownedBy @<InsurancePlan.ownedBy> AND {fhir:link 
+    			@<Organization> }?;  # Plan issuer
+    fhir:administeredBy @<InsurancePlan.administeredBy> AND {fhir:link 
+    			@<Organization> }?;  # Product administrator
+    fhir:coverageArea @<OneOrMore_InsurancePlan.coverageArea_Location>?;  # Where product applies
+    fhir:contact @<OneOrMore_InsurancePlan.contact>?;  # Official contact details relevant 
+                                            # to the health insurance 
+                                            # plan/product 
+    fhir:endpoint @<OneOrMore_InsurancePlan.endpoint_Endpoint>?;  # Technical endpoint
+    fhir:network @<OneOrMore_InsurancePlan.network_Organization>?;  # What networks are Included
+    fhir:coverage @<OneOrMore_InsurancePlan.coverage>?;  # Coverage details
+    fhir:plan @<OneOrMore_InsurancePlan.plan>?;  # Plan details
+} AND (
+
+# Constraint: UniqueKey:ipn-1
+# Human readable:The organization SHALL at least have a name or an identifier, and possibly more than one
+# XPath:count(f:identifier | f:name) > 0
+# Constraint:(identifier.count() + name.count()) > 0
+# ShEx:
+
+( count( fhir:identifier ) SHEX_Plus_SHEX  count( fhir:name )) { fhir:v MinExclusive 0 } 
+
+)
+ 
+
+# Benefits list
+<InsurancePlan.plan.specificCost.benefit> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:type @<InsurancePlan.plan.specificCost.benefit.type>;  # Type of specific benefit
+    fhir:cost @<OneOrMore_InsurancePlan.plan.specificCost.benefit.cost>?;  # List of the costs
+}  
+
+# Coverage details
+<InsurancePlan.coverage> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:type @<InsurancePlan.coverage.type>;  # Type of coverage
+    fhir:network @<OneOrMore_InsurancePlan.coverage.network_Organization>?;  # What networks provide coverage
+    fhir:benefit @<OneOrMore_InsurancePlan.coverage.benefit>;  # List of benefits
+}  
+
+# List of benefits
+<InsurancePlan.coverage.benefit> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:type @<InsurancePlan.coverage.benefit.type>;  # Type of benefit
+    fhir:requirement @<InsurancePlan.coverage.benefit.requirement>?;  # Referral requirements
+    fhir:limit @<OneOrMore_InsurancePlan.coverage.benefit.limit>?;  # Benefit limits
+}  
+
+# Benefit limits
+<InsurancePlan.coverage.benefit.limit> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:value @<InsurancePlan.coverage.benefit.limit.value>?;  # Maximum value allowed
+    fhir:code @<InsurancePlan.coverage.benefit.limit.code>?;  # Benefit limit details
+}  
+
+# Specific costs
+<InsurancePlan.plan.specificCost> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:category @<InsurancePlan.plan.specificCost.category>;  # General category of benefit
+    fhir:benefit @<OneOrMore_InsurancePlan.plan.specificCost.benefit>?;  # Benefits list
+}  
+
+# List of the costs
+<InsurancePlan.plan.specificCost.benefit.cost> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:type @<InsurancePlan.plan.specificCost.benefit.cost.type>;  # Type of cost
+    fhir:applicability @<InsurancePlan.plan.specificCost.benefit.cost.applicability>?;  # in-network | out-of-network | other
+    fhir:qualifiers @<OneOrMore_InsurancePlan.plan.specificCost.benefit.cost.qualifiers>?;  # Additional information about the 
+                                            # cost 
+    fhir:value @<InsurancePlan.plan.specificCost.benefit.cost.value>?;  # The actual cost value
+}  
+
+# Plan details
+<InsurancePlan.plan> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:identifier @<OneOrMore_InsurancePlan.plan.identifier>?;  # Business Identifier for Product
+    fhir:type @<InsurancePlan.plan.type>?;  # Type of plan
+    fhir:coverageArea @<OneOrMore_InsurancePlan.plan.coverageArea_Location>?;  # Where product applies
+    fhir:network @<OneOrMore_InsurancePlan.plan.network_Organization>?;  # What networks provide coverage
+    fhir:generalCost @<OneOrMore_InsurancePlan.plan.generalCost>?;  # Overall costs
+    fhir:specificCost @<OneOrMore_InsurancePlan.plan.specificCost>?;  # Specific costs
+}  
+
+# Overall costs
+<InsurancePlan.plan.generalCost> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:type @<InsurancePlan.plan.generalCost.type>?;  # Type of cost
+    fhir:groupSize @<InsurancePlan.plan.generalCost.groupSize>?;  # Number of enrollees
+    fhir:cost @<InsurancePlan.plan.generalCost.cost>?;  # Cost value
+    fhir:comment @<InsurancePlan.plan.generalCost.comment>?;  # Additional cost information
+}  
+
+#---------------------- Data Types -------------------
+
+#---------------------- Cardinality Types (OneOrMore) -------------------
+
+<OneOrMore_InsurancePlan.identifier> CLOSED {
+    rdf:first @<InsurancePlan.identifier>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_InsurancePlan.identifier> 
+}
+
+<OneOrMore_InsurancePlan.type> CLOSED {
+    rdf:first @<InsurancePlan.type>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_InsurancePlan.type> 
+}
+
+<OneOrMore_InsurancePlan.alias> CLOSED {
+    rdf:first @<InsurancePlan.alias>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_InsurancePlan.alias> 
+}
+
+<OneOrMore_InsurancePlan.coverageArea_Location> CLOSED {
+    rdf:first @<InsurancePlan.coverageArea> AND {fhir:link 
+			@<Location> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_InsurancePlan.coverageArea_Location> 
+}
+
+<OneOrMore_InsurancePlan.contact> CLOSED {
+    rdf:first @<InsurancePlan.contact>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_InsurancePlan.contact> 
+}
+
+<OneOrMore_InsurancePlan.endpoint_Endpoint> CLOSED {
+    rdf:first @<InsurancePlan.endpoint> AND {fhir:link 
+			@<Endpoint> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_InsurancePlan.endpoint_Endpoint> 
+}
+
+<OneOrMore_InsurancePlan.network_Organization> CLOSED {
+    rdf:first @<InsurancePlan.network> AND {fhir:link 
+			@<Organization> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_InsurancePlan.network_Organization> 
+}
+
+<OneOrMore_InsurancePlan.coverage> CLOSED {
+    rdf:first @<InsurancePlan.coverage>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_InsurancePlan.coverage> 
+}
+
+<OneOrMore_InsurancePlan.plan> CLOSED {
+    rdf:first @<InsurancePlan.plan>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_InsurancePlan.plan> 
+}
+
+<OneOrMore_InsurancePlan.plan.specificCost.benefit.cost> CLOSED {
+    rdf:first @<InsurancePlan.plan.specificCost.benefit.cost>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_InsurancePlan.plan.specificCost.benefit.cost> 
+}
+
+<OneOrMore_InsurancePlan.coverage.network_Organization> CLOSED {
+    rdf:first @<InsurancePlan.coverage.network> AND {fhir:link 
+			@<Organization> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_InsurancePlan.coverage.network_Organization> 
+}
+
+<OneOrMore_InsurancePlan.coverage.benefit> CLOSED {
+    rdf:first @<InsurancePlan.coverage.benefit>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_InsurancePlan.coverage.benefit> 
+}
+
+<OneOrMore_InsurancePlan.coverage.benefit.limit> CLOSED {
+    rdf:first @<InsurancePlan.coverage.benefit.limit>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_InsurancePlan.coverage.benefit.limit> 
+}
+
+<OneOrMore_InsurancePlan.plan.specificCost.benefit> CLOSED {
+    rdf:first @<InsurancePlan.plan.specificCost.benefit>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_InsurancePlan.plan.specificCost.benefit> 
+}
+
+<OneOrMore_InsurancePlan.plan.specificCost.benefit.cost.qualifiers> CLOSED {
+    rdf:first @<InsurancePlan.plan.specificCost.benefit.cost.qualifiers>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_InsurancePlan.plan.specificCost.benefit.cost.qualifiers> 
+}
+
+<OneOrMore_InsurancePlan.plan.identifier> CLOSED {
+    rdf:first @<InsurancePlan.plan.identifier>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_InsurancePlan.plan.identifier> 
+}
+
+<OneOrMore_InsurancePlan.plan.coverageArea_Location> CLOSED {
+    rdf:first @<InsurancePlan.plan.coverageArea> AND {fhir:link 
+			@<Location> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_InsurancePlan.plan.coverageArea_Location> 
+}
+
+<OneOrMore_InsurancePlan.plan.network_Organization> CLOSED {
+    rdf:first @<InsurancePlan.plan.network> AND {fhir:link 
+			@<Organization> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_InsurancePlan.plan.network_Organization> 
+}
+
+<OneOrMore_InsurancePlan.plan.generalCost> CLOSED {
+    rdf:first @<InsurancePlan.plan.generalCost>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_InsurancePlan.plan.generalCost> 
+}
+
+<OneOrMore_InsurancePlan.plan.specificCost> CLOSED {
+    rdf:first @<InsurancePlan.plan.specificCost>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_InsurancePlan.plan.specificCost> 
+}
+
+#---------------------- Reference Types -------------------
+
+#---------------------- Value Sets ------------------------

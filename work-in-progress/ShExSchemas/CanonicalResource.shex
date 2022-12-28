@@ -1,0 +1,79 @@
+﻿PREFIX fhir: <http://hl7.org/fhir/> 
+PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+BASE <http://hl7.org/fhir/shape/>
+
+
+start=@<CanonicalResource> AND {fhir:nodeRole [fhir:treeRoot]}
+
+
+# Common Ancestor declaration for definitional resources
+<CanonicalResource> EXTENDS @<DomainResource> CLOSED {   
+
+    a [fhir:CanonicalResource];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:url @<CanonicalResource.url>?;     # Canonical identifier for this 
+                                            # {{title}}, represented as a URI 
+                                            # (globally unique) 
+    fhir:identifier @<OneOrMore_CanonicalResource.identifier>?;  # Additional identifier for the 
+                                            # {{title}} 
+    fhir:version @<CanonicalResource.version>?;  # Business version of the {{title}}
+    fhir:name @<CanonicalResource.name>?;   # Name for this {{title}} (computer 
+                                            # friendly) 
+    fhir:title @<CanonicalResource.title>?;  # Name for this {{title}} (human 
+                                            # friendly) 
+    fhir:status @<CanonicalResource.status>;  # draft | active | retired | unknown
+    fhir:experimental @<CanonicalResource.experimental>?;  # For testing purposes, not real 
+                                            # usage 
+    fhir:date @<CanonicalResource.date>?;   # Date last changed
+    fhir:publisher @<CanonicalResource.publisher>?;  # Name of the publisher 
+                                            # (organization or individual) 
+    fhir:contact @<OneOrMore_CanonicalResource.contact>?;  # Contact details for the publisher
+    fhir:description @<CanonicalResource.description>?;  # Natural language description of 
+                                            # the {{title}} 
+    fhir:useContext @<OneOrMore_CanonicalResource.useContext>?;  # The context that the content is 
+                                            # intended to support 
+    fhir:jurisdiction @<OneOrMore_CanonicalResource.jurisdiction>?;  # Intended jurisdiction for 
+                                            # {{title}} (if applicable) 
+    fhir:purpose @<CanonicalResource.purpose>?;  # Why this {{title}} is defined
+    fhir:copyright @<CanonicalResource.copyright>?;  # Use and/or publishing restrictions
+} AND (
+
+# Constraint: UniqueKey:cnl-0
+# Human readable:Name should be usable as an identifier for the module by machine processing applications such as code generation
+# XPath:not(exists(f:name/@value)) or matches(f:name/@value, '[A-Z]([A-Za-z0-9_]){0,254}')
+# Constraint:name.exists() implies name.matches('[A-Z]([A-Za-z0-9_]){0,254}')
+# ShEx:
+
+{ fhir:name . } AND { fhir:name { fhir:v /'[A-Z]([A-Za-z0-9_]){0,254}'/ }  }
+
+)
+ 
+
+#---------------------- Data Types -------------------
+
+#---------------------- Cardinality Types (OneOrMore) -------------------
+
+<OneOrMore_CanonicalResource.identifier> CLOSED {
+    rdf:first @<CanonicalResource.identifier>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_CanonicalResource.identifier> 
+}
+
+<OneOrMore_CanonicalResource.contact> CLOSED {
+    rdf:first @<CanonicalResource.contact>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_CanonicalResource.contact> 
+}
+
+<OneOrMore_CanonicalResource.useContext> CLOSED {
+    rdf:first @<CanonicalResource.useContext>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_CanonicalResource.useContext> 
+}
+
+<OneOrMore_CanonicalResource.jurisdiction> CLOSED {
+    rdf:first @<CanonicalResource.jurisdiction>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_CanonicalResource.jurisdiction> 
+}
+
+#---------------------- Reference Types -------------------
+
+#---------------------- Value Sets ------------------------

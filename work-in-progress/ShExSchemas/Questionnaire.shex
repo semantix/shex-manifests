@@ -1,0 +1,711 @@
+﻿PREFIX fhir: <http://hl7.org/fhir/> 
+PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+BASE <http://hl7.org/fhir/shape/>
+
+
+start=@<Questionnaire> AND {fhir:nodeRole [fhir:treeRoot]}
+
+
+# A structured set of questions
+<Questionnaire> EXTENDS @<MetadataResource> CLOSED {   
+
+    a [fhir:Questionnaire];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:url @<Questionnaire.url>?;         # Canonical identifier for this 
+                                            # questionnaire, represented as a 
+                                            # URI (globally unique) 
+    fhir:identifier @<OneOrMore_Questionnaire.identifier>?;  # Additional identifier for the 
+                                            # questionnaire 
+    fhir:version @<Questionnaire.version>?;  # Business version of the 
+                                            # questionnaire 
+    fhir:name @<Questionnaire.name>?;       # Name for this questionnaire 
+                                            # (computer friendly) 
+    fhir:title @<Questionnaire.title>?;     # Name for this questionnaire (human 
+                                            # friendly) 
+    fhir:derivedFrom @<OneOrMore_Questionnaire.derivedFrom>?;  # Instantiates protocol or definition
+    fhir:status @<Questionnaire.status>;    # draft | active | retired | unknown
+    fhir:experimental @<Questionnaire.experimental>?;  # For testing purposes, not real 
+                                            # usage 
+    fhir:subjectType @<OneOrMore_Questionnaire.subjectType>?;  # Resource that can be subject of 
+                                            # QuestionnaireResponse 
+    fhir:date @<Questionnaire.date>?;       # Date last formally published
+    fhir:publisher @<Questionnaire.publisher>?;  # Name of the publisher 
+                                            # (organization or individual) 
+    fhir:contact @<OneOrMore_Questionnaire.contact>?;  # Contact details for the publisher
+    fhir:description @<Questionnaire.description>?;  # Natural language description of 
+                                            # the questionnaire 
+    fhir:useContext @<OneOrMore_Questionnaire.useContext>?;  # The context that the content is 
+                                            # intended to support 
+    fhir:jurisdiction @<OneOrMore_Questionnaire.jurisdiction>?;  # Intended jurisdiction for 
+                                            # questionnaire (if applicable) 
+    fhir:purpose @<Questionnaire.purpose>?;  # Why this questionnaire is defined
+    fhir:copyright @<Questionnaire.copyright>?;  # Use and/or publishing restrictions
+    fhir:approvalDate @<Questionnaire.approvalDate>?;  # When the questionnaire was 
+                                            # approved by publisher 
+    fhir:lastReviewDate @<Questionnaire.lastReviewDate>?;  # When the questionnaire was last 
+                                            # reviewed 
+    fhir:effectivePeriod @<Questionnaire.effectivePeriod>?;  # When the questionnaire is expected 
+                                            # to be used 
+    fhir:code @<OneOrMore_Questionnaire.code>?;  # Concept that represents the 
+                                            # overall questionnaire 
+    fhir:item @<OneOrMore_Questionnaire.item>?;  # Questions and sections within the 
+                                            # Questionnaire 
+} AND (
+
+# Constraint: UniqueKey:cnl-0
+# Human readable:Name should be usable as an identifier for the module by machine processing applications such as code generation
+# XPath:not(exists(f:name/@value)) or matches(f:name/@value, '[A-Z]([A-Za-z0-9_]){0,254}')
+# Constraint:name.exists() implies name.matches('[A-Z]([A-Za-z0-9_]){0,254}')
+# ShEx:
+
+{ fhir:name . } AND { fhir:name { fhir:v /'[A-Z]([A-Za-z0-9_]){0,254}'/ }  }
+
+) AND (
+
+# Constraint: UniqueKey:que-2
+# Human readable:The link ids for groups and questions must be unique within the questionnaire
+# XPath:count(descendant::f:linkId/@value)=count(distinct-values(descendant::f:linkId/@value))
+# Constraint:descendants().linkId.isDistinct()
+# ShEx:
+
+ isDistinct(  descendants(  ) fhir:linkId )
+
+) AND (
+
+# Constraint: UniqueKey:que-9
+# Human readable:Read-only can't be specified for "display" items
+# XPath:not(f:type/@value=('group', 'display') and f:*[starts-with(local-name(.), 'initial')])
+# Constraint:type!='display' or readOnly.empty()
+# ShEx:
+
+({ fhir:type { fhir:v [ . -'display'] } }) OR  NOT { fhir:readOnly {fhir:v .} } 
+
+) AND (
+
+# Constraint: UniqueKey:que-8
+# Human readable:Initial values can't be specified for groups or display items
+# XPath:not(f:type/@value=('group', 'display') and f:*[starts-with(local-name(.), 'initial')])
+# Constraint:(type!='group' and type!='display') or initial.empty()
+# ShEx:
+
+(({ fhir:type { fhir:v [ . -'group'] } }) AND ({ fhir:type { fhir:v [ . -'display'] } })) OR  NOT { fhir:initial {fhir:v .} } 
+
+) AND (
+
+# Constraint: UniqueKey:que-6
+# Human readable:Required and repeat aren't permitted for display items
+# XPath:not(f:type/@value='display' and (f:required or f:repeats))
+# Constraint:type!='display' or (required.empty() and repeats.empty())
+# ShEx:
+
+({ fhir:type { fhir:v [ . -'display'] } }) OR ( NOT { fhir:required {fhir:v .} }  AND  NOT { fhir:repeats {fhir:v .} } )
+
+) AND (
+
+# Constraint: UniqueKey:que-5
+# Human readable:Only coding, decimal, integer, date, dateTime, time, string or quantity  items can have answerOption or answerValueSet
+# XPath:f:type/@value=('coding','decimal','integer','date','dateTime','time','string','quantity') or not(f:answerOption or f:answerValueSet)
+# Constraint:(type='coding' or type = 'decimal' or type = 'integer' or type = 'date' or type = 'dateTime' or type = 'time' or type = 'string' or type = 'quantity') or (answerValueSet.empty() and answerOption.empty())
+# ShEx:
+
+(({ fhir:type { fhir:v ['coding'] }  }) OR ({ fhir:type { fhir:v ['decimal'] }  }) OR ({ fhir:type { fhir:v ['integer'] }  }) OR ({ fhir:type { fhir:v ['date'] }  }) OR ({ fhir:type { fhir:v ['dateTime'] }  }) OR ({ fhir:type { fhir:v ['time'] }  }) OR ({ fhir:type { fhir:v ['string'] }  }) OR ({ fhir:type { fhir:v ['quantity'] }  })) OR ( NOT { fhir:answerValueSet {fhir:v .} }  AND  NOT { fhir:answerOption {fhir:v .} } )
+
+) AND (
+
+# Constraint: UniqueKey:que-4
+# Human readable:A question cannot have both answerOption and answerValueSet
+# XPath:not(f:answerValueSet and f:answerOption)
+# Constraint:answerOption.empty() or answerValueSet.empty()
+# ShEx:
+
+ NOT { fhir:answerOption {fhir:v .} }  OR  NOT { fhir:answerValueSet {fhir:v .} } 
+
+) AND (
+
+# Constraint: UniqueKey:que-3
+# Human readable:Display items cannot have a "code" asserted
+# XPath:not(f:type/@value='display' and f:code)
+# Constraint:type!='display' or code.empty()
+# ShEx:
+
+({ fhir:type { fhir:v [ . -'display'] } }) OR  NOT { fhir:code {fhir:v .} } 
+
+) AND (
+
+# Constraint: UniqueKey:que-1c
+# Human readable:Display items cannot have child items
+# XPath:not(f:type/@value='display' and exists(f:item))
+# Constraint:type='display' implies item.empty()
+# ShEx:
+
+({ fhir:type { fhir:v ['display'] }  }) AND  NOT { fhir:item {fhir:v .} } 
+
+) AND (
+
+# Constraint: UniqueKey:que-1a
+# Human readable:Group items must have nested items when Questionanire is complete
+# XPath:not(f:type/@value='group' and ancestor::f:Questionnaire/f:status/@value='complete' and not(exists(f:item)))
+# Constraint:(type='group' and %resource.status='complete') implies item.empty().not()
+# ShEx:
+
+
+) AND (
+
+# Constraint: UniqueKey:que-1b
+# Human readable:Groups should have items
+# XPath:not(f:type/@value='group' and not(exists(f:item)))
+# Constraint:type='group' implies item.empty().not()
+# ShEx:
+
+({ fhir:type { fhir:v ['group'] }  }) AND  NOT { fhir:item  NOT {  {fhir:v .} }  }
+
+) AND (
+
+# Constraint: UniqueKey:que-10
+# Human readable:Maximum length can only be declared for simple question types
+# XPath:f:type/@value=('boolean', 'decimal', 'integer', 'string', 'text', 'url') or f:answerConstraint/@value='openOrString' or not(f:maxLength)
+# Constraint:(type in ('boolean' | 'decimal' | 'integer' | 'string' | 'text' | 'url')) or answerConstraint='optionOrString' or maxLength.empty()
+# ShEx:
+
+({ fhir:type { fhir:v [('boolean' | 'decimal' | 'integer' | 'string' | 'text' | 'url')] }  }) OR ({ fhir:answerConstraint { fhir:v ['optionOrString'] }  }) OR  NOT { fhir:maxLength {fhir:v .} } 
+
+) AND (
+
+# Constraint: UniqueKey:que-13
+# Human readable:Can only have multiple initial values for repeating items
+# XPath:f:repeats/@value='true' or count(f:initial)<=1
+# Constraint:repeats=true or initial.count() <= 1
+# ShEx:
+
+({ fhir:repeats { fhir:v [true] }  }) OR ( count( fhir:initial ) { fhir:v MaxInclusive 1 } )
+
+) AND (
+
+# Constraint: UniqueKey:que-14
+# Human readable:Can only have answerConstraint if answerOption or answerValueset are present
+# XPath:not(exists(f:answerConstraint)) or exists(f:answerOption) or exists(f:answerValueSet)
+# Constraint:answerConstraint.exists() implies answerOption.exists() or answerValueset.exists()
+# ShEx:
+
+{ fhir:answerConstraint . } AND ({ fhir:answerOption . } OR { fhir:answerValueset . })
+
+) AND (
+
+# Constraint: UniqueKey:que-11
+# Human readable:If one or more answerOption is present, initial cannot be present.  Use answerOption.initialSelected instead
+# XPath:not(f:answerOption) or not(count(f:*[starts-with(local-name(.), 'initial')]))
+# Constraint:answerOption.empty() or initial.empty()
+# ShEx:
+
+ NOT { fhir:answerOption {fhir:v .} }  OR  NOT { fhir:initial {fhir:v .} } 
+
+) AND (
+
+# Constraint: UniqueKey:que-12
+# Human readable:If there are more than one enableWhen, enableBehavior must be specified
+# XPath:not(count(f:enableWhen) > 1) or exists(f:enableBehavior)
+# Constraint:enableWhen.count() > 1 implies enableBehavior.exists()
+# ShEx:
+
+( count( fhir:enableWhen ) { fhir:v MinExclusive 1 } ) AND { fhir:enableBehavior . }
+
+) AND (
+
+# Constraint: UniqueKey:que-7
+# Human readable:If the operator is 'exists', the value must be a boolean
+# XPath:f:operator/@value != 'exists' or exists(f:answerBoolean)
+# Constraint:operator = 'exists' implies (answer is Boolean)
+# ShEx:
+
+({ fhir:operator { fhir:v ['exists'] }  }) AND ({ fhir:answer a { fhir:Boolean } })
+
+)
+ 
+
+# Initial value(s) when item is first rendered
+<Questionnaire.item.initial> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:value (@<boolean>  OR 
+    			@<decimal>  OR 
+    			@<integer>  OR 
+    			@<date>  OR 
+    			@<dateTime>  OR 
+    			@<time>  OR 
+    			@<string>  OR 
+    			@<uri>  OR 
+    			@<Attachment>  OR 
+    			@<Coding>  OR 
+    			@<Quantity>  OR 
+    			(@<Reference>  AND {fhir:link @<Resource> }) )  AND { rdf:type IRI } ;  # Actual value for initializing the 
+                                            # question 
+}  
+
+# Questions and sections within the Questionnaire
+<Questionnaire.item> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:linkId @<Questionnaire.item.linkId>;  # Unique id for item in questionnaire
+    fhir:definition @<Questionnaire.item.definition>?;  # ElementDefinition - details for 
+                                            # the item 
+    fhir:code @<OneOrMore_Questionnaire.item.code>?;  # Corresponding concept for this 
+                                            # item in a terminology 
+    fhir:prefix @<Questionnaire.item.prefix>?;  # E.g. "1(a)", "2.5.3"
+    fhir:text @<Questionnaire.item.text>?;  # Primary text for the item
+    fhir:type @<Questionnaire.item.type>;   # group | display | boolean | 
+                                            # decimal | integer | date | 
+                                            # dateTime + 
+    fhir:enableWhen @<OneOrMore_Questionnaire.item.enableWhen>?;  # Only allow data when
+    fhir:enableBehavior @<Questionnaire.item.enableBehavior>?;  # all | any
+    fhir:disabledDisplay @<Questionnaire.item.disabledDisplay>?;  # hidden | protected
+    fhir:required @<Questionnaire.item.required>?;  # Whether the item must be included 
+                                            # in data results 
+    fhir:repeats @<Questionnaire.item.repeats>?;  # Whether the item may repeat
+    fhir:readOnly @<Questionnaire.item.readOnly>?;  # Don't allow human editing
+    fhir:maxLength @<Questionnaire.item.maxLength>?;  # No more than this many characters
+    fhir:answerConstraint @<Questionnaire.item.answerConstraint>?;  # optionsOnly | optionsOrType | 
+                                            # optionsOrString 
+    fhir:answerValueSet @<Questionnaire.item.answerValueSet>?;  # Valueset containing permitted 
+                                            # answers 
+    fhir:answerOption @<OneOrMore_Questionnaire.item.answerOption>?;  # Permitted answer
+    fhir:initial @<OneOrMore_Questionnaire.item.initial>?;  # Initial value(s) when item is 
+                                            # first rendered 
+    fhir:item @<OneOrMore_Questionnaire.item>?;  # Nested questionnaire items
+} AND (
+
+# Constraint: UniqueKey:cnl-0
+# Human readable:Name should be usable as an identifier for the module by machine processing applications such as code generation
+# XPath:not(exists(f:name/@value)) or matches(f:name/@value, '[A-Z]([A-Za-z0-9_]){0,254}')
+# Constraint:name.exists() implies name.matches('[A-Z]([A-Za-z0-9_]){0,254}')
+# ShEx:
+
+{ fhir:name . } AND { fhir:name { fhir:v /'[A-Z]([A-Za-z0-9_]){0,254}'/ }  }
+
+) AND (
+
+# Constraint: UniqueKey:que-2
+# Human readable:The link ids for groups and questions must be unique within the questionnaire
+# XPath:count(descendant::f:linkId/@value)=count(distinct-values(descendant::f:linkId/@value))
+# Constraint:descendants().linkId.isDistinct()
+# ShEx:
+
+ isDistinct(  descendants(  ) fhir:linkId )
+
+) AND (
+
+# Constraint: UniqueKey:que-9
+# Human readable:Read-only can't be specified for "display" items
+# XPath:not(f:type/@value=('group', 'display') and f:*[starts-with(local-name(.), 'initial')])
+# Constraint:type!='display' or readOnly.empty()
+# ShEx:
+
+({ fhir:type { fhir:v [ . -'display'] } }) OR  NOT { fhir:readOnly {fhir:v .} } 
+
+) AND (
+
+# Constraint: UniqueKey:que-8
+# Human readable:Initial values can't be specified for groups or display items
+# XPath:not(f:type/@value=('group', 'display') and f:*[starts-with(local-name(.), 'initial')])
+# Constraint:(type!='group' and type!='display') or initial.empty()
+# ShEx:
+
+(({ fhir:type { fhir:v [ . -'group'] } }) AND ({ fhir:type { fhir:v [ . -'display'] } })) OR  NOT { fhir:initial {fhir:v .} } 
+
+) AND (
+
+# Constraint: UniqueKey:que-6
+# Human readable:Required and repeat aren't permitted for display items
+# XPath:not(f:type/@value='display' and (f:required or f:repeats))
+# Constraint:type!='display' or (required.empty() and repeats.empty())
+# ShEx:
+
+({ fhir:type { fhir:v [ . -'display'] } }) OR ( NOT { fhir:required {fhir:v .} }  AND  NOT { fhir:repeats {fhir:v .} } )
+
+) AND (
+
+# Constraint: UniqueKey:que-5
+# Human readable:Only coding, decimal, integer, date, dateTime, time, string or quantity  items can have answerOption or answerValueSet
+# XPath:f:type/@value=('coding','decimal','integer','date','dateTime','time','string','quantity') or not(f:answerOption or f:answerValueSet)
+# Constraint:(type='coding' or type = 'decimal' or type = 'integer' or type = 'date' or type = 'dateTime' or type = 'time' or type = 'string' or type = 'quantity') or (answerValueSet.empty() and answerOption.empty())
+# ShEx:
+
+(({ fhir:type { fhir:v ['coding'] }  }) OR ({ fhir:type { fhir:v ['decimal'] }  }) OR ({ fhir:type { fhir:v ['integer'] }  }) OR ({ fhir:type { fhir:v ['date'] }  }) OR ({ fhir:type { fhir:v ['dateTime'] }  }) OR ({ fhir:type { fhir:v ['time'] }  }) OR ({ fhir:type { fhir:v ['string'] }  }) OR ({ fhir:type { fhir:v ['quantity'] }  })) OR ( NOT { fhir:answerValueSet {fhir:v .} }  AND  NOT { fhir:answerOption {fhir:v .} } )
+
+) AND (
+
+# Constraint: UniqueKey:que-4
+# Human readable:A question cannot have both answerOption and answerValueSet
+# XPath:not(f:answerValueSet and f:answerOption)
+# Constraint:answerOption.empty() or answerValueSet.empty()
+# ShEx:
+
+ NOT { fhir:answerOption {fhir:v .} }  OR  NOT { fhir:answerValueSet {fhir:v .} } 
+
+) AND (
+
+# Constraint: UniqueKey:que-3
+# Human readable:Display items cannot have a "code" asserted
+# XPath:not(f:type/@value='display' and f:code)
+# Constraint:type!='display' or code.empty()
+# ShEx:
+
+({ fhir:type { fhir:v [ . -'display'] } }) OR  NOT { fhir:code {fhir:v .} } 
+
+) AND (
+
+# Constraint: UniqueKey:que-1c
+# Human readable:Display items cannot have child items
+# XPath:not(f:type/@value='display' and exists(f:item))
+# Constraint:type='display' implies item.empty()
+# ShEx:
+
+({ fhir:type { fhir:v ['display'] }  }) AND  NOT { fhir:item {fhir:v .} } 
+
+) AND (
+
+# Constraint: UniqueKey:que-1a
+# Human readable:Group items must have nested items when Questionanire is complete
+# XPath:not(f:type/@value='group' and ancestor::f:Questionnaire/f:status/@value='complete' and not(exists(f:item)))
+# Constraint:(type='group' and %resource.status='complete') implies item.empty().not()
+# ShEx:
+
+
+) AND (
+
+# Constraint: UniqueKey:que-1b
+# Human readable:Groups should have items
+# XPath:not(f:type/@value='group' and not(exists(f:item)))
+# Constraint:type='group' implies item.empty().not()
+# ShEx:
+
+({ fhir:type { fhir:v ['group'] }  }) AND  NOT { fhir:item  NOT {  {fhir:v .} }  }
+
+) AND (
+
+# Constraint: UniqueKey:que-10
+# Human readable:Maximum length can only be declared for simple question types
+# XPath:f:type/@value=('boolean', 'decimal', 'integer', 'string', 'text', 'url') or f:answerConstraint/@value='openOrString' or not(f:maxLength)
+# Constraint:(type in ('boolean' | 'decimal' | 'integer' | 'string' | 'text' | 'url')) or answerConstraint='optionOrString' or maxLength.empty()
+# ShEx:
+
+({ fhir:type { fhir:v [('boolean' | 'decimal' | 'integer' | 'string' | 'text' | 'url')] }  }) OR ({ fhir:answerConstraint { fhir:v ['optionOrString'] }  }) OR  NOT { fhir:maxLength {fhir:v .} } 
+
+) AND (
+
+# Constraint: UniqueKey:que-13
+# Human readable:Can only have multiple initial values for repeating items
+# XPath:f:repeats/@value='true' or count(f:initial)<=1
+# Constraint:repeats=true or initial.count() <= 1
+# ShEx:
+
+({ fhir:repeats { fhir:v [true] }  }) OR ( count( fhir:initial ) { fhir:v MaxInclusive 1 } )
+
+) AND (
+
+# Constraint: UniqueKey:que-14
+# Human readable:Can only have answerConstraint if answerOption or answerValueset are present
+# XPath:not(exists(f:answerConstraint)) or exists(f:answerOption) or exists(f:answerValueSet)
+# Constraint:answerConstraint.exists() implies answerOption.exists() or answerValueset.exists()
+# ShEx:
+
+{ fhir:answerConstraint . } AND ({ fhir:answerOption . } OR { fhir:answerValueset . })
+
+) AND (
+
+# Constraint: UniqueKey:que-11
+# Human readable:If one or more answerOption is present, initial cannot be present.  Use answerOption.initialSelected instead
+# XPath:not(f:answerOption) or not(count(f:*[starts-with(local-name(.), 'initial')]))
+# Constraint:answerOption.empty() or initial.empty()
+# ShEx:
+
+ NOT { fhir:answerOption {fhir:v .} }  OR  NOT { fhir:initial {fhir:v .} } 
+
+) AND (
+
+# Constraint: UniqueKey:que-12
+# Human readable:If there are more than one enableWhen, enableBehavior must be specified
+# XPath:not(count(f:enableWhen) > 1) or exists(f:enableBehavior)
+# Constraint:enableWhen.count() > 1 implies enableBehavior.exists()
+# ShEx:
+
+( count( fhir:enableWhen ) { fhir:v MinExclusive 1 } ) AND { fhir:enableBehavior . }
+
+) AND (
+
+# Constraint: UniqueKey:que-7
+# Human readable:If the operator is 'exists', the value must be a boolean
+# XPath:f:operator/@value != 'exists' or exists(f:answerBoolean)
+# Constraint:operator = 'exists' implies (answer is Boolean)
+# ShEx:
+
+({ fhir:operator { fhir:v ['exists'] }  }) AND ({ fhir:answer a { fhir:Boolean } })
+
+)
+ 
+
+# Permitted answer
+<Questionnaire.item.answerOption> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:value (@<integer>  OR 
+    			@<date>  OR 
+    			@<time>  OR 
+    			@<string>  OR 
+    			@<Coding>  OR 
+    			(@<Reference>  AND {fhir:link @<Resource> }) )  AND { rdf:type IRI } ;  # Answer value
+    fhir:initialSelected @<Questionnaire.item.answerOption.initialSelected>?;  # Whether option is selected by 
+                                            # default 
+}  
+
+# Nested questionnaire items
+<Questionnaire.item.item> CLOSED {   
+}  
+
+# Only allow data when
+<Questionnaire.item.enableWhen> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:question @<Questionnaire.item.enableWhen.question>;  # The linkId of question that 
+                                            # determines whether item is 
+                                            # enabled/disabled 
+    fhir:operator @<Questionnaire.item.enableWhen.operator>;  # exists | = | != | > | < | >= | <=
+    fhir:answer (@<boolean>  OR 
+    			@<decimal>  OR 
+    			@<integer>  OR 
+    			@<date>  OR 
+    			@<dateTime>  OR 
+    			@<time>  OR 
+    			@<string>  OR 
+    			@<Coding>  OR 
+    			@<Quantity>  OR 
+    			(@<Reference>  AND {fhir:link @<Resource> }) )  AND { rdf:type IRI } ;  # Value for question comparison 
+                                            # based on operator 
+}  
+
+#---------------------- Data Types -------------------
+
+# Primitive Type date
+<date> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:date];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v @<date.value>?;                  # Primitive value for date
+}  
+
+# Primitive Type dateTime
+<dateTime> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:dateTime];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v @<dateTime.value>?;              # Primitive value for dateTime
+}  
+
+# Primitive Type string
+<string> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:string];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v @<string.value>?;                # Primitive value for string
+}  
+
+# A reference from one resource to another
+<Reference> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Reference];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:link IRI?;
+    fhir:reference @<Reference.reference>?;  # Literal reference, Relative, 
+                                            # internal or absolute URL 
+    fhir:type @<Reference.type>?;           # Type the reference refers to (e.g. 
+                                            # "Patient") 
+    fhir:identifier @<Reference.identifier>?;  # Logical reference, when literal 
+                                            # reference is not known 
+    fhir:display @<Reference.display>?;     # Text alternative for the resource
+} AND (
+
+# Constraint: UniqueKey:ref-1
+# Human readable:SHALL have a contained resource if a local reference is provided
+# XPath:not(starts-with(f:reference/@value, '#')) or exists(ancestor::*[self::f:entry or self::f:parameter]/f:resource/f:*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')]|/*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')])
+# Constraint:reference.startsWith('#').not() or (reference.substring(1).trace('url') in %rootResource.contained.id.trace('ids')) or (reference='#' and %rootResource!=%resource)
+# ShEx:
+
+
+)
+ 
+
+# A measured or measurable amount
+<Quantity> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Quantity];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:value @<Quantity.value>?;          # Numerical value (with implicit 
+                                            # precision) 
+    fhir:comparator @<Quantity.comparator>?;  # < | <= | >= | > | ad - how to 
+                                            # understand the value 
+    fhir:unit @<Quantity.unit>?;            # Unit representation
+    fhir:system @<Quantity.system>?;        # System that defines coded unit form
+    fhir:code @<Quantity.code>?;            # Coded form of the unit
+} AND (
+
+# Constraint: UniqueKey:qty-3
+# Human readable:If a code for the unit is present, the system SHALL also be present
+# XPath:not(exists(f:code)) or exists(f:system)
+# Constraint:code.empty() or system.exists()
+# ShEx:
+
+ NOT { fhir:code {fhir:v .} }  OR { fhir:system . }
+
+)
+ 
+
+# Content in a format defined elsewhere
+<Attachment> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Attachment];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:contentType @<Attachment.contentType>?;  # Mime type of the content, with 
+                                            # charset etc. 
+    fhir:language @<Attachment.language>?;  # Human language of the content 
+                                            # (BCP-47) 
+    fhir:data @<Attachment.data>?;          # Data inline, base64ed
+    fhir:url @<Attachment.url>?;            # Uri where the data can be found
+    fhir:size @<Attachment.size>?;          # Number of bytes of content (if url 
+                                            # provided) 
+    fhir:hash @<Attachment.hash>?;          # Hash of the data (sha-1, base64ed)
+    fhir:title @<Attachment.title>?;        # Label to display in place of the 
+                                            # data 
+    fhir:creation @<Attachment.creation>?;  # Date attachment was first created
+    fhir:height @<Attachment.height>?;      # Height of the image in pixels 
+                                            # (photo/video) 
+    fhir:width @<Attachment.width>?;        # Width of the image in pixels 
+                                            # (photo/video) 
+    fhir:frames @<Attachment.frames>?;      # Number of frames if > 1 (photo)
+    fhir:duration @<Attachment.duration>?;  # Length in seconds (audio / video)
+    fhir:pages @<Attachment.pages>?;        # Number of printed pages
+} AND (
+
+# Constraint: UniqueKey:att-1
+# Human readable:If the Attachment has data, it SHALL have a contentType
+# XPath:not(exists(f:data)) or exists(f:contentType)
+# Constraint:data.empty() or contentType.exists()
+# ShEx:
+
+ NOT { fhir:data {fhir:v .} }  OR { fhir:contentType . }
+
+)
+ 
+
+# Primitive Type integer
+<integer> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:integer];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v @<integer.value>?;               # Primitive value for integer
+}  
+
+# Primitive Type uri
+<uri> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:uri];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v @<uri.value>?;                   # Primitive value for uri
+}  
+
+# Primitive Type boolean
+<boolean> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:boolean];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v @<boolean.value>?;               # Primitive value for boolean
+}  
+
+# A reference to a code defined by a terminology system
+<Coding> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Coding];
+    fhir:nodeRole [fhir:treeRoot]?;
+    a NONLITERAL?;
+    fhir:system @<Coding.system>?;          # Identity of the terminology system
+    fhir:version @<Coding.version>?;        # Version of the system - if relevant
+    fhir:code @<Coding.code>?;              # Symbol in syntax defined by the 
+                                            # system 
+    fhir:display @<Coding.display>?;        # Representation defined by the 
+                                            # system 
+    fhir:userSelected @<Coding.userSelected>?;  # If this coding was chosen directly 
+                                            # by the user 
+}  
+
+# Primitive Type time
+<time> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:time];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v @<time.value>?;                  # Primitive value for time
+}  
+
+# Primitive Type decimal
+<decimal> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:decimal];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v @<decimal.value>?;               # Primitive value for decimal
+}  
+
+#---------------------- Cardinality Types (OneOrMore) -------------------
+
+<OneOrMore_Questionnaire.identifier> CLOSED {
+    rdf:first @<Questionnaire.identifier>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Questionnaire.identifier> 
+}
+
+<OneOrMore_Questionnaire.derivedFrom> CLOSED {
+    rdf:first @<Questionnaire.derivedFrom>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Questionnaire.derivedFrom> 
+}
+
+<OneOrMore_Questionnaire.subjectType> CLOSED {
+    rdf:first @<Questionnaire.subjectType>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Questionnaire.subjectType> 
+}
+
+<OneOrMore_Questionnaire.contact> CLOSED {
+    rdf:first @<Questionnaire.contact>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Questionnaire.contact> 
+}
+
+<OneOrMore_Questionnaire.useContext> CLOSED {
+    rdf:first @<Questionnaire.useContext>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Questionnaire.useContext> 
+}
+
+<OneOrMore_Questionnaire.jurisdiction> CLOSED {
+    rdf:first @<Questionnaire.jurisdiction>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Questionnaire.jurisdiction> 
+}
+
+<OneOrMore_Questionnaire.code> CLOSED {
+    rdf:first @<Questionnaire.code>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Questionnaire.code> 
+}
+
+<OneOrMore_Questionnaire.item> CLOSED {
+    rdf:first @<Questionnaire.item>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Questionnaire.item> 
+}
+
+<OneOrMore_Questionnaire.item.code> CLOSED {
+    rdf:first @<Questionnaire.item.code>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Questionnaire.item.code> 
+}
+
+<OneOrMore_Questionnaire.item.enableWhen> CLOSED {
+    rdf:first @<Questionnaire.item.enableWhen>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Questionnaire.item.enableWhen> 
+}
+
+<OneOrMore_Questionnaire.item.answerOption> CLOSED {
+    rdf:first @<Questionnaire.item.answerOption>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Questionnaire.item.answerOption> 
+}
+
+<OneOrMore_Questionnaire.item.initial> CLOSED {
+    rdf:first @<Questionnaire.item.initial>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Questionnaire.item.initial> 
+}
+
+#---------------------- Reference Types -------------------
+
+#---------------------- Value Sets ------------------------

@@ -1,0 +1,26 @@
+﻿PREFIX fhir: <http://hl7.org/fhir/> 
+PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+BASE <http://hl7.org/fhir/shape/>
+
+
+# Mother(s) & Father(s) - genetic & other
+<family-member-history-genetics-parent> EXTENDS @<Extension> CLOSED {   
+
+    a [fhir:family-member-history-genetics-parent];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:type @<Extension>; 
+    fhir:reference @<Extension>; 
+    fhir:v @<Extension.url> AND
+    	{fhir:value ["http://hl7.org/fhir/StructureDefinition/family-member-history-genetics-parent"]}; 
+    ^fhir:extension { a [fhir:FamilyMemberHistory]
+    		}
+}  
+
+#---------------------- Data Types -------------------
+
+#---------------------- Cardinality Types (OneOrMore) -------------------
+
+#---------------------- Reference Types -------------------
+
+#---------------------- Value Sets ------------------------

@@ -1,0 +1,84 @@
+﻿PREFIX fhir: <http://hl7.org/fhir/> 
+PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+BASE <http://hl7.org/fhir/shape/>
+
+
+start=@<VisionPrescription> AND {fhir:nodeRole [fhir:treeRoot]}
+
+
+# Prescription for vision correction products for a patient
+<VisionPrescription> EXTENDS @<DomainResource> CLOSED {   
+
+    a [fhir:VisionPrescription];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:identifier @<OneOrMore_VisionPrescription.identifier>?;  # Business Identifier for vision 
+                                            # prescription 
+    fhir:status @<VisionPrescription.status>;  # active | cancelled | draft | 
+                                            # entered-in-error 
+    fhir:created @<VisionPrescription.created>;  # Response creation date
+    fhir:patient @<VisionPrescription.patient> AND {fhir:link 
+    			@<Patient> };  # Who prescription is for
+    fhir:encounter @<VisionPrescription.encounter> AND {fhir:link 
+    			@<Encounter> }?;  # Created during encounter / 
+                                            # admission / stay 
+    fhir:dateWritten @<VisionPrescription.dateWritten>;  # When prescription was authorized
+    fhir:prescriber @<VisionPrescription.prescriber> AND {fhir:link 
+    			@<Practitioner> OR 
+    			@<PractitionerRole> };  # Who authorized the vision 
+                                            # prescription 
+    fhir:lensSpecification @<OneOrMore_VisionPrescription.lensSpecification>;  # Vision lens authorization
+}  
+
+# Eye alignment compensation
+<VisionPrescription.lensSpecification.prism> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:amount @<VisionPrescription.lensSpecification.prism.amount>;  # Amount of adjustment
+    fhir:base @<VisionPrescription.lensSpecification.prism.base>;  # up | down | in | out
+}  
+
+# Vision lens authorization
+<VisionPrescription.lensSpecification> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:product @<VisionPrescription.lensSpecification.product>;  # Product to be supplied
+    fhir:eye @<VisionPrescription.lensSpecification.eye>;  # right | left
+    fhir:sphere @<VisionPrescription.lensSpecification.sphere>?;  # Power of the lens
+    fhir:cylinder @<VisionPrescription.lensSpecification.cylinder>?;  # Lens power for astigmatism
+    fhir:axis @<VisionPrescription.lensSpecification.axis>?;  # Lens meridian which contain no 
+                                            # power for astigmatism 
+    fhir:prism @<OneOrMore_VisionPrescription.lensSpecification.prism>?;  # Eye alignment compensation
+    fhir:add @<VisionPrescription.lensSpecification.add>?;  # Added power for multifocal levels
+    fhir:power @<VisionPrescription.lensSpecification.power>?;  # Contact lens power
+    fhir:backCurve @<VisionPrescription.lensSpecification.backCurve>?;  # Contact lens back curvature
+    fhir:diameter @<VisionPrescription.lensSpecification.diameter>?;  # Contact lens diameter
+    fhir:duration @<VisionPrescription.lensSpecification.duration>?;  # Lens wear duration
+    fhir:color @<VisionPrescription.lensSpecification.color>?;  # Color required
+    fhir:brand @<VisionPrescription.lensSpecification.brand>?;  # Brand required
+    fhir:note @<OneOrMore_VisionPrescription.lensSpecification.note>?;  # Notes for coatings
+}  
+
+#---------------------- Data Types -------------------
+
+#---------------------- Cardinality Types (OneOrMore) -------------------
+
+<OneOrMore_VisionPrescription.identifier> CLOSED {
+    rdf:first @<VisionPrescription.identifier>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_VisionPrescription.identifier> 
+}
+
+<OneOrMore_VisionPrescription.lensSpecification> CLOSED {
+    rdf:first @<VisionPrescription.lensSpecification>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_VisionPrescription.lensSpecification> 
+}
+
+<OneOrMore_VisionPrescription.lensSpecification.prism> CLOSED {
+    rdf:first @<VisionPrescription.lensSpecification.prism>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_VisionPrescription.lensSpecification.prism> 
+}
+
+<OneOrMore_VisionPrescription.lensSpecification.note> CLOSED {
+    rdf:first @<VisionPrescription.lensSpecification.note>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_VisionPrescription.lensSpecification.note> 
+}
+
+#---------------------- Reference Types -------------------
+
+#---------------------- Value Sets ------------------------

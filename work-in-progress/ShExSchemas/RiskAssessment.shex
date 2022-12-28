@@ -1,0 +1,193 @@
+﻿PREFIX fhir: <http://hl7.org/fhir/> 
+PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+BASE <http://hl7.org/fhir/shape/>
+
+
+start=@<RiskAssessment> AND {fhir:nodeRole [fhir:treeRoot]}
+
+
+# Potential outcomes for a subject with likelihood
+<RiskAssessment> EXTENDS @<DomainResource> CLOSED {   
+
+    a [fhir:RiskAssessment];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:identifier @<OneOrMore_RiskAssessment.identifier>?;  # Unique identifier for the 
+                                            # assessment 
+    fhir:basedOn @<RiskAssessment.basedOn> AND {fhir:link 
+    			@<Resource> }?;  # Request fulfilled by this 
+                                            # assessment 
+    fhir:parent @<RiskAssessment.parent> AND {fhir:link 
+    			@<Resource> }?;  # Part of this occurrence
+    fhir:status @<RiskAssessment.status>;   # registered | preliminary | final | 
+                                            # amended + 
+    fhir:method @<RiskAssessment.method>?;  # Evaluation mechanism
+    fhir:code @<RiskAssessment.code>?;      # Type of assessment
+    fhir:subject @<RiskAssessment.subject> AND {fhir:link 
+    			@<Group> OR 
+    			@<Patient> };  # Who/what does assessment apply to?
+    fhir:encounter @<RiskAssessment.encounter> AND {fhir:link 
+    			@<Encounter> }?;  # Where was assessment performed?
+    fhir:occurrence (@<dateTime>  OR 
+    			@<Period> )  AND { rdf:type IRI } ?;  # When was assessment made?
+    fhir:condition @<RiskAssessment.condition> AND {fhir:link 
+    			@<Condition> }?;  # Condition assessed
+    fhir:performer @<RiskAssessment.performer> AND {fhir:link 
+    			@<Device> OR 
+    			@<Patient> OR 
+    			@<Practitioner> OR 
+    			@<PractitionerRole> OR 
+    			@<RelatedPerson> }?;  # Who did assessment?
+    fhir:reason @<OneOrMore_RiskAssessment.reason>?;  # Why the assessment was necessary?
+    fhir:basis @<OneOrMore_RiskAssessment.basis_Resource>?;  # Information used in assessment
+    fhir:prediction @<OneOrMore_RiskAssessment.prediction>?;  # Outcome predicted
+    fhir:mitigation @<RiskAssessment.mitigation>?;  # How to reduce risk
+    fhir:note @<OneOrMore_RiskAssessment.note>?;  # Comments on the risk assessment
+} AND (
+
+# Constraint: UniqueKey:ras-2
+# Human readable:Must be <= 100
+# XPath:not(f:probabilityDecimal) or f:probabilityDecimal/@value <= 100
+# Constraint:probability is decimal implies (probability as decimal) <= 100
+# ShEx:
+
+({ fhir:probability a { fhir:decimal } }) AND (({ fhir:probability a { fhir:decimal } }) { fhir:v MaxInclusive 100 } )
+
+) AND (
+
+# Constraint: UniqueKey:ras-1
+# Human readable:low and high must be percentages, if present
+# XPath:(not(f:low) or f:low[f:code/@value='%' and f:system/@value='http://unitsofmeasure.org']) and (not(f:high) or f:high[f:code/@value='%' and f:system/@value='http://unitsofmeasure.org'])
+# Constraint:(low.empty() or ((low.code = '%') and (low.system = %ucum))) and (high.empty() or ((high.code = '%') and (high.system = %ucum)))
+# ShEx:
+
+( NOT { fhir:low {fhir:v .} }  OR (({ fhir:low.code } { fhir:v ['%'] } ) AND ({ fhir:low.system } { fhir:v ['http://unitsofmeasure.org'] } ))) AND ( NOT { fhir:high {fhir:v .} }  OR (({ fhir:high.code } { fhir:v ['%'] } ) AND ({ fhir:high.system } { fhir:v ['http://unitsofmeasure.org'] } )))
+
+)
+ 
+
+# Outcome predicted
+<RiskAssessment.prediction> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:outcome @<RiskAssessment.prediction.outcome>?;  # Possible outcome for the subject
+    fhir:probability (@<decimal>  OR 
+    			@<Range> )  AND { rdf:type IRI } ?;  # Likelihood of specified outcome
+    fhir:qualitativeRisk @<RiskAssessment.prediction.qualitativeRisk>?;  # Likelihood of specified outcome as 
+                                            # a qualitative value 
+    fhir:relativeRisk @<RiskAssessment.prediction.relativeRisk>?;  # Relative likelihood
+    fhir:when (@<Period>  OR 
+    			@<Range> )  AND { rdf:type IRI } ?;  # Timeframe or age range
+    fhir:rationale @<RiskAssessment.prediction.rationale>?;  # Explanation of prediction
+} AND (
+
+# Constraint: UniqueKey:ras-2
+# Human readable:Must be <= 100
+# XPath:not(f:probabilityDecimal) or f:probabilityDecimal/@value <= 100
+# Constraint:probability is decimal implies (probability as decimal) <= 100
+# ShEx:
+
+({ fhir:probability a { fhir:decimal } }) AND (({ fhir:probability a { fhir:decimal } }) { fhir:v MaxInclusive 100 } )
+
+) AND (
+
+# Constraint: UniqueKey:ras-1
+# Human readable:low and high must be percentages, if present
+# XPath:(not(f:low) or f:low[f:code/@value='%' and f:system/@value='http://unitsofmeasure.org']) and (not(f:high) or f:high[f:code/@value='%' and f:system/@value='http://unitsofmeasure.org'])
+# Constraint:(low.empty() or ((low.code = '%') and (low.system = %ucum))) and (high.empty() or ((high.code = '%') and (high.system = %ucum)))
+# ShEx:
+
+( NOT { fhir:low {fhir:v .} }  OR (({ fhir:low.code } { fhir:v ['%'] } ) AND ({ fhir:low.system } { fhir:v ['http://unitsofmeasure.org'] } ))) AND ( NOT { fhir:high {fhir:v .} }  OR (({ fhir:high.code } { fhir:v ['%'] } ) AND ({ fhir:high.system } { fhir:v ['http://unitsofmeasure.org'] } )))
+
+)
+ 
+
+#---------------------- Data Types -------------------
+
+# Primitive Type dateTime
+<dateTime> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:dateTime];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v @<dateTime.value>?;              # Primitive value for dateTime
+}  
+
+# Time range defined by start and end date/time
+<Period> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Period];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:start @<Period.start>?;            # Starting time with inclusive 
+                                            # boundary 
+    fhir:end @<Period.end>?;                # End time with inclusive boundary, 
+                                            # if not ongoing 
+} AND (
+
+# Constraint: UniqueKey:per-1
+# Human readable:If present, start SHALL have a lower or equal value than end
+# XPath:not(exists(f:start/@value)) or not(exists(f:end/@value)) or (xs:dateTime(f:start/@value) <= xs:dateTime(f:end/@value))
+# Constraint:start.hasValue().not() or end.hasValue().not() or (start <= end)
+# ShEx:
+
+ NOT { fhir:start  . } OR  NOT { fhir:end  . } OR ({ fhir:start { fhir:v MaxInclusive { fhir:end } }  })
+
+)
+ 
+
+# Primitive Type decimal
+<decimal> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:decimal];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v @<decimal.value>?;               # Primitive value for decimal
+}  
+
+# Set of values bounded by low and high
+<Range> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Range];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:low @<Range.low>?;                 # Low limit
+    fhir:high @<Range.high>?;               # High limit
+} AND (
+
+# Constraint: UniqueKey:rng-2
+# Human readable:If present, low SHALL have a lower value than high
+# XPath:not(exists(f:low/f:value/@value)) or not(exists(f:high/f:value/@value)) or (number(f:low/f:value/@value) <= number(f:high/f:value/@value))
+# Constraint:low.value.empty() or high.value.empty() or (low <= high)
+# ShEx:
+
+ NOT { fhir:low fhir:value {fhir:v .} }  OR  NOT { fhir:high fhir:value {fhir:v .} }  OR ({ fhir:low { fhir:v MaxInclusive { fhir:high } }  })
+
+)
+ 
+
+#---------------------- Cardinality Types (OneOrMore) -------------------
+
+<OneOrMore_RiskAssessment.identifier> CLOSED {
+    rdf:first @<RiskAssessment.identifier>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_RiskAssessment.identifier> 
+}
+
+<OneOrMore_RiskAssessment.reason> CLOSED {
+    rdf:first @<RiskAssessment.reason>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_RiskAssessment.reason> 
+}
+
+<OneOrMore_RiskAssessment.basis_Resource> CLOSED {
+    rdf:first @<RiskAssessment.basis> AND {fhir:link 
+			@<Resource> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_RiskAssessment.basis_Resource> 
+}
+
+<OneOrMore_RiskAssessment.prediction> CLOSED {
+    rdf:first @<RiskAssessment.prediction>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_RiskAssessment.prediction> 
+}
+
+<OneOrMore_RiskAssessment.note> CLOSED {
+    rdf:first @<RiskAssessment.note>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_RiskAssessment.note> 
+}
+
+#---------------------- Reference Types -------------------
+
+#---------------------- Value Sets ------------------------

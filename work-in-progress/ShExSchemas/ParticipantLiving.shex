@@ -1,0 +1,36 @@
+﻿PREFIX fhir: <http://hl7.org/fhir/> 
+PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+BASE <http://hl7.org/fhir/shape/>
+
+
+# Participant Pattern
+<ParticipantLiving> CLOSED {   
+
+    a [fhir:ParticipantLiving];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:birthDate @<ParticipantLiving.birthDate>?;  # The date of birth for the 
+                                            # individual 
+    fhir:gender @<ParticipantLiving.gender>?;  # male | female | other | unknown
+    fhir:photo @<OneOrMore_ParticipantLiving.photo>?;  # Image of the participant
+    fhir:communication @<OneOrMore_ParticipantLiving.communication>?;  # The language which can be used to 
+                                            # communicate with the participant 
+}  
+
+#---------------------- Data Types -------------------
+
+#---------------------- Cardinality Types (OneOrMore) -------------------
+
+<OneOrMore_ParticipantLiving.photo> CLOSED {
+    rdf:first @<ParticipantLiving.photo>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ParticipantLiving.photo> 
+}
+
+<OneOrMore_ParticipantLiving.communication> CLOSED {
+    rdf:first @<ParticipantLiving.communication>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ParticipantLiving.communication> 
+}
+
+#---------------------- Reference Types -------------------
+
+#---------------------- Value Sets ------------------------

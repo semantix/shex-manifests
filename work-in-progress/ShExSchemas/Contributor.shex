@@ -1,0 +1,29 @@
+﻿PREFIX fhir: <http://hl7.org/fhir/> 
+PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+BASE <http://hl7.org/fhir/shape/>
+
+
+# Contributor information
+<Contributor> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Contributor];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:type @<Contributor.type>;          # author | editor | reviewer | 
+                                            # endorser 
+    fhir:name @<Contributor.name>;          # Who contributed the content
+    fhir:contact @<OneOrMore_Contributor.contact>?;  # Contact details of the contributor
+}  
+
+#---------------------- Data Types -------------------
+
+#---------------------- Cardinality Types (OneOrMore) -------------------
+
+<OneOrMore_Contributor.contact> CLOSED {
+    rdf:first @<Contributor.contact>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Contributor.contact> 
+}
+
+#---------------------- Reference Types -------------------
+
+#---------------------- Value Sets ------------------------

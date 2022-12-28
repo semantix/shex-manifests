@@ -1,0 +1,45 @@
+﻿PREFIX fhir: <http://hl7.org/fhir/> 
+PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+BASE <http://hl7.org/fhir/shape/>
+
+
+# Shareable Pattern
+<Shareable> CLOSED {   
+
+    a [fhir:Shareable];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:url @<Shareable.url>;              # Canonical identifier for this 
+                                            # {{title}}, represented as a URI 
+                                            # (globally unique) 
+    fhir:version @<Shareable.version>;      # Business version of the {{title}}
+    fhir:status @<Shareable.status>;        # draft | active | retired | unknown
+    fhir:experimental @<Shareable.experimental>?;  # For testing purposes, not real 
+                                            # usage 
+    fhir:publisher @<Shareable.publisher>;  # Name of the publisher (or steward) 
+                                            # (organization or individual) 
+    fhir:description @<Shareable.description>;  # Natural language description of 
+                                            # the {{title}} 
+    fhir:knowledgeCapability @<OneOrMore_Shareable.knowledgeCapability>?;  # shareable | publishable | 
+                                            # computable | executable 
+    fhir:knowledgeRepresentationLevel @<OneOrMore_Shareable.knowledgeRepresentationLevel>?;  # narrative | semi-structured | 
+                                            # structured | executable 
+}  
+
+#---------------------- Data Types -------------------
+
+#---------------------- Cardinality Types (OneOrMore) -------------------
+
+<OneOrMore_Shareable.knowledgeCapability> CLOSED {
+    rdf:first @<Shareable.knowledgeCapability>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Shareable.knowledgeCapability> 
+}
+
+<OneOrMore_Shareable.knowledgeRepresentationLevel> CLOSED {
+    rdf:first @<Shareable.knowledgeRepresentationLevel>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Shareable.knowledgeRepresentationLevel> 
+}
+
+#---------------------- Reference Types -------------------
+
+#---------------------- Value Sets ------------------------

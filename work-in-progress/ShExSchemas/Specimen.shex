@@ -1,0 +1,220 @@
+﻿PREFIX fhir: <http://hl7.org/fhir/> 
+PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+BASE <http://hl7.org/fhir/shape/>
+
+
+start=@<Specimen> AND {fhir:nodeRole [fhir:treeRoot]}
+
+
+# Sample for analysis
+<Specimen> EXTENDS @<DomainResource> CLOSED {   
+
+    a [fhir:Specimen];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:identifier @<OneOrMore_Specimen.identifier>?;  # External Identifier
+    fhir:accessionIdentifier @<Specimen.accessionIdentifier>?;  # Identifier assigned by the lab
+    fhir:status @<Specimen.status>?;        # available | unavailable | 
+                                            # unsatisfactory | entered-in-error 
+    fhir:type @<Specimen.type>?;            # Kind of material that forms the 
+                                            # specimen 
+    fhir:subject @<Specimen.subject> AND {fhir:link 
+    			@<BiologicallyDerivedProduct> OR 
+    			@<Device> OR 
+    			@<Group> OR 
+    			@<Location> OR 
+    			@<Patient> OR 
+    			@<Substance> }?;  # Where the specimen came from. This 
+                                            # may be from patient(s), from a 
+                                            # location (e.g., the source of an 
+                                            # environmental sample), or a 
+                                            # sampling of a substance, a 
+                                            # biologically-derived product, or a 
+                                            # device 
+    fhir:receivedTime @<Specimen.receivedTime>?;  # The time when specimen is received 
+                                            # by the testing laboratory 
+    fhir:parent @<OneOrMore_Specimen.parent_Specimen>?;  # Specimen from which this specimen 
+                                            # originated 
+    fhir:request @<OneOrMore_Specimen.request_ServiceRequest>?;  # Why the specimen was collected
+    fhir:feature @<OneOrMore_Specimen.feature>?;  # The physical feature of a specimen 
+    fhir:collection @<Specimen.collection>?;  # Collection details
+    fhir:processing @<OneOrMore_Specimen.processing>?;  # Processing and processing step 
+                                            # details 
+    fhir:container @<OneOrMore_Specimen.container>?;  # Direct container of specimen 
+                                            # (tube/slide, etc.) 
+    fhir:condition @<OneOrMore_Specimen.condition>?;  # State of the specimen
+    fhir:note @<OneOrMore_Specimen.note>?;  # Comments
+}  
+
+# Collection details
+<Specimen.collection> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:collector @<Specimen.collection.collector> AND {fhir:link 
+    			@<Patient> OR 
+    			@<Practitioner> OR 
+    			@<PractitionerRole> OR 
+    			@<RelatedPerson> }?;  # Who collected the specimen
+    fhir:collected (@<dateTime>  OR 
+    			@<Period> )  AND { rdf:type IRI } ?;  # Collection time
+    fhir:duration @<Specimen.collection.duration>?;  # How long it took to collect 
+                                            # specimen 
+    fhir:quantity @<Specimen.collection.quantity>?;  # The quantity of specimen collected
+    fhir:method @<Specimen.collection.method>?;  # Technique used to perform 
+                                            # collection 
+    fhir:device @<Specimen.collection.device>?;  # Device used to perform collection
+    fhir:procedure @<Specimen.collection.procedure> AND {fhir:link 
+    			@<Procedure> }?;  # The procedure that collects the 
+                                            # specimen 
+    fhir:bodySite @<Specimen.collection.bodySite>?;  # Anatomical collection site
+    fhir:fastingStatus (@<CodeableConcept>  OR 
+    			@<Duration> )  AND { rdf:type IRI } ?;  # Whether or how long patient 
+                                            # abstained from food and/or drink 
+}  
+
+# Direct container of specimen (tube/slide, etc.)
+<Specimen.container> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:device @<Specimen.container.device> AND {fhir:link 
+    			@<Device> };  # Device resource for the container
+    fhir:location @<Specimen.container.location> AND {fhir:link 
+    			@<Location> }?;  # Where the container is
+    fhir:specimenQuantity @<Specimen.container.specimenQuantity>?;  # Quantity of specimen within 
+                                            # container 
+}  
+
+# The physical feature of a specimen 
+<Specimen.feature> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:type @<Specimen.feature.type>;     # Highlighted feature
+    fhir:description @<Specimen.feature.description>;  # Information about the feature
+}  
+
+# Processing and processing step details
+<Specimen.processing> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:description @<Specimen.processing.description>?;  # Textual description of procedure
+    fhir:method @<Specimen.processing.method>?;  # Indicates the treatment step  
+                                            # applied to the specimen 
+    fhir:additive @<OneOrMore_Specimen.processing.additive_Substance>?;  # Material used in the processing 
+                                            # step 
+    fhir:time (@<dateTime>  OR 
+    			@<Period> )  AND { rdf:type IRI } ?;  # Date and time of specimen 
+                                            # processing 
+}  
+
+#---------------------- Data Types -------------------
+
+# Primitive Type dateTime
+<dateTime> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:dateTime];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v @<dateTime.value>?;              # Primitive value for dateTime
+}  
+
+# Time range defined by start and end date/time
+<Period> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Period];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:start @<Period.start>?;            # Starting time with inclusive 
+                                            # boundary 
+    fhir:end @<Period.end>?;                # End time with inclusive boundary, 
+                                            # if not ongoing 
+} AND (
+
+# Constraint: UniqueKey:per-1
+# Human readable:If present, start SHALL have a lower or equal value than end
+# XPath:not(exists(f:start/@value)) or not(exists(f:end/@value)) or (xs:dateTime(f:start/@value) <= xs:dateTime(f:end/@value))
+# Constraint:start.hasValue().not() or end.hasValue().not() or (start <= end)
+# ShEx:
+
+ NOT { fhir:start  . } OR  NOT { fhir:end  . } OR ({ fhir:start { fhir:v MaxInclusive { fhir:end } }  })
+
+)
+ 
+
+# A length of time
+<Duration> EXTENDS @<Quantity> CLOSED {   
+
+    a [fhir:Duration];
+    fhir:nodeRole [fhir:treeRoot]?;
+} AND (
+
+# Constraint: UniqueKey:drt-1
+# Human readable:There SHALL be a code if there is a value and it SHALL be an expression of time.  If system is present, it SHALL be UCUM.
+# XPath:(f:code or not(f:value)) and (not(exists(f:system)) or f:system/@value='http://unitsofmeasure.org')
+# Constraint:code.exists() implies ((system = %ucum) and value.exists())
+# ShEx:
+
+{ fhir:code . } AND (({ fhir:system { fhir:v ['http://unitsofmeasure.org'] }  }) AND { fhir:value . })
+
+)
+ 
+
+# Concept - reference to a terminology or just  text
+<CodeableConcept> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:CodeableConcept];
+    fhir:nodeRole [fhir:treeRoot]?;
+    a NONLITERAL*;
+    fhir:coding @<OneOrMore_CodeableConcept.coding>?;  # Code defined by a terminology 
+                                            # system 
+    fhir:text @<CodeableConcept.text>?;     # Plain text representation of the 
+                                            # concept 
+}  
+
+#---------------------- Cardinality Types (OneOrMore) -------------------
+
+<OneOrMore_Specimen.identifier> CLOSED {
+    rdf:first @<Specimen.identifier>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Specimen.identifier> 
+}
+
+<OneOrMore_Specimen.parent_Specimen> CLOSED {
+    rdf:first @<Specimen.parent> AND {fhir:link 
+			@<Specimen> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Specimen.parent_Specimen> 
+}
+
+<OneOrMore_Specimen.request_ServiceRequest> CLOSED {
+    rdf:first @<Specimen.request> AND {fhir:link 
+			@<ServiceRequest> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Specimen.request_ServiceRequest> 
+}
+
+<OneOrMore_Specimen.feature> CLOSED {
+    rdf:first @<Specimen.feature>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Specimen.feature> 
+}
+
+<OneOrMore_Specimen.processing> CLOSED {
+    rdf:first @<Specimen.processing>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Specimen.processing> 
+}
+
+<OneOrMore_Specimen.container> CLOSED {
+    rdf:first @<Specimen.container>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Specimen.container> 
+}
+
+<OneOrMore_Specimen.condition> CLOSED {
+    rdf:first @<Specimen.condition>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Specimen.condition> 
+}
+
+<OneOrMore_Specimen.note> CLOSED {
+    rdf:first @<Specimen.note>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Specimen.note> 
+}
+
+<OneOrMore_Specimen.processing.additive_Substance> CLOSED {
+    rdf:first @<Specimen.processing.additive> AND {fhir:link 
+			@<Substance> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Specimen.processing.additive_Substance> 
+}
+
+<OneOrMore_CodeableConcept.coding> CLOSED {
+    rdf:first @<CodeableConcept.coding>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_CodeableConcept.coding> 
+}
+
+#---------------------- Reference Types -------------------
+
+#---------------------- Value Sets ------------------------

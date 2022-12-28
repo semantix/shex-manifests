@@ -1,0 +1,53 @@
+﻿PREFIX fhir: <http://hl7.org/fhir/> 
+PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+BASE <http://hl7.org/fhir/shape/>
+
+
+start=@<PaymentNotice> AND {fhir:nodeRole [fhir:treeRoot]}
+
+
+# PaymentNotice request
+<PaymentNotice> EXTENDS @<DomainResource> CLOSED {   
+
+    a [fhir:PaymentNotice];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:identifier @<OneOrMore_PaymentNotice.identifier>?;  # Business Identifier for the 
+                                            # payment noctice 
+    fhir:status @<PaymentNotice.status>;    # active | cancelled | draft | 
+                                            # entered-in-error 
+    fhir:request @<PaymentNotice.request> AND {fhir:link 
+    			@<Resource> }?;  # Request reference
+    fhir:response @<PaymentNotice.response> AND {fhir:link 
+    			@<Resource> }?;  # Response reference
+    fhir:created @<PaymentNotice.created>;  # Creation date
+    fhir:provider @<PaymentNotice.provider> AND {fhir:link 
+    			@<Organization> OR 
+    			@<Practitioner> OR 
+    			@<PractitionerRole> }?;  # Responsible practitioner
+    fhir:payment @<PaymentNotice.payment> AND {fhir:link 
+    			@<PaymentReconciliation> };  # Payment reference
+    fhir:paymentDate @<PaymentNotice.paymentDate>?;  # Payment or clearing date
+    fhir:payee @<PaymentNotice.payee> AND {fhir:link 
+    			@<Organization> OR 
+    			@<Practitioner> OR 
+    			@<PractitionerRole> }?;  # Party being paid
+    fhir:recipient @<PaymentNotice.recipient> AND {fhir:link 
+    			@<Organization> };  # Party being notified
+    fhir:amount @<PaymentNotice.amount>;    # Monetary amount of the payment
+    fhir:paymentStatus @<PaymentNotice.paymentStatus>?;  # Issued or cleared Status of the 
+                                            # payment 
+}  
+
+#---------------------- Data Types -------------------
+
+#---------------------- Cardinality Types (OneOrMore) -------------------
+
+<OneOrMore_PaymentNotice.identifier> CLOSED {
+    rdf:first @<PaymentNotice.identifier>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_PaymentNotice.identifier> 
+}
+
+#---------------------- Reference Types -------------------
+
+#---------------------- Value Sets ------------------------

@@ -1,0 +1,266 @@
+﻿PREFIX fhir: <http://hl7.org/fhir/> 
+PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+BASE <http://hl7.org/fhir/shape/>
+
+
+start=@<NutritionOrder> AND {fhir:nodeRole [fhir:treeRoot]}
+
+
+# Diet, formula or nutritional supplement request
+<NutritionOrder> EXTENDS @<DomainResource> CLOSED {   
+
+    a [fhir:NutritionOrder];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:identifier @<OneOrMore_NutritionOrder.identifier>?;  # Identifiers assigned to this order
+    fhir:instantiatesCanonical @<OneOrMore_NutritionOrder.instantiatesCanonical>?;  # Instantiates FHIR protocol or 
+                                            # definition 
+    fhir:instantiatesUri @<OneOrMore_NutritionOrder.instantiatesUri>?;  # Instantiates external protocol or 
+                                            # definition 
+    fhir:instantiates @<OneOrMore_NutritionOrder.instantiates>?;  # Instantiates protocol or definition
+    fhir:status @<NutritionOrder.status>;   # draft | active | on-hold | revoked 
+                                            # | completed | entered-in-error | 
+                                            # unknown 
+    fhir:intent @<NutritionOrder.intent>;   # proposal | plan | directive | 
+                                            # order | original-order | 
+                                            # reflex-order | filler-order | 
+                                            # instance-order | option 
+    fhir:patient @<NutritionOrder.patient> AND {fhir:link 
+    			@<Patient> };  # The person who requires the diet, 
+                                            # formula or nutritional supplement 
+    fhir:encounter @<NutritionOrder.encounter> AND {fhir:link 
+    			@<Encounter> }?;  # The encounter associated with this 
+                                            # nutrition order 
+    fhir:dateTime @<NutritionOrder.dateTime>;  # Date and time the nutrition order 
+                                            # was requested 
+    fhir:orderer @<NutritionOrder.orderer> AND {fhir:link 
+    			@<Practitioner> OR 
+    			@<PractitionerRole> }?;  # Who ordered the diet, formula or 
+                                            # nutritional supplement 
+    fhir:allergyIntolerance @<OneOrMore_NutritionOrder.allergyIntolerance_AllergyIntolerance>?;  # List of the patient's food and 
+                                            # nutrition-related allergies and 
+                                            # intolerances 
+    fhir:foodPreferenceModifier @<OneOrMore_NutritionOrder.foodPreferenceModifier>?;  # Order-specific modifier about the 
+                                            # type of food that should be given 
+    fhir:excludeFoodModifier @<OneOrMore_NutritionOrder.excludeFoodModifier>?;  # Order-specific modifier about the 
+                                            # type of food that should not be 
+                                            # given 
+    fhir:oralDiet @<NutritionOrder.oralDiet>?;  # Oral diet components
+    fhir:supplement @<OneOrMore_NutritionOrder.supplement>?;  # Supplement components
+    fhir:enteralFormula @<NutritionOrder.enteralFormula>?;  # Enteral formula components
+    fhir:note @<OneOrMore_NutritionOrder.note>?;  # Comments
+} AND (
+
+# Constraint: UniqueKey:nor-1
+# Human readable:Nutrition Order SHALL contain either Oral Diet , Supplement, or Enteral Formula class
+# XPath:exists(f:oralDiet) or exists(f:supplement) or exists(f:enteralFormula)
+# Constraint:oralDiet.exists() or supplement.exists() or enteralFormula.exists()
+# ShEx:
+
+{ fhir:oralDiet . } OR { fhir:supplement . } OR { fhir:enteralFormula . }
+
+)
+ 
+
+# Required  texture modifications
+<NutritionOrder.oralDiet.texture> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:modifier @<NutritionOrder.oralDiet.texture.modifier>?;  # Code to indicate how to alter the 
+                                            # texture of the foods, e.g. pureed 
+    fhir:foodType @<NutritionOrder.oralDiet.texture.foodType>?;  # Concepts that are used to identify 
+                                            # an entity that is ingested for 
+                                            # nutritional purposes 
+}  
+
+# Formula feeding instruction as structured data
+<NutritionOrder.enteralFormula.administration> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:schedule @<NutritionOrder.enteralFormula.administration.schedule>?;  # Scheduled frequency of enteral 
+                                            # feeding 
+    fhir:quantity @<NutritionOrder.enteralFormula.administration.quantity>?;  # The volume of formula to provide
+    fhir:rate (@<SimpleQuantity>  OR 
+    			@<Ratio> )  AND { rdf:type IRI } ?;  # Speed with which the formula is 
+                                            # provided per period of time 
+}  
+
+# Oral diet components
+<NutritionOrder.oralDiet> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:type @<OneOrMore_NutritionOrder.oralDiet.type>?;  # Type of oral diet or diet 
+                                            # restrictions that describe what 
+                                            # can be consumed orally 
+    fhir:schedule @<OneOrMore_NutritionOrder.oralDiet.schedule>?;  # Scheduled frequency of diet
+    fhir:nutrient @<OneOrMore_NutritionOrder.oralDiet.nutrient>?;  # Required  nutrient modifications
+    fhir:texture @<OneOrMore_NutritionOrder.oralDiet.texture>?;  # Required  texture modifications
+    fhir:fluidConsistencyType @<OneOrMore_NutritionOrder.oralDiet.fluidConsistencyType>?;  # The required consistency of fluids 
+                                            # and liquids provided to the 
+                                            # patient 
+    fhir:instruction @<NutritionOrder.oralDiet.instruction>?;  # Instructions or additional 
+                                            # information about the oral diet 
+}  
+
+# Required  nutrient modifications
+<NutritionOrder.oralDiet.nutrient> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:modifier @<NutritionOrder.oralDiet.nutrient.modifier>?;  # Type of nutrient that is being 
+                                            # modified 
+    fhir:amount @<NutritionOrder.oralDiet.nutrient.amount>?;  # Quantity of the specified nutrient
+}  
+
+# Supplement components
+<NutritionOrder.supplement> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:type @<NutritionOrder.supplement.type>?;  # Type of supplement product 
+                                            # requested 
+    fhir:productName @<NutritionOrder.supplement.productName>?;  # Product or brand name of the 
+                                            # nutritional supplement 
+    fhir:schedule @<OneOrMore_NutritionOrder.supplement.schedule>?;  # Scheduled frequency of supplement
+    fhir:quantity @<NutritionOrder.supplement.quantity>?;  # Amount of the nutritional 
+                                            # supplement 
+    fhir:instruction @<NutritionOrder.supplement.instruction>?;  # Instructions or additional 
+                                            # information about the oral 
+                                            # supplement 
+}  
+
+# Enteral formula components
+<NutritionOrder.enteralFormula> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:baseFormulaType @<NutritionOrder.enteralFormula.baseFormulaType>?;  # Type of enteral or infant formula
+    fhir:baseFormulaProductName @<NutritionOrder.enteralFormula.baseFormulaProductName>?;  # Product or brand name of the 
+                                            # enteral or infant formula 
+    fhir:additiveType @<NutritionOrder.enteralFormula.additiveType>?;  # Type of modular component to add 
+                                            # to the feeding 
+    fhir:additiveProductName @<NutritionOrder.enteralFormula.additiveProductName>?;  # Product or brand name of the 
+                                            # modular additive 
+    fhir:caloricDensity @<NutritionOrder.enteralFormula.caloricDensity>?;  # Amount of energy per specified 
+                                            # volume that is required 
+    fhir:routeofAdministration @<NutritionOrder.enteralFormula.routeofAdministration>?;  # How the formula should enter the 
+                                            # patient's gastrointestinal tract 
+    fhir:administration @<OneOrMore_NutritionOrder.enteralFormula.administration>?;  # Formula feeding instruction as 
+                                            # structured data 
+    fhir:maxVolumeToDeliver @<NutritionOrder.enteralFormula.maxVolumeToDeliver>?;  # Upper limit on formula volume per 
+                                            # unit of time 
+    fhir:administrationInstruction @<NutritionOrder.enteralFormula.administrationInstruction>?;  # Formula feeding instructions 
+                                            # expressed as text 
+}  
+
+#---------------------- Data Types -------------------
+
+# A fixed quantity (no comparator)
+<SimpleQuantity> EXTENDS @<Quantity> CLOSED {   
+
+    a [fhir:SimpleQuantity];
+    fhir:nodeRole [fhir:treeRoot]?;
+} AND (
+
+# Constraint: UniqueKey:sqty-1
+# Human readable:The comparator is not used on a SimpleQuantity
+# XPath:not(exists(f:comparator))
+# Constraint:comparator.empty()
+# ShEx:
+
+ NOT { fhir:comparator {fhir:v .} } 
+
+)
+ 
+
+# A ratio of two Quantity values - a numerator and a denominator
+<Ratio> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Ratio];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:numerator @<Ratio.numerator>?;     # Numerator value
+    fhir:denominator @<Ratio.denominator>?;  # Denominator value
+} AND (
+
+# Constraint: UniqueKey:rat-1
+# Human readable:Numerator and denominator SHALL both be present, or both are absent. If both are absent, there SHALL be some extension present
+# XPath:(count(f:numerator) = count(f:denominator)) and ((count(f:numerator) > 0) or (count(f:extension) > 0))
+# Constraint:(numerator.empty() xor denominator.exists()) and (numerator.exists() or extension.exists())
+# ShEx:
+
+(( NOT { fhir:numerator {fhir:v .} }  AND NOT  { fhir:denominator . }) OR ( NOT  NOT { fhir:numerator {fhir:v .} }  AND  { fhir:denominator . })) AND ({ fhir:numerator . } OR { fhir:extension . })
+
+)
+ 
+
+#---------------------- Cardinality Types (OneOrMore) -------------------
+
+<OneOrMore_NutritionOrder.identifier> CLOSED {
+    rdf:first @<NutritionOrder.identifier>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_NutritionOrder.identifier> 
+}
+
+<OneOrMore_NutritionOrder.instantiatesCanonical> CLOSED {
+    rdf:first @<NutritionOrder.instantiatesCanonical>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_NutritionOrder.instantiatesCanonical> 
+}
+
+<OneOrMore_NutritionOrder.instantiatesUri> CLOSED {
+    rdf:first @<NutritionOrder.instantiatesUri>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_NutritionOrder.instantiatesUri> 
+}
+
+<OneOrMore_NutritionOrder.instantiates> CLOSED {
+    rdf:first @<NutritionOrder.instantiates>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_NutritionOrder.instantiates> 
+}
+
+<OneOrMore_NutritionOrder.allergyIntolerance_AllergyIntolerance> CLOSED {
+    rdf:first @<NutritionOrder.allergyIntolerance> AND {fhir:link 
+			@<AllergyIntolerance> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_NutritionOrder.allergyIntolerance_AllergyIntolerance> 
+}
+
+<OneOrMore_NutritionOrder.foodPreferenceModifier> CLOSED {
+    rdf:first @<NutritionOrder.foodPreferenceModifier>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_NutritionOrder.foodPreferenceModifier> 
+}
+
+<OneOrMore_NutritionOrder.excludeFoodModifier> CLOSED {
+    rdf:first @<NutritionOrder.excludeFoodModifier>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_NutritionOrder.excludeFoodModifier> 
+}
+
+<OneOrMore_NutritionOrder.supplement> CLOSED {
+    rdf:first @<NutritionOrder.supplement>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_NutritionOrder.supplement> 
+}
+
+<OneOrMore_NutritionOrder.note> CLOSED {
+    rdf:first @<NutritionOrder.note>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_NutritionOrder.note> 
+}
+
+<OneOrMore_NutritionOrder.oralDiet.type> CLOSED {
+    rdf:first @<NutritionOrder.oralDiet.type>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_NutritionOrder.oralDiet.type> 
+}
+
+<OneOrMore_NutritionOrder.oralDiet.schedule> CLOSED {
+    rdf:first @<NutritionOrder.oralDiet.schedule>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_NutritionOrder.oralDiet.schedule> 
+}
+
+<OneOrMore_NutritionOrder.oralDiet.nutrient> CLOSED {
+    rdf:first @<NutritionOrder.oralDiet.nutrient>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_NutritionOrder.oralDiet.nutrient> 
+}
+
+<OneOrMore_NutritionOrder.oralDiet.texture> CLOSED {
+    rdf:first @<NutritionOrder.oralDiet.texture>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_NutritionOrder.oralDiet.texture> 
+}
+
+<OneOrMore_NutritionOrder.oralDiet.fluidConsistencyType> CLOSED {
+    rdf:first @<NutritionOrder.oralDiet.fluidConsistencyType>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_NutritionOrder.oralDiet.fluidConsistencyType> 
+}
+
+<OneOrMore_NutritionOrder.supplement.schedule> CLOSED {
+    rdf:first @<NutritionOrder.supplement.schedule>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_NutritionOrder.supplement.schedule> 
+}
+
+<OneOrMore_NutritionOrder.enteralFormula.administration> CLOSED {
+    rdf:first @<NutritionOrder.enteralFormula.administration>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_NutritionOrder.enteralFormula.administration> 
+}
+
+#---------------------- Reference Types -------------------
+
+#---------------------- Value Sets ------------------------

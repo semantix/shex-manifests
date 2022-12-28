@@ -1,0 +1,42 @@
+﻿PREFIX fhir: <http://hl7.org/fhir/> 
+PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+BASE <http://hl7.org/fhir/shape/>
+
+
+start=@<EnrollmentRequest> AND {fhir:nodeRole [fhir:treeRoot]}
+
+
+# Enroll in coverage
+<EnrollmentRequest> EXTENDS @<DomainResource> CLOSED {   
+
+    a [fhir:EnrollmentRequest];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:identifier @<OneOrMore_EnrollmentRequest.identifier>?;  # Business Identifier
+    fhir:status @<EnrollmentRequest.status>?;  # active | cancelled | draft | 
+                                            # entered-in-error 
+    fhir:created @<EnrollmentRequest.created>?;  # Creation date
+    fhir:insurer @<EnrollmentRequest.insurer> AND {fhir:link 
+    			@<Organization> }?;  # Target
+    fhir:provider @<EnrollmentRequest.provider> AND {fhir:link 
+    			@<Organization> OR 
+    			@<Practitioner> OR 
+    			@<PractitionerRole> }?;  # Responsible practitioner
+    fhir:candidate @<EnrollmentRequest.candidate> AND {fhir:link 
+    			@<Patient> }?;  # The subject to be enrolled
+    fhir:coverage @<EnrollmentRequest.coverage> AND {fhir:link 
+    			@<Coverage> }?;  # Insurance information
+}  
+
+#---------------------- Data Types -------------------
+
+#---------------------- Cardinality Types (OneOrMore) -------------------
+
+<OneOrMore_EnrollmentRequest.identifier> CLOSED {
+    rdf:first @<EnrollmentRequest.identifier>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_EnrollmentRequest.identifier> 
+}
+
+#---------------------- Reference Types -------------------
+
+#---------------------- Value Sets ------------------------

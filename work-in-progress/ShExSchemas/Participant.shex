@@ -1,0 +1,29 @@
+﻿PREFIX fhir: <http://hl7.org/fhir/> 
+PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+BASE <http://hl7.org/fhir/shape/>
+
+
+# Participant Pattern
+<Participant> CLOSED {   
+
+    a [fhir:Participant];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:identifier @<OneOrMore_Participant.identifier>?;  # Business Identifier for participant
+    fhir:active @<Participant.active>?;     # Whether the participant is 
+                                            # currently active 
+    fhir:name @<Participant.name>?;         # A name for the participant
+}  
+
+#---------------------- Data Types -------------------
+
+#---------------------- Cardinality Types (OneOrMore) -------------------
+
+<OneOrMore_Participant.identifier> CLOSED {
+    rdf:first @<Participant.identifier>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Participant.identifier> 
+}
+
+#---------------------- Reference Types -------------------
+
+#---------------------- Value Sets ------------------------

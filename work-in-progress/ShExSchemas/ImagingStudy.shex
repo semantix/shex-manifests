@@ -1,0 +1,171 @@
+﻿PREFIX fhir: <http://hl7.org/fhir/> 
+PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+BASE <http://hl7.org/fhir/shape/>
+
+
+start=@<ImagingStudy> AND {fhir:nodeRole [fhir:treeRoot]}
+
+
+# A set of images produced in single study (one or more series of references images)
+<ImagingStudy> EXTENDS @<DomainResource> CLOSED {   
+
+    a [fhir:ImagingStudy];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:identifier @<OneOrMore_ImagingStudy.identifier>?;  # Identifiers for the whole study
+    fhir:status @<ImagingStudy.status>;     # registered | available | cancelled 
+                                            # | entered-in-error | unknown 
+    fhir:modality @<OneOrMore_ImagingStudy.modality>?;  # All of the distinct values for 
+                                            # series' modalities 
+    fhir:subject @<ImagingStudy.subject> AND {fhir:link 
+    			@<Device> OR 
+    			@<Group> OR 
+    			@<Patient> };  # Who or what is the subject of the 
+                                            # study 
+    fhir:encounter @<ImagingStudy.encounter> AND {fhir:link 
+    			@<Encounter> }?;  # Encounter with which this imaging 
+                                            # study is associated 
+    fhir:started @<ImagingStudy.started>?;  # When the study was started
+    fhir:basedOn @<OneOrMore_ImagingStudy.basedOn_Appointment_OR_AppointmentResponse_OR_CarePlan_OR_ServiceRequest_OR_Task>?;  # Request fulfilled
+    fhir:referrer @<ImagingStudy.referrer> AND {fhir:link 
+    			@<Practitioner> OR 
+    			@<PractitionerRole> }?;  # Referring physician
+    fhir:interpreter @<OneOrMore_ImagingStudy.interpreter_Practitioner_OR_PractitionerRole>?;  # Who interpreted images
+    fhir:endpoint @<OneOrMore_ImagingStudy.endpoint_Endpoint>?;  # Study access endpoint
+    fhir:numberOfSeries @<ImagingStudy.numberOfSeries>?;  # Number of Study Related Series
+    fhir:numberOfInstances @<ImagingStudy.numberOfInstances>?;  # Number of Study Related Instances
+    fhir:procedure @<OneOrMore_ImagingStudy.procedure>?;  # The performed procedure or code
+    fhir:location @<ImagingStudy.location> AND {fhir:link 
+    			@<Location> }?;  # Where ImagingStudy occurred
+    fhir:reason @<OneOrMore_ImagingStudy.reason>?;  # Why the study was requested / 
+                                            # performed 
+    fhir:note @<OneOrMore_ImagingStudy.note>?;  # User-defined comments
+    fhir:description @<ImagingStudy.description>?;  # Institution-generated description
+    fhir:series @<OneOrMore_ImagingStudy.series>?;  # Each study has one or more series 
+                                            # of instances 
+}  
+
+# Each study has one or more series of instances
+<ImagingStudy.series> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:uid @<ImagingStudy.series.uid>;    # DICOM Series Instance UID for the 
+                                            # series 
+    fhir:number @<ImagingStudy.series.number>?;  # Numeric identifier of this series
+    fhir:modality @<ImagingStudy.series.modality>;  # The modality used for this series
+    fhir:description @<ImagingStudy.series.description>?;  # A short human readable summary of 
+                                            # the series 
+    fhir:numberOfInstances @<ImagingStudy.series.numberOfInstances>?;  # Number of Series Related Instances
+    fhir:endpoint @<OneOrMore_ImagingStudy.series.endpoint_Endpoint>?;  # Series access endpoint
+    fhir:bodySite @<ImagingStudy.series.bodySite>?;  # Body part examined
+    fhir:laterality @<ImagingStudy.series.laterality>?;  # Body part laterality
+    fhir:specimen @<OneOrMore_ImagingStudy.series.specimen_Specimen>?;  # Specimen imaged
+    fhir:started @<ImagingStudy.series.started>?;  # When the series started
+    fhir:performer @<OneOrMore_ImagingStudy.series.performer>?;  # Who performed the series
+    fhir:instance @<OneOrMore_ImagingStudy.series.instance>?;  # A single SOP instance from the 
+                                            # series 
+}  
+
+# Who performed the series
+<ImagingStudy.series.performer> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:function @<ImagingStudy.series.performer.function>?;  # Type of performance
+    fhir:actor @<ImagingStudy.series.performer.actor> AND {fhir:link 
+    			@<CareTeam> OR 
+    			@<Device> OR 
+    			@<HealthcareService> OR 
+    			@<Organization> OR 
+    			@<Patient> OR 
+    			@<Practitioner> OR 
+    			@<PractitionerRole> OR 
+    			@<RelatedPerson> };  # Who performed the series
+}  
+
+# A single SOP instance from the series
+<ImagingStudy.series.instance> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:uid @<ImagingStudy.series.instance.uid>;  # DICOM SOP Instance UID
+    fhir:sopClass @<ImagingStudy.series.instance.sopClass>;  # DICOM class type
+    fhir:number @<ImagingStudy.series.instance.number>?;  # The number of this instance in the 
+                                            # series 
+    fhir:title @<ImagingStudy.series.instance.title>?;  # Description of instance
+}  
+
+#---------------------- Data Types -------------------
+
+#---------------------- Cardinality Types (OneOrMore) -------------------
+
+<OneOrMore_ImagingStudy.identifier> CLOSED {
+    rdf:first @<ImagingStudy.identifier>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ImagingStudy.identifier> 
+}
+
+<OneOrMore_ImagingStudy.modality> CLOSED {
+    rdf:first @<ImagingStudy.modality>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ImagingStudy.modality> 
+}
+
+<OneOrMore_ImagingStudy.basedOn_Appointment_OR_AppointmentResponse_OR_CarePlan_OR_ServiceRequest_OR_Task> CLOSED {
+    rdf:first @<ImagingStudy.basedOn> AND {fhir:link 
+			@<Appointment> OR 
+			@<AppointmentResponse> OR 
+			@<CarePlan> OR 
+			@<ServiceRequest> OR 
+			@<Task> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ImagingStudy.basedOn_Appointment_OR_AppointmentResponse_OR_CarePlan_OR_ServiceRequest_OR_Task> 
+}
+
+<OneOrMore_ImagingStudy.interpreter_Practitioner_OR_PractitionerRole> CLOSED {
+    rdf:first @<ImagingStudy.interpreter> AND {fhir:link 
+			@<Practitioner> OR 
+			@<PractitionerRole> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ImagingStudy.interpreter_Practitioner_OR_PractitionerRole> 
+}
+
+<OneOrMore_ImagingStudy.endpoint_Endpoint> CLOSED {
+    rdf:first @<ImagingStudy.endpoint> AND {fhir:link 
+			@<Endpoint> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ImagingStudy.endpoint_Endpoint> 
+}
+
+<OneOrMore_ImagingStudy.procedure> CLOSED {
+    rdf:first @<ImagingStudy.procedure>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ImagingStudy.procedure> 
+}
+
+<OneOrMore_ImagingStudy.reason> CLOSED {
+    rdf:first @<ImagingStudy.reason>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ImagingStudy.reason> 
+}
+
+<OneOrMore_ImagingStudy.note> CLOSED {
+    rdf:first @<ImagingStudy.note>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ImagingStudy.note> 
+}
+
+<OneOrMore_ImagingStudy.series> CLOSED {
+    rdf:first @<ImagingStudy.series>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ImagingStudy.series> 
+}
+
+<OneOrMore_ImagingStudy.series.endpoint_Endpoint> CLOSED {
+    rdf:first @<ImagingStudy.series.endpoint> AND {fhir:link 
+			@<Endpoint> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ImagingStudy.series.endpoint_Endpoint> 
+}
+
+<OneOrMore_ImagingStudy.series.specimen_Specimen> CLOSED {
+    rdf:first @<ImagingStudy.series.specimen> AND {fhir:link 
+			@<Specimen> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ImagingStudy.series.specimen_Specimen> 
+}
+
+<OneOrMore_ImagingStudy.series.performer> CLOSED {
+    rdf:first @<ImagingStudy.series.performer>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ImagingStudy.series.performer> 
+}
+
+<OneOrMore_ImagingStudy.series.instance> CLOSED {
+    rdf:first @<ImagingStudy.series.instance>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ImagingStudy.series.instance> 
+}
+
+#---------------------- Reference Types -------------------
+
+#---------------------- Value Sets ------------------------

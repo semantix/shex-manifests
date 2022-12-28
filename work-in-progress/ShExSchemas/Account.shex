@@ -1,0 +1,92 @@
+﻿PREFIX fhir: <http://hl7.org/fhir/> 
+PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+BASE <http://hl7.org/fhir/shape/>
+
+
+start=@<Account> AND {fhir:nodeRole [fhir:treeRoot]}
+
+
+# Tracks balance, charges, for patient or cost center
+<Account> EXTENDS @<DomainResource> CLOSED {   
+
+    a [fhir:Account];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:identifier @<OneOrMore_Account.identifier>?;  # Account number
+    fhir:status @<Account.status>;          # active | inactive | 
+                                            # entered-in-error | on-hold | 
+                                            # unknown 
+    fhir:billingStatus @<Account.billingStatus>?;  # Tracks the lifecycle of the 
+                                            # account through the billing 
+                                            # process 
+    fhir:type @<Account.type>?;             # E.g. patient, expense, depreciation
+    fhir:name @<Account.name>?;             # Human-readable label
+    fhir:subject @<OneOrMore_Account.subject_Device_OR_HealthcareService_OR_Location_OR_Organization_OR_Patient_OR_Practitioner_OR_PractitionerRole>?;  # The entity that caused the expenses
+    fhir:servicePeriod @<Account.servicePeriod>?;  # Transaction window
+    fhir:coverage @<OneOrMore_Account.coverage>?;  # The party(s) that are responsible 
+                                            # for covering the payment of this 
+                                            # account, and what order should 
+                                            # they be applied to the account 
+    fhir:owner @<Account.owner> AND {fhir:link 
+    			@<Organization> }?;  # Entity managing the Account
+    fhir:description @<Account.description>?;  # Explanation of purpose/use
+    fhir:guarantor @<OneOrMore_Account.guarantor>?;  # The parties ultimately responsible 
+                                            # for balancing the Account 
+    fhir:partOf @<Account.partOf> AND {fhir:link 
+    			@<Account> }?;  # Reference to a parent Account
+}  
+
+# The parties ultimately responsible for balancing the Account
+<Account.guarantor> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:party @<Account.guarantor.party> AND {fhir:link 
+    			@<Organization> OR 
+    			@<Patient> OR 
+    			@<RelatedPerson> };  # Responsible entity
+    fhir:onHold @<Account.guarantor.onHold>?;  # Credit or other hold applied
+    fhir:period @<Account.guarantor.period>?;  # Guarantee account during
+}  
+
+# The party(s) that are responsible for covering the payment of this account, and what order should they be applied to the account
+<Account.coverage> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:coverage @<Account.coverage.coverage> AND {fhir:link 
+    			@<Coverage> };  # The party(s), such as insurances, 
+                                            # that may contribute to the payment 
+                                            # of this account 
+    fhir:priority @<Account.coverage.priority>?;  # The priority of the coverage in 
+                                            # the context of this account 
+}  
+
+#---------------------- Data Types -------------------
+
+#---------------------- Cardinality Types (OneOrMore) -------------------
+
+<OneOrMore_Account.identifier> CLOSED {
+    rdf:first @<Account.identifier>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Account.identifier> 
+}
+
+<OneOrMore_Account.subject_Device_OR_HealthcareService_OR_Location_OR_Organization_OR_Patient_OR_Practitioner_OR_PractitionerRole> CLOSED {
+    rdf:first @<Account.subject> AND {fhir:link 
+			@<Device> OR 
+			@<HealthcareService> OR 
+			@<Location> OR 
+			@<Organization> OR 
+			@<Patient> OR 
+			@<Practitioner> OR 
+			@<PractitionerRole> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Account.subject_Device_OR_HealthcareService_OR_Location_OR_Organization_OR_Patient_OR_Practitioner_OR_PractitionerRole> 
+}
+
+<OneOrMore_Account.coverage> CLOSED {
+    rdf:first @<Account.coverage>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Account.coverage> 
+}
+
+<OneOrMore_Account.guarantor> CLOSED {
+    rdf:first @<Account.guarantor>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Account.guarantor> 
+}
+
+#---------------------- Reference Types -------------------
+
+#---------------------- Value Sets ------------------------

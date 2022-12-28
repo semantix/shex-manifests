@@ -1,0 +1,33 @@
+﻿PREFIX fhir: <http://hl7.org/fhir/> 
+PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+BASE <http://hl7.org/fhir/shape/>
+
+
+# A context-specific sex for clinical use
+<patient-sexForClinicalUse> EXTENDS @<Extension> CLOSED {   
+
+    a [fhir:patient-sexForClinicalUse];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:value @<Extension>; 
+    fhir:period @<Extension>?; 
+    fhir:comment @<Extension>?; 
+    fhir:supportingInfo @<OneOrMore_Extension>?; 
+    fhir:v @<Extension.url> AND
+    	{fhir:value ["http://hl7.org/fhir/StructureDefinition/patient-sexForClinicalUse"]}; 
+    ^fhir:extension { a [fhir:Resource]
+    		}
+}  
+
+#---------------------- Data Types -------------------
+
+#---------------------- Cardinality Types (OneOrMore) -------------------
+
+<OneOrMore_Extension> CLOSED {
+    rdf:first @<Extension>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Extension> 
+}
+
+#---------------------- Reference Types -------------------
+
+#---------------------- Value Sets ------------------------

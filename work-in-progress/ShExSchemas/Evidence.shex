@@ -1,0 +1,343 @@
+﻿PREFIX fhir: <http://hl7.org/fhir/> 
+PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+BASE <http://hl7.org/fhir/shape/>
+
+
+start=@<Evidence> AND {fhir:nodeRole [fhir:treeRoot]}
+
+
+# Single evidence bit
+<Evidence> EXTENDS @<MetadataResource> CLOSED {   
+
+    a [fhir:Evidence];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:url @<Evidence.url>?;              # Canonical identifier for this 
+                                            # evidence, represented as a 
+                                            # globally unique URI 
+    fhir:identifier @<OneOrMore_Evidence.identifier>?;  # Additional identifier for the 
+                                            # summary 
+    fhir:version @<Evidence.version>?;      # Business version of this summary
+    fhir:name @<Evidence.name>?;            # Name for this summary (machine 
+                                            # friendly) 
+    fhir:title @<Evidence.title>?;          # Name for this summary (human 
+                                            # friendly) 
+    fhir:citeAs ((@<Reference>  AND {fhir:link @<Citation> })  OR 
+    			@<markdown> )  AND { rdf:type IRI } ?;  # Citation for this evidence
+    fhir:status @<Evidence.status>;         # draft | active | retired | unknown
+    fhir:experimental @<Evidence.experimental>?;  # For testing purposes, not real 
+                                            # usage 
+    fhir:date @<Evidence.date>?;            # Date last changed
+    fhir:useContext @<OneOrMore_Evidence.useContext>?;  # The context that the content is 
+                                            # intended to support 
+    fhir:approvalDate @<Evidence.approvalDate>?;  # When the summary was approved by 
+                                            # publisher 
+    fhir:lastReviewDate @<Evidence.lastReviewDate>?;  # When the summary was last reviewed
+    fhir:publisher @<Evidence.publisher>?;  # Name of the publisher 
+                                            # (organization or individual) 
+    fhir:contact @<OneOrMore_Evidence.contact>?;  # Contact details for the publisher
+    fhir:author @<OneOrMore_Evidence.author>?;  # Who authored the content
+    fhir:editor @<OneOrMore_Evidence.editor>?;  # Who edited the content
+    fhir:reviewer @<OneOrMore_Evidence.reviewer>?;  # Who reviewed the content
+    fhir:endorser @<OneOrMore_Evidence.endorser>?;  # Who endorsed the content
+    fhir:relatedArtifact @<OneOrMore_Evidence.relatedArtifact>?;  # Link or citation to artifact 
+                                            # associated with the summary 
+    fhir:description @<Evidence.description>?;  # Description of the particular 
+                                            # summary 
+    fhir:assertion @<Evidence.assertion>?;  # Declarative description of the 
+                                            # Evidence 
+    fhir:note @<OneOrMore_Evidence.note>?;  # Footnotes and/or explanatory notes
+    fhir:variableDefinition @<OneOrMore_Evidence.variableDefinition>;  # Evidence variable such as 
+                                            # population, exposure, or outcome 
+    fhir:synthesisType @<Evidence.synthesisType>?;  # The method to combine studies
+    fhir:studyType @<Evidence.studyType>?;  # The type of study that produced 
+                                            # this evidence 
+    fhir:statistic @<OneOrMore_Evidence.statistic>?;  # Values and parameters for a single 
+                                            # statistic 
+    fhir:certainty @<OneOrMore_Evidence.certainty>?;  # Certainty or quality of the 
+                                            # evidence 
+} AND (
+
+# Constraint: UniqueKey:cnl-0
+# Human readable:Name should be usable as an identifier for the module by machine processing applications such as code generation
+# XPath:not(exists(f:name/@value)) or matches(f:name/@value, '[A-Z]([A-Za-z0-9_]){0,254}')
+# Constraint:name.exists() implies name.matches('[A-Z]([A-Za-z0-9_]){0,254}')
+# ShEx:
+
+{ fhir:name . } AND { fhir:name { fhir:v /'[A-Z]([A-Za-z0-9_]){0,254}'/ }  }
+
+)
+ 
+
+# An aspect of the statistical model
+<Evidence.statistic.modelCharacteristic> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:code @<Evidence.statistic.modelCharacteristic.code>;  # Model specification
+    fhir:value @<Evidence.statistic.modelCharacteristic.value>?;  # Numerical value to complete model 
+                                            # specification 
+    fhir:variable @<OneOrMore_Evidence.statistic.modelCharacteristic.variable>?;  # A variable adjusted for in the 
+                                            # adjusted analysis 
+    fhir:attributeEstimate @<OneOrMore_Evidence.statistic.attributeEstimate>?;  # An attribute of the statistic used 
+                                            # as a model characteristic 
+}  
+
+# Values and parameters for a single statistic
+<Evidence.statistic> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:description @<Evidence.statistic.description>?;  # Description of content
+    fhir:note @<OneOrMore_Evidence.statistic.note>?;  # Footnotes and/or explanatory notes
+    fhir:statisticType @<Evidence.statistic.statisticType>?;  # Type of statistic, e.g., relative 
+                                            # risk 
+    fhir:category @<Evidence.statistic.category>?;  # Associated category for 
+                                            # categorical variable 
+    fhir:quantity @<Evidence.statistic.quantity>?;  # Statistic value
+    fhir:numberOfEvents @<Evidence.statistic.numberOfEvents>?;  # The number of events associated 
+                                            # with the statistic 
+    fhir:numberAffected @<Evidence.statistic.numberAffected>?;  # The number of participants affected
+    fhir:sampleSize @<Evidence.statistic.sampleSize>?;  # Number of samples in the statistic
+    fhir:attributeEstimate @<OneOrMore_Evidence.statistic.attributeEstimate>?;  # An attribute of the Statistic
+    fhir:modelCharacteristic @<OneOrMore_Evidence.statistic.modelCharacteristic>?;  # An aspect of the statistical model
+}  
+
+# A nested attribute estimate; which is the attribute estimate of an attribute estimate
+<Evidence.statistic.attributeEstimate.attributeEstimate> CLOSED {   
+}  
+
+# Certainty or quality of the evidence
+<Evidence.certainty> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:description @<Evidence.certainty.description>?;  # Textual description of certainty
+    fhir:note @<OneOrMore_Evidence.certainty.note>?;  # Footnotes and/or explanatory notes
+    fhir:type @<Evidence.certainty.type>?;  # Aspect of certainty being rated
+    fhir:rating @<Evidence.certainty.rating>?;  # Assessment or judgement of the 
+                                            # aspect 
+    fhir:rater @<Evidence.certainty.rater>?;  # Individual or group who did the 
+                                            # rating 
+    fhir:subcomponent @<OneOrMore_Evidence.certainty>?;  # A domain or subdomain of certainty
+}  
+
+# An attribute of the Statistic
+<Evidence.statistic.attributeEstimate> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:description @<Evidence.statistic.attributeEstimate.description>?;  # Textual description of the 
+                                            # attribute estimate 
+    fhir:note @<OneOrMore_Evidence.statistic.attributeEstimate.note>?;  # Footnote or explanatory note about 
+                                            # the estimate 
+    fhir:type @<Evidence.statistic.attributeEstimate.type>?;  # The type of attribute estimate, 
+                                            # e.g., confidence interval or p 
+                                            # value 
+    fhir:quantity @<Evidence.statistic.attributeEstimate.quantity>?;  # The singular quantity of the 
+                                            # attribute estimate, for attribute 
+                                            # estimates represented as single 
+                                            # values; also used to report unit 
+                                            # of measure 
+    fhir:level @<Evidence.statistic.attributeEstimate.level>?;  # Level of confidence interval, 
+                                            # e.g., 0.95 for 95% confidence 
+                                            # interval 
+    fhir:range @<Evidence.statistic.attributeEstimate.range>?;  # Lower and upper bound values of 
+                                            # the attribute estimate 
+    fhir:attributeEstimate @<OneOrMore_Evidence.statistic.attributeEstimate>?;  # A nested attribute estimate; which 
+                                            # is the attribute estimate of an 
+                                            # attribute estimate 
+}  
+
+# A domain or subdomain of certainty
+<Evidence.certainty.subcomponent> CLOSED {   
+}  
+
+# Evidence variable such as population, exposure, or outcome
+<Evidence.variableDefinition> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:description @<Evidence.variableDefinition.description>?;  # A text description or summary of 
+                                            # the variable 
+    fhir:note @<OneOrMore_Evidence.variableDefinition.note>?;  # Footnotes and/or explanatory notes
+    fhir:variableRole @<Evidence.variableDefinition.variableRole>;  # population | subpopulation | 
+                                            # exposure | referenceExposure | 
+                                            # measuredVariable | confounder 
+    fhir:observed @<Evidence.variableDefinition.observed> AND {fhir:link 
+    			@<EvidenceVariable> OR 
+    			@<Group> }?;  # Definition of the actual variable 
+                                            # related to the statistic(s) 
+    fhir:intended @<Evidence.variableDefinition.intended> AND {fhir:link 
+    			@<EvidenceVariable> OR 
+    			@<Group> }?;  # Definition of the intended 
+                                            # variable related to the Evidence 
+    fhir:directnessMatch @<Evidence.variableDefinition.directnessMatch>?;  # low | moderate | high | exact
+}  
+
+# Number of samples in the statistic
+<Evidence.statistic.sampleSize> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:description @<Evidence.statistic.sampleSize.description>?;  # Textual description of sample size 
+                                            # for statistic 
+    fhir:note @<OneOrMore_Evidence.statistic.sampleSize.note>?;  # Footnote or explanatory note about 
+                                            # the sample size 
+    fhir:numberOfStudies @<Evidence.statistic.sampleSize.numberOfStudies>?;  # Number of contributing studies
+    fhir:numberOfParticipants @<Evidence.statistic.sampleSize.numberOfParticipants>?;  # Cumulative number of participants
+    fhir:knownDataCount @<Evidence.statistic.sampleSize.knownDataCount>?;  # Number of participants with known 
+                                            # results for measured variables 
+}  
+
+# A variable adjusted for in the adjusted analysis
+<Evidence.statistic.modelCharacteristic.variable> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:variableDefinition @<Evidence.statistic.modelCharacteristic.variable.variableDefinition> AND {fhir:link 
+    			@<EvidenceVariable> OR 
+    			@<Group> };  # Description of the variable
+    fhir:handling @<Evidence.statistic.modelCharacteristic.variable.handling>?;  # continuous | dichotomous | ordinal 
+                                            # | polychotomous 
+    fhir:valueCategory @<OneOrMore_Evidence.statistic.modelCharacteristic.variable.valueCategory>?;  # Description for grouping of 
+                                            # ordinal or polychotomous variables 
+    fhir:valueQuantity @<OneOrMore_Evidence.statistic.modelCharacteristic.variable.valueQuantity>?;  # Discrete value for grouping of 
+                                            # ordinal or polychotomous variables 
+    fhir:valueRange @<OneOrMore_Evidence.statistic.modelCharacteristic.variable.valueRange>?;  # Range of values for grouping of 
+                                            # ordinal or polychotomous variables 
+}  
+
+#---------------------- Data Types -------------------
+
+# A reference from one resource to another
+<Reference> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Reference];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:link IRI?;
+    fhir:reference @<Reference.reference>?;  # Literal reference, Relative, 
+                                            # internal or absolute URL 
+    fhir:type @<Reference.type>?;           # Type the reference refers to (e.g. 
+                                            # "Patient") 
+    fhir:identifier @<Reference.identifier>?;  # Logical reference, when literal 
+                                            # reference is not known 
+    fhir:display @<Reference.display>?;     # Text alternative for the resource
+} AND (
+
+# Constraint: UniqueKey:ref-1
+# Human readable:SHALL have a contained resource if a local reference is provided
+# XPath:not(starts-with(f:reference/@value, '#')) or exists(ancestor::*[self::f:entry or self::f:parameter]/f:resource/f:*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')]|/*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')])
+# Constraint:reference.startsWith('#').not() or (reference.substring(1).trace('url') in %rootResource.contained.id.trace('ids')) or (reference='#' and %rootResource!=%resource)
+# ShEx:
+
+
+)
+ 
+
+# Primitive Type markdown
+<markdown> EXTENDS @<string> CLOSED {   
+
+    a [fhir:markdown];
+    fhir:nodeRole [fhir:treeRoot]?;
+}  
+
+#---------------------- Cardinality Types (OneOrMore) -------------------
+
+<OneOrMore_Evidence.identifier> CLOSED {
+    rdf:first @<Evidence.identifier>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Evidence.identifier> 
+}
+
+<OneOrMore_Evidence.useContext> CLOSED {
+    rdf:first @<Evidence.useContext>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Evidence.useContext> 
+}
+
+<OneOrMore_Evidence.contact> CLOSED {
+    rdf:first @<Evidence.contact>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Evidence.contact> 
+}
+
+<OneOrMore_Evidence.author> CLOSED {
+    rdf:first @<Evidence.author>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Evidence.author> 
+}
+
+<OneOrMore_Evidence.editor> CLOSED {
+    rdf:first @<Evidence.editor>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Evidence.editor> 
+}
+
+<OneOrMore_Evidence.reviewer> CLOSED {
+    rdf:first @<Evidence.reviewer>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Evidence.reviewer> 
+}
+
+<OneOrMore_Evidence.endorser> CLOSED {
+    rdf:first @<Evidence.endorser>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Evidence.endorser> 
+}
+
+<OneOrMore_Evidence.relatedArtifact> CLOSED {
+    rdf:first @<Evidence.relatedArtifact>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Evidence.relatedArtifact> 
+}
+
+<OneOrMore_Evidence.note> CLOSED {
+    rdf:first @<Evidence.note>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Evidence.note> 
+}
+
+<OneOrMore_Evidence.variableDefinition> CLOSED {
+    rdf:first @<Evidence.variableDefinition>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Evidence.variableDefinition> 
+}
+
+<OneOrMore_Evidence.statistic> CLOSED {
+    rdf:first @<Evidence.statistic>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Evidence.statistic> 
+}
+
+<OneOrMore_Evidence.certainty> CLOSED {
+    rdf:first @<Evidence.certainty>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Evidence.certainty> 
+}
+
+<OneOrMore_Evidence.statistic.modelCharacteristic.variable> CLOSED {
+    rdf:first @<Evidence.statistic.modelCharacteristic.variable>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Evidence.statistic.modelCharacteristic.variable> 
+}
+
+<OneOrMore_Evidence.statistic.attributeEstimate> CLOSED {
+    rdf:first @<Evidence.statistic.attributeEstimate>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Evidence.statistic.attributeEstimate> 
+}
+
+<OneOrMore_Evidence.statistic.note> CLOSED {
+    rdf:first @<Evidence.statistic.note>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Evidence.statistic.note> 
+}
+
+<OneOrMore_Evidence.statistic.modelCharacteristic> CLOSED {
+    rdf:first @<Evidence.statistic.modelCharacteristic>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Evidence.statistic.modelCharacteristic> 
+}
+
+<OneOrMore_Evidence.certainty.note> CLOSED {
+    rdf:first @<Evidence.certainty.note>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Evidence.certainty.note> 
+}
+
+<OneOrMore_Evidence.statistic.attributeEstimate.note> CLOSED {
+    rdf:first @<Evidence.statistic.attributeEstimate.note>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Evidence.statistic.attributeEstimate.note> 
+}
+
+<OneOrMore_Evidence.variableDefinition.note> CLOSED {
+    rdf:first @<Evidence.variableDefinition.note>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Evidence.variableDefinition.note> 
+}
+
+<OneOrMore_Evidence.statistic.sampleSize.note> CLOSED {
+    rdf:first @<Evidence.statistic.sampleSize.note>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Evidence.statistic.sampleSize.note> 
+}
+
+<OneOrMore_Evidence.statistic.modelCharacteristic.variable.valueCategory> CLOSED {
+    rdf:first @<Evidence.statistic.modelCharacteristic.variable.valueCategory>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Evidence.statistic.modelCharacteristic.variable.valueCategory> 
+}
+
+<OneOrMore_Evidence.statistic.modelCharacteristic.variable.valueQuantity> CLOSED {
+    rdf:first @<Evidence.statistic.modelCharacteristic.variable.valueQuantity>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Evidence.statistic.modelCharacteristic.variable.valueQuantity> 
+}
+
+<OneOrMore_Evidence.statistic.modelCharacteristic.variable.valueRange> CLOSED {
+    rdf:first @<Evidence.statistic.modelCharacteristic.variable.valueRange>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Evidence.statistic.modelCharacteristic.variable.valueRange> 
+}
+
+#---------------------- Reference Types -------------------
+
+#---------------------- Value Sets ------------------------

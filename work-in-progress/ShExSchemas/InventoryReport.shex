@@ -1,0 +1,81 @@
+﻿PREFIX fhir: <http://hl7.org/fhir/> 
+PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+BASE <http://hl7.org/fhir/shape/>
+
+
+start=@<InventoryReport> AND {fhir:nodeRole [fhir:treeRoot]}
+
+
+# A report of inventory or stock items
+<InventoryReport> EXTENDS @<DomainResource> CLOSED {   
+
+    a [fhir:InventoryReport];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:identifier @<OneOrMore_InventoryReport.identifier>?;  # Identifiers for the report
+    fhir:status @<InventoryReport.status>;  # draft | requested | active | 
+                                            # entered-in-error 
+    fhir:countType @<InventoryReport.countType>;  # snapshot | difference
+    fhir:operationType @<InventoryReport.operationType>?;  # addition | subtraction
+    fhir:operationTypeReason @<InventoryReport.operationTypeReason>?;  # The reason for this count - 
+                                            # regular count, ad-hoc count, new 
+                                            # arrivals, etc. 
+    fhir:reportedDateTime @<InventoryReport.reportedDateTime>;  # When the report has been submitted
+    fhir:reporter @<InventoryReport.reporter> AND {fhir:link 
+    			@<Device> OR 
+    			@<Patient> OR 
+    			@<Practitioner> OR 
+    			@<RelatedPerson> }?;  # Who submits the report
+    fhir:reportingPeriod @<InventoryReport.reportingPeriod>?;  # The period the report refers to
+    fhir:inventoryListing @<OneOrMore_InventoryReport.inventoryListing>?;  # An inventory listing section 
+                                            # (grouped by any of the attributes) 
+    fhir:note @<InventoryReport.note>?;     # A note associated with the 
+                                            # InventoryReport 
+}  
+
+# An inventory listing section (grouped by any of the attributes)
+<InventoryReport.inventoryListing> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:location @<InventoryReport.inventoryListing.location> AND {fhir:link 
+    			@<Location> }?;  # Location of the inventory items
+    fhir:itemStatus @<InventoryReport.inventoryListing.itemStatus>?;  # The status of the items
+    fhir:countingDateTime @<InventoryReport.inventoryListing.countingDateTime>?;  # The date and time when the items 
+                                            # were counted 
+    fhir:items @<OneOrMore_InventoryReport.inventoryListing.items>?;  # The item or items in this listing
+}  
+
+# The item or items in this listing
+<InventoryReport.inventoryListing.items> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:category @<InventoryReport.inventoryListing.items.category>?;  # The category of the item or items
+    fhir:quantity @<InventoryReport.inventoryListing.items.quantity>;  # The quantity of the item or items
+    fhir:item @<InventoryReport.inventoryListing.items.item>;  # The code or reference to the item 
+                                            # type 
+    fhir:lot @<InventoryReport.inventoryListing.items.lot>?;  # The lot number of the item or items
+    fhir:serial @<InventoryReport.inventoryListing.items.serial>?;  # The serial number of the item
+    fhir:expiry @<InventoryReport.inventoryListing.items.expiry>?;  # The expiry date of the item or 
+                                            # items 
+    fhir:manufacturingDate @<InventoryReport.inventoryListing.items.manufacturingDate>?;  # The manufacturingDate of the item 
+                                            # or items 
+}  
+
+#---------------------- Data Types -------------------
+
+#---------------------- Cardinality Types (OneOrMore) -------------------
+
+<OneOrMore_InventoryReport.identifier> CLOSED {
+    rdf:first @<InventoryReport.identifier>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_InventoryReport.identifier> 
+}
+
+<OneOrMore_InventoryReport.inventoryListing> CLOSED {
+    rdf:first @<InventoryReport.inventoryListing>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_InventoryReport.inventoryListing> 
+}
+
+<OneOrMore_InventoryReport.inventoryListing.items> CLOSED {
+    rdf:first @<InventoryReport.inventoryListing.items>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_InventoryReport.inventoryListing.items> 
+}
+
+#---------------------- Reference Types -------------------
+
+#---------------------- Value Sets ------------------------

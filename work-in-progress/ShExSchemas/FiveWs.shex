@@ -1,0 +1,214 @@
+﻿PREFIX fhir: <http://hl7.org/fhir/> 
+PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+BASE <http://hl7.org/fhir/shape/>
+
+
+# Who What When Where Why - Common pattern for all resources that deals with attribution
+<FiveWs> CLOSED {   
+
+    a [fhir:FiveWs];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:identifier @<OneOrMore_FiveWs.identifier>?;  # Business Identifier
+    fhir:version @<FiveWs.version>?;        # Identifier for this version
+    fhir:status @<FiveWs.status>?;          # Status Field
+    fhir:class @<OneOrMore_FiveWs.class>?;  # Classifier Field
+    fhir:grade @<FiveWs.grade>?;            # A field that indicates the 
+                                            # potential impact of the content of 
+                                            # the resource 
+    fhir:what (@<CodeableConcept>  OR 
+    			(@<Reference>  AND {fhir:link @<Resource> }) )  AND { rdf:type IRI } ?;  # What this resource is about
+    fhir:subject @<OneOrMore_FiveWs.subject_Organization_OR_Patient_OR_Practitioner_OR_RelatedPerson>?;  # Who this resource is about
+    fhir:context @<FiveWs.context> AND {fhir:link 
+    			@<Encounter> OR 
+    			@<EpisodeOfCare> }?;  # Context for the work described in 
+                                            # this resource 
+    fhir:init @<FiveWs.init>?;              # When the work described in this 
+                                            # resource was started (or will be) 
+    fhir:planned @<OneOrMore_FiveWs.planned>?;  # When this resource is planned to 
+                                            # occur 
+    fhir:done (@<dateTime>  OR 
+    			@<Period> )  AND { rdf:type IRI } ?;  # When the work described in this 
+                                            # resource was completed (or will 
+                                            # be) 
+    fhir:recorded @<FiveWs.recorded>?;      # When this resource itself was 
+                                            # created 
+    fhir:author @<OneOrMore_FiveWs.author_Organization_OR_Patient_OR_Practitioner_OR_RelatedPerson>?;  # Who authored the content of the 
+                                            # resource 
+    fhir:source @<OneOrMore_FiveWs.source_Organization_OR_Patient_OR_Practitioner_OR_RelatedPerson>?;  # Who provided the information in 
+                                            # this resource 
+    fhir:actor @<OneOrMore_FiveWs.actor_Organization_OR_Patient_OR_Practitioner_OR_RelatedPerson>?;  # Who did the work described the 
+                                            # resource (or will do) 
+    fhir:cause @<OneOrMore_FiveWs.cause_Organization_OR_Patient_OR_Practitioner_OR_RelatedPerson>?;  # Who prompted the work described in 
+                                            # the resource 
+    fhir:witness @<OneOrMore_FiveWs.witness_Patient_OR_Practitioner_OR_RelatedPerson>?;  # Who attests to the content of the 
+                                            # resource (individual or org) 
+    fhir:who @<OneOrMore_FiveWs.who_Organization_OR_Patient_OR_Practitioner_OR_RelatedPerson>?;  # An actor involved in the work 
+                                            # described by this resource 
+    fhir:where (@<OneOrMore_CodeableConcept>  OR 
+    			(@<OneOrMore_Reference>  AND {fhir:link @<OneOrMore_Location> }) )  AND { rdf:type IRI } ?;  # The location of the work described
+    fhir:why (@<OneOrMore_CodeableConcept>  OR 
+    			(@<OneOrMore_Reference>  AND {fhir:link @<OneOrMore_Resource> }) )  AND { rdf:type IRI } ?;  # Why this work was done
+}  
+
+#---------------------- Data Types -------------------
+
+# Primitive Type dateTime
+<dateTime> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:dateTime];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v @<dateTime.value>?;              # Primitive value for dateTime
+}  
+
+# A reference from one resource to another
+<Reference> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Reference];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:link IRI?;
+    fhir:reference @<Reference.reference>?;  # Literal reference, Relative, 
+                                            # internal or absolute URL 
+    fhir:type @<Reference.type>?;           # Type the reference refers to (e.g. 
+                                            # "Patient") 
+    fhir:identifier @<Reference.identifier>?;  # Logical reference, when literal 
+                                            # reference is not known 
+    fhir:display @<Reference.display>?;     # Text alternative for the resource
+} AND (
+
+# Constraint: UniqueKey:ref-1
+# Human readable:SHALL have a contained resource if a local reference is provided
+# XPath:not(starts-with(f:reference/@value, '#')) or exists(ancestor::*[self::f:entry or self::f:parameter]/f:resource/f:*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')]|/*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')])
+# Constraint:reference.startsWith('#').not() or (reference.substring(1).trace('url') in %rootResource.contained.id.trace('ids')) or (reference='#' and %rootResource!=%resource)
+# ShEx:
+
+
+)
+ 
+
+# Time range defined by start and end date/time
+<Period> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Period];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:start @<Period.start>?;            # Starting time with inclusive 
+                                            # boundary 
+    fhir:end @<Period.end>?;                # End time with inclusive boundary, 
+                                            # if not ongoing 
+} AND (
+
+# Constraint: UniqueKey:per-1
+# Human readable:If present, start SHALL have a lower or equal value than end
+# XPath:not(exists(f:start/@value)) or not(exists(f:end/@value)) or (xs:dateTime(f:start/@value) <= xs:dateTime(f:end/@value))
+# Constraint:start.hasValue().not() or end.hasValue().not() or (start <= end)
+# ShEx:
+
+ NOT { fhir:start  . } OR  NOT { fhir:end  . } OR ({ fhir:start { fhir:v MaxInclusive { fhir:end } }  })
+
+)
+ 
+
+# Concept - reference to a terminology or just  text
+<CodeableConcept> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:CodeableConcept];
+    fhir:nodeRole [fhir:treeRoot]?;
+    a NONLITERAL*;
+    fhir:coding @<OneOrMore_CodeableConcept.coding>?;  # Code defined by a terminology 
+                                            # system 
+    fhir:text @<CodeableConcept.text>?;     # Plain text representation of the 
+                                            # concept 
+}  
+
+#---------------------- Cardinality Types (OneOrMore) -------------------
+
+<OneOrMore_FiveWs.identifier> CLOSED {
+    rdf:first @<FiveWs.identifier>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_FiveWs.identifier> 
+}
+
+<OneOrMore_FiveWs.class> CLOSED {
+    rdf:first @<FiveWs.class>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_FiveWs.class> 
+}
+
+<OneOrMore_FiveWs.subject_Organization_OR_Patient_OR_Practitioner_OR_RelatedPerson> CLOSED {
+    rdf:first @<FiveWs.subject> AND {fhir:link 
+			@<Organization> OR 
+			@<Patient> OR 
+			@<Practitioner> OR 
+			@<RelatedPerson> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_FiveWs.subject_Organization_OR_Patient_OR_Practitioner_OR_RelatedPerson> 
+}
+
+<OneOrMore_FiveWs.planned> CLOSED {
+    rdf:first @<FiveWs.planned>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_FiveWs.planned> 
+}
+
+<OneOrMore_FiveWs.author_Organization_OR_Patient_OR_Practitioner_OR_RelatedPerson> CLOSED {
+    rdf:first @<FiveWs.author> AND {fhir:link 
+			@<Organization> OR 
+			@<Patient> OR 
+			@<Practitioner> OR 
+			@<RelatedPerson> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_FiveWs.author_Organization_OR_Patient_OR_Practitioner_OR_RelatedPerson> 
+}
+
+<OneOrMore_FiveWs.source_Organization_OR_Patient_OR_Practitioner_OR_RelatedPerson> CLOSED {
+    rdf:first @<FiveWs.source> AND {fhir:link 
+			@<Organization> OR 
+			@<Patient> OR 
+			@<Practitioner> OR 
+			@<RelatedPerson> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_FiveWs.source_Organization_OR_Patient_OR_Practitioner_OR_RelatedPerson> 
+}
+
+<OneOrMore_FiveWs.actor_Organization_OR_Patient_OR_Practitioner_OR_RelatedPerson> CLOSED {
+    rdf:first @<FiveWs.actor> AND {fhir:link 
+			@<Organization> OR 
+			@<Patient> OR 
+			@<Practitioner> OR 
+			@<RelatedPerson> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_FiveWs.actor_Organization_OR_Patient_OR_Practitioner_OR_RelatedPerson> 
+}
+
+<OneOrMore_FiveWs.cause_Organization_OR_Patient_OR_Practitioner_OR_RelatedPerson> CLOSED {
+    rdf:first @<FiveWs.cause> AND {fhir:link 
+			@<Organization> OR 
+			@<Patient> OR 
+			@<Practitioner> OR 
+			@<RelatedPerson> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_FiveWs.cause_Organization_OR_Patient_OR_Practitioner_OR_RelatedPerson> 
+}
+
+<OneOrMore_FiveWs.witness_Patient_OR_Practitioner_OR_RelatedPerson> CLOSED {
+    rdf:first @<FiveWs.witness> AND {fhir:link 
+			@<Patient> OR 
+			@<Practitioner> OR 
+			@<RelatedPerson> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_FiveWs.witness_Patient_OR_Practitioner_OR_RelatedPerson> 
+}
+
+<OneOrMore_FiveWs.who_Organization_OR_Patient_OR_Practitioner_OR_RelatedPerson> CLOSED {
+    rdf:first @<FiveWs.who> AND {fhir:link 
+			@<Organization> OR 
+			@<Patient> OR 
+			@<Practitioner> OR 
+			@<RelatedPerson> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_FiveWs.who_Organization_OR_Patient_OR_Practitioner_OR_RelatedPerson> 
+}
+
+<OneOrMore_CodeableConcept> CLOSED {
+    rdf:first @<CodeableConcept>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_CodeableConcept> 
+}
+
+<OneOrMore_CodeableConcept.coding> CLOSED {
+    rdf:first @<CodeableConcept.coding>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_CodeableConcept.coding> 
+}
+
+#---------------------- Reference Types -------------------
+
+#---------------------- Value Sets ------------------------

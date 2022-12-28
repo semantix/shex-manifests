@@ -1,0 +1,159 @@
+﻿PREFIX fhir: <http://hl7.org/fhir/> 
+PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+BASE <http://hl7.org/fhir/shape/>
+
+
+start=@<Provenance> AND {fhir:nodeRole [fhir:treeRoot]}
+
+
+# Who, What, When for a set of resources
+<Provenance> EXTENDS @<DomainResource> CLOSED {   
+
+    a [fhir:Provenance];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:target @<OneOrMore_Provenance.target_Resource>;  # Target Reference(s) (usually 
+                                            # version specific) 
+    fhir:occurred (@<Period>  OR 
+    			@<dateTime> )  AND { rdf:type IRI } ?;  # When the activity occurred
+    fhir:recorded @<Provenance.recorded>?;  # When the activity was recorded / 
+                                            # updated 
+    fhir:policy @<OneOrMore_Provenance.policy>?;  # Policy or plan the activity was 
+                                            # defined by 
+    fhir:location @<Provenance.location> AND {fhir:link 
+    			@<Location> }?;  # Where the activity occurred, if 
+                                            # relevant 
+    fhir:authorization @<OneOrMore_Provenance.authorization>?;  # Authorization (purposeOfUse) 
+                                            # related to the event 
+    fhir:activity @<Provenance.activity>?;  # Activity that occurred
+    fhir:basedOn @<OneOrMore_Provenance.basedOn_CarePlan_OR_DeviceRequest_OR_ImmunizationRecommendation_OR_MedicationRequest_OR_NutritionOrder_OR_ServiceRequest_OR_Task>?;  # Workflow authorization within 
+                                            # which this event occurred 
+    fhir:patient @<Provenance.patient> AND {fhir:link 
+    			@<Patient> }?;  # The patient is the subject of the 
+                                            # data created/updated (.target) by 
+                                            # the activity 
+    fhir:encounter @<Provenance.encounter> AND {fhir:link 
+    			@<Encounter> }?;  # Encounter within which this event 
+                                            # occurred or which the event is 
+                                            # tightly associated 
+    fhir:agent @<OneOrMore_Provenance.agent>;  # Actor involved
+    fhir:entity @<OneOrMore_Provenance.entity>?;  # An entity used in this activity
+    fhir:signature @<OneOrMore_Provenance.signature>?;  # Signature on target
+}  
+
+# An entity used in this activity
+<Provenance.entity> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:role @<Provenance.entity.role>;    # revision | quotation | source | 
+                                            # instantiates | removal 
+    fhir:what @<Provenance.entity.what> AND {fhir:link 
+    			@<Resource> };  # Identity of entity
+    fhir:agent @<OneOrMore_Provenance.agent>?;  # Entity is attributed to this agent
+}  
+
+# Actor involved
+<Provenance.agent> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:type @<Provenance.agent.type>?;    # How the agent participated
+    fhir:role @<OneOrMore_Provenance.agent.role>?;  # What the agents role was
+    fhir:who @<Provenance.agent.who> AND {fhir:link 
+    			@<CareTeam> OR 
+    			@<Device> OR 
+    			@<Organization> OR 
+    			@<Patient> OR 
+    			@<Practitioner> OR 
+    			@<PractitionerRole> OR 
+    			@<RelatedPerson> };  # The agent that participated in the 
+                                            # event 
+    fhir:onBehalfOf @<Provenance.agent.onBehalfOf> AND {fhir:link 
+    			@<CareTeam> OR 
+    			@<Organization> OR 
+    			@<Patient> OR 
+    			@<Practitioner> OR 
+    			@<PractitionerRole> OR 
+    			@<RelatedPerson> }?;  # The agent that delegated
+}  
+
+#---------------------- Data Types -------------------
+
+# Primitive Type dateTime
+<dateTime> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:dateTime];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v @<dateTime.value>?;              # Primitive value for dateTime
+}  
+
+# Time range defined by start and end date/time
+<Period> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Period];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:start @<Period.start>?;            # Starting time with inclusive 
+                                            # boundary 
+    fhir:end @<Period.end>?;                # End time with inclusive boundary, 
+                                            # if not ongoing 
+} AND (
+
+# Constraint: UniqueKey:per-1
+# Human readable:If present, start SHALL have a lower or equal value than end
+# XPath:not(exists(f:start/@value)) or not(exists(f:end/@value)) or (xs:dateTime(f:start/@value) <= xs:dateTime(f:end/@value))
+# Constraint:start.hasValue().not() or end.hasValue().not() or (start <= end)
+# ShEx:
+
+ NOT { fhir:start  . } OR  NOT { fhir:end  . } OR ({ fhir:start { fhir:v MaxInclusive { fhir:end } }  })
+
+)
+ 
+
+#---------------------- Cardinality Types (OneOrMore) -------------------
+
+<OneOrMore_Provenance.target_Resource> CLOSED {
+    rdf:first @<Provenance.target> AND {fhir:link 
+			@<Resource> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Provenance.target_Resource> 
+}
+
+<OneOrMore_Provenance.policy> CLOSED {
+    rdf:first @<Provenance.policy>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Provenance.policy> 
+}
+
+<OneOrMore_Provenance.authorization> CLOSED {
+    rdf:first @<Provenance.authorization>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Provenance.authorization> 
+}
+
+<OneOrMore_Provenance.basedOn_CarePlan_OR_DeviceRequest_OR_ImmunizationRecommendation_OR_MedicationRequest_OR_NutritionOrder_OR_ServiceRequest_OR_Task> CLOSED {
+    rdf:first @<Provenance.basedOn> AND {fhir:link 
+			@<CarePlan> OR 
+			@<DeviceRequest> OR 
+			@<ImmunizationRecommendation> OR 
+			@<MedicationRequest> OR 
+			@<NutritionOrder> OR 
+			@<ServiceRequest> OR 
+			@<Task> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Provenance.basedOn_CarePlan_OR_DeviceRequest_OR_ImmunizationRecommendation_OR_MedicationRequest_OR_NutritionOrder_OR_ServiceRequest_OR_Task> 
+}
+
+<OneOrMore_Provenance.agent> CLOSED {
+    rdf:first @<Provenance.agent>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Provenance.agent> 
+}
+
+<OneOrMore_Provenance.entity> CLOSED {
+    rdf:first @<Provenance.entity>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Provenance.entity> 
+}
+
+<OneOrMore_Provenance.signature> CLOSED {
+    rdf:first @<Provenance.signature>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Provenance.signature> 
+}
+
+<OneOrMore_Provenance.agent.role> CLOSED {
+    rdf:first @<Provenance.agent.role>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Provenance.agent.role> 
+}
+
+#---------------------- Reference Types -------------------
+
+#---------------------- Value Sets ------------------------

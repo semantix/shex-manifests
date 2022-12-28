@@ -1,0 +1,258 @@
+﻿PREFIX fhir: <http://hl7.org/fhir/> 
+PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+BASE <http://hl7.org/fhir/shape/>
+
+
+start=@<CommunicationRequest> AND {fhir:nodeRole [fhir:treeRoot]}
+
+
+# A request for information to be sent to a receiver
+<CommunicationRequest> EXTENDS @<DomainResource> CLOSED {   
+
+    a [fhir:CommunicationRequest];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:identifier @<OneOrMore_CommunicationRequest.identifier>?;  # Unique identifier
+    fhir:basedOn @<OneOrMore_CommunicationRequest.basedOn_Resource>?;  # Fulfills plan or proposal
+    fhir:replaces @<OneOrMore_CommunicationRequest.replaces_CommunicationRequest>?;  # Request(s) replaced by this request
+    fhir:groupIdentifier @<CommunicationRequest.groupIdentifier>?;  # Composite request this is part of
+    fhir:status @<CommunicationRequest.status>;  # draft | active | on-hold | revoked 
+                                            # | completed | entered-in-error | 
+                                            # unknown 
+    fhir:statusReason @<CommunicationRequest.statusReason>?;  # Reason for current status
+    fhir:intent @<CommunicationRequest.intent>;  # proposal | plan | directive | 
+                                            # order | original-order | 
+                                            # reflex-order | filler-order | 
+                                            # instance-order | option 
+    fhir:category @<OneOrMore_CommunicationRequest.category>?;  # Message category
+    fhir:priority @<CommunicationRequest.priority>?;  # routine | urgent | asap | stat
+    fhir:doNotPerform @<CommunicationRequest.doNotPerform>?;  # True if request is prohibiting 
+                                            # action 
+    fhir:medium @<OneOrMore_CommunicationRequest.medium>?;  # A channel of communication
+    fhir:subject @<CommunicationRequest.subject> AND {fhir:link 
+    			@<Group> OR 
+    			@<Patient> }?;  # Focus of message
+    fhir:about @<OneOrMore_CommunicationRequest.about_Resource>?;  # Resources that pertain to this 
+                                            # communication request 
+    fhir:encounter @<CommunicationRequest.encounter> AND {fhir:link 
+    			@<Encounter> }?;  # The Encounter during which this 
+                                            # CommunicationRequest was created 
+    fhir:payload @<OneOrMore_CommunicationRequest.payload>?;  # Message payload
+    fhir:occurrence (@<dateTime>  OR 
+    			@<Period> )  AND { rdf:type IRI } ?;  # When scheduled
+    fhir:authoredOn @<CommunicationRequest.authoredOn>?;  # When request transitioned to being 
+                                            # actionable 
+    fhir:requester @<CommunicationRequest.requester> AND {fhir:link 
+    			@<Device> OR 
+    			@<Organization> OR 
+    			@<Patient> OR 
+    			@<Practitioner> OR 
+    			@<PractitionerRole> OR 
+    			@<RelatedPerson> }?;  # Who asks for the information to be 
+                                            # shared 
+    fhir:recipient @<OneOrMore_CommunicationRequest.recipient_CareTeam_OR_Device_OR_Endpoint_OR_Group_OR_HealthcareService_OR_Organization_OR_Patient_OR_Practitioner_OR_PractitionerRole_OR_RelatedPerson>?;  # Who to share the information with
+    fhir:informationProvider @<OneOrMore_CommunicationRequest.informationProvider_Device_OR_Endpoint_OR_HealthcareService_OR_Organization_OR_Patient_OR_Practitioner_OR_PractitionerRole_OR_RelatedPerson>?;  # Who should share the information
+    fhir:reason @<OneOrMore_CommunicationRequest.reason>?;  # Why is communication needed?
+    fhir:note @<OneOrMore_CommunicationRequest.note>?;  # Comments made about communication 
+                                            # request 
+}  
+
+# Message payload
+<CommunicationRequest.payload> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:content (@<Attachment>  OR 
+    			(@<Reference>  AND {fhir:link @<Resource> })  OR 
+    			@<CodeableConcept> )  AND { rdf:type IRI } ;  # Message part content
+}  
+
+#---------------------- Data Types -------------------
+
+# Primitive Type dateTime
+<dateTime> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:dateTime];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v @<dateTime.value>?;              # Primitive value for dateTime
+}  
+
+# A reference from one resource to another
+<Reference> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Reference];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:link IRI?;
+    fhir:reference @<Reference.reference>?;  # Literal reference, Relative, 
+                                            # internal or absolute URL 
+    fhir:type @<Reference.type>?;           # Type the reference refers to (e.g. 
+                                            # "Patient") 
+    fhir:identifier @<Reference.identifier>?;  # Logical reference, when literal 
+                                            # reference is not known 
+    fhir:display @<Reference.display>?;     # Text alternative for the resource
+} AND (
+
+# Constraint: UniqueKey:ref-1
+# Human readable:SHALL have a contained resource if a local reference is provided
+# XPath:not(starts-with(f:reference/@value, '#')) or exists(ancestor::*[self::f:entry or self::f:parameter]/f:resource/f:*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')]|/*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')])
+# Constraint:reference.startsWith('#').not() or (reference.substring(1).trace('url') in %rootResource.contained.id.trace('ids')) or (reference='#' and %rootResource!=%resource)
+# ShEx:
+
+
+)
+ 
+
+# Time range defined by start and end date/time
+<Period> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Period];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:start @<Period.start>?;            # Starting time with inclusive 
+                                            # boundary 
+    fhir:end @<Period.end>?;                # End time with inclusive boundary, 
+                                            # if not ongoing 
+} AND (
+
+# Constraint: UniqueKey:per-1
+# Human readable:If present, start SHALL have a lower or equal value than end
+# XPath:not(exists(f:start/@value)) or not(exists(f:end/@value)) or (xs:dateTime(f:start/@value) <= xs:dateTime(f:end/@value))
+# Constraint:start.hasValue().not() or end.hasValue().not() or (start <= end)
+# ShEx:
+
+ NOT { fhir:start  . } OR  NOT { fhir:end  . } OR ({ fhir:start { fhir:v MaxInclusive { fhir:end } }  })
+
+)
+ 
+
+# Content in a format defined elsewhere
+<Attachment> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Attachment];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:contentType @<Attachment.contentType>?;  # Mime type of the content, with 
+                                            # charset etc. 
+    fhir:language @<Attachment.language>?;  # Human language of the content 
+                                            # (BCP-47) 
+    fhir:data @<Attachment.data>?;          # Data inline, base64ed
+    fhir:url @<Attachment.url>?;            # Uri where the data can be found
+    fhir:size @<Attachment.size>?;          # Number of bytes of content (if url 
+                                            # provided) 
+    fhir:hash @<Attachment.hash>?;          # Hash of the data (sha-1, base64ed)
+    fhir:title @<Attachment.title>?;        # Label to display in place of the 
+                                            # data 
+    fhir:creation @<Attachment.creation>?;  # Date attachment was first created
+    fhir:height @<Attachment.height>?;      # Height of the image in pixels 
+                                            # (photo/video) 
+    fhir:width @<Attachment.width>?;        # Width of the image in pixels 
+                                            # (photo/video) 
+    fhir:frames @<Attachment.frames>?;      # Number of frames if > 1 (photo)
+    fhir:duration @<Attachment.duration>?;  # Length in seconds (audio / video)
+    fhir:pages @<Attachment.pages>?;        # Number of printed pages
+} AND (
+
+# Constraint: UniqueKey:att-1
+# Human readable:If the Attachment has data, it SHALL have a contentType
+# XPath:not(exists(f:data)) or exists(f:contentType)
+# Constraint:data.empty() or contentType.exists()
+# ShEx:
+
+ NOT { fhir:data {fhir:v .} }  OR { fhir:contentType . }
+
+)
+ 
+
+# Concept - reference to a terminology or just  text
+<CodeableConcept> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:CodeableConcept];
+    fhir:nodeRole [fhir:treeRoot]?;
+    a NONLITERAL*;
+    fhir:coding @<OneOrMore_CodeableConcept.coding>?;  # Code defined by a terminology 
+                                            # system 
+    fhir:text @<CodeableConcept.text>?;     # Plain text representation of the 
+                                            # concept 
+}  
+
+#---------------------- Cardinality Types (OneOrMore) -------------------
+
+<OneOrMore_CommunicationRequest.identifier> CLOSED {
+    rdf:first @<CommunicationRequest.identifier>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_CommunicationRequest.identifier> 
+}
+
+<OneOrMore_CommunicationRequest.basedOn_Resource> CLOSED {
+    rdf:first @<CommunicationRequest.basedOn> AND {fhir:link 
+			@<Resource> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_CommunicationRequest.basedOn_Resource> 
+}
+
+<OneOrMore_CommunicationRequest.replaces_CommunicationRequest> CLOSED {
+    rdf:first @<CommunicationRequest.replaces> AND {fhir:link 
+			@<CommunicationRequest> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_CommunicationRequest.replaces_CommunicationRequest> 
+}
+
+<OneOrMore_CommunicationRequest.category> CLOSED {
+    rdf:first @<CommunicationRequest.category>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_CommunicationRequest.category> 
+}
+
+<OneOrMore_CommunicationRequest.medium> CLOSED {
+    rdf:first @<CommunicationRequest.medium>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_CommunicationRequest.medium> 
+}
+
+<OneOrMore_CommunicationRequest.about_Resource> CLOSED {
+    rdf:first @<CommunicationRequest.about> AND {fhir:link 
+			@<Resource> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_CommunicationRequest.about_Resource> 
+}
+
+<OneOrMore_CommunicationRequest.payload> CLOSED {
+    rdf:first @<CommunicationRequest.payload>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_CommunicationRequest.payload> 
+}
+
+<OneOrMore_CommunicationRequest.recipient_CareTeam_OR_Device_OR_Endpoint_OR_Group_OR_HealthcareService_OR_Organization_OR_Patient_OR_Practitioner_OR_PractitionerRole_OR_RelatedPerson> CLOSED {
+    rdf:first @<CommunicationRequest.recipient> AND {fhir:link 
+			@<CareTeam> OR 
+			@<Device> OR 
+			@<Endpoint> OR 
+			@<Group> OR 
+			@<HealthcareService> OR 
+			@<Organization> OR 
+			@<Patient> OR 
+			@<Practitioner> OR 
+			@<PractitionerRole> OR 
+			@<RelatedPerson> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_CommunicationRequest.recipient_CareTeam_OR_Device_OR_Endpoint_OR_Group_OR_HealthcareService_OR_Organization_OR_Patient_OR_Practitioner_OR_PractitionerRole_OR_RelatedPerson> 
+}
+
+<OneOrMore_CommunicationRequest.informationProvider_Device_OR_Endpoint_OR_HealthcareService_OR_Organization_OR_Patient_OR_Practitioner_OR_PractitionerRole_OR_RelatedPerson> CLOSED {
+    rdf:first @<CommunicationRequest.informationProvider> AND {fhir:link 
+			@<Device> OR 
+			@<Endpoint> OR 
+			@<HealthcareService> OR 
+			@<Organization> OR 
+			@<Patient> OR 
+			@<Practitioner> OR 
+			@<PractitionerRole> OR 
+			@<RelatedPerson> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_CommunicationRequest.informationProvider_Device_OR_Endpoint_OR_HealthcareService_OR_Organization_OR_Patient_OR_Practitioner_OR_PractitionerRole_OR_RelatedPerson> 
+}
+
+<OneOrMore_CommunicationRequest.reason> CLOSED {
+    rdf:first @<CommunicationRequest.reason>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_CommunicationRequest.reason> 
+}
+
+<OneOrMore_CommunicationRequest.note> CLOSED {
+    rdf:first @<CommunicationRequest.note>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_CommunicationRequest.note> 
+}
+
+<OneOrMore_CodeableConcept.coding> CLOSED {
+    rdf:first @<CodeableConcept.coding>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_CodeableConcept.coding> 
+}
+
+#---------------------- Reference Types -------------------
+
+#---------------------- Value Sets ------------------------

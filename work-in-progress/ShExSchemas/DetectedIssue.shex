@@ -1,0 +1,120 @@
+﻿PREFIX fhir: <http://hl7.org/fhir/> 
+PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+BASE <http://hl7.org/fhir/shape/>
+
+
+start=@<DetectedIssue> AND {fhir:nodeRole [fhir:treeRoot]}
+
+
+# Clinical issue with action
+<DetectedIssue> EXTENDS @<DomainResource> CLOSED {   
+
+    a [fhir:DetectedIssue];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:identifier @<OneOrMore_DetectedIssue.identifier>?;  # Unique id for the detected issue
+    fhir:status @<DetectedIssue.status>;    # registered | preliminary | final | 
+                                            # amended + 
+    fhir:code @<DetectedIssue.code>?;       # Issue Category, e.g. drug-drug, 
+                                            # duplicate therapy, etc. 
+    fhir:severity @<DetectedIssue.severity>?;  # high | moderate | low
+    fhir:patient @<DetectedIssue.patient> AND {fhir:link 
+    			@<Patient> }?;  # Associated patient
+    fhir:identified (@<dateTime>  OR 
+    			@<Period> )  AND { rdf:type IRI } ?;  # When identified
+    fhir:author @<DetectedIssue.author> AND {fhir:link 
+    			@<Device> OR 
+    			@<Practitioner> OR 
+    			@<PractitionerRole> }?;  # The provider or device that 
+                                            # identified the issue 
+    fhir:implicated @<OneOrMore_DetectedIssue.implicated_Resource>?;  # Problem resource
+    fhir:evidence @<OneOrMore_DetectedIssue.evidence>?;  # Supporting evidence
+    fhir:detail @<DetectedIssue.detail>?;   # Description and context
+    fhir:reference @<DetectedIssue.reference>?;  # Authority for issue
+    fhir:mitigation @<OneOrMore_DetectedIssue.mitigation>?;  # Step taken to address
+}  
+
+# Supporting evidence
+<DetectedIssue.evidence> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:code @<OneOrMore_DetectedIssue.evidence.code>?;  # Manifestation
+    fhir:detail @<OneOrMore_DetectedIssue.evidence.detail_Resource>?;  # Supporting information
+}  
+
+# Step taken to address
+<DetectedIssue.mitigation> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:action @<DetectedIssue.mitigation.action>;  # What mitigation?
+    fhir:date @<DetectedIssue.mitigation.date>?;  # Date committed
+    fhir:author @<DetectedIssue.mitigation.author> AND {fhir:link 
+    			@<Practitioner> OR 
+    			@<PractitionerRole> }?;  # Who is committing?
+}  
+
+#---------------------- Data Types -------------------
+
+# Primitive Type dateTime
+<dateTime> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:dateTime];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v @<dateTime.value>?;              # Primitive value for dateTime
+}  
+
+# Time range defined by start and end date/time
+<Period> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Period];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:start @<Period.start>?;            # Starting time with inclusive 
+                                            # boundary 
+    fhir:end @<Period.end>?;                # End time with inclusive boundary, 
+                                            # if not ongoing 
+} AND (
+
+# Constraint: UniqueKey:per-1
+# Human readable:If present, start SHALL have a lower or equal value than end
+# XPath:not(exists(f:start/@value)) or not(exists(f:end/@value)) or (xs:dateTime(f:start/@value) <= xs:dateTime(f:end/@value))
+# Constraint:start.hasValue().not() or end.hasValue().not() or (start <= end)
+# ShEx:
+
+ NOT { fhir:start  . } OR  NOT { fhir:end  . } OR ({ fhir:start { fhir:v MaxInclusive { fhir:end } }  })
+
+)
+ 
+
+#---------------------- Cardinality Types (OneOrMore) -------------------
+
+<OneOrMore_DetectedIssue.identifier> CLOSED {
+    rdf:first @<DetectedIssue.identifier>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_DetectedIssue.identifier> 
+}
+
+<OneOrMore_DetectedIssue.implicated_Resource> CLOSED {
+    rdf:first @<DetectedIssue.implicated> AND {fhir:link 
+			@<Resource> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_DetectedIssue.implicated_Resource> 
+}
+
+<OneOrMore_DetectedIssue.evidence> CLOSED {
+    rdf:first @<DetectedIssue.evidence>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_DetectedIssue.evidence> 
+}
+
+<OneOrMore_DetectedIssue.mitigation> CLOSED {
+    rdf:first @<DetectedIssue.mitigation>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_DetectedIssue.mitigation> 
+}
+
+<OneOrMore_DetectedIssue.evidence.code> CLOSED {
+    rdf:first @<DetectedIssue.evidence.code>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_DetectedIssue.evidence.code> 
+}
+
+<OneOrMore_DetectedIssue.evidence.detail_Resource> CLOSED {
+    rdf:first @<DetectedIssue.evidence.detail> AND {fhir:link 
+			@<Resource> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_DetectedIssue.evidence.detail_Resource> 
+}
+
+#---------------------- Reference Types -------------------
+
+#---------------------- Value Sets ------------------------

@@ -1,0 +1,69 @@
+﻿PREFIX fhir: <http://hl7.org/fhir/> 
+PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+BASE <http://hl7.org/fhir/shape/>
+
+
+# Product Pattern
+<Product> CLOSED {   
+
+    a [fhir:Product];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:status @<Product.status>;          # active | inactive | 
+                                            # entered-in-error 
+    fhir:category @<OneOrMore_Product.category>?;  # A category or class of the product
+    fhir:code @<Product.code>?;             # A code designating a specific type 
+                                            # of product 
+    fhir:manufacturer @<OneOrMore_Product.manufacturer_Organization>?;  # Manufacturer, representative or 
+                                            # officially responsible for the 
+                                            # product 
+    fhir:instance @<Product.instance>?;     # One or several physical instances 
+                                            # or occurrences of the product 
+    fhir:note @<OneOrMore_Product.note>?;   # Comments made about the product
+}  
+
+# One or several physical instances or occurrences of the product
+<Product.instance> EXTENDS @<Element> CLOSED {   
+    fhir:quantity @<Product.instance.quantity>?;  # The amount of items
+    fhir:identifier @<OneOrMore_Product.instance.identifier>?;  # The identifier for the physical 
+                                            # instance, typically a serial 
+                                            # number 
+    fhir:lotNumber @<Product.instance.lotNumber>?;  # The identification of the batch or 
+                                            # lot of the product 
+    fhir:expiry @<Product.instance.expiry>?;  # The expiry date or date and time 
+                                            # for the product 
+    fhir:subject @<Product.instance.subject> AND {fhir:link 
+    			@<Group> OR 
+    			@<Patient> }?;  # Individual the product is 
+                                            # associated with, or which has used 
+                                            # the product 
+}  
+
+#---------------------- Data Types -------------------
+
+#---------------------- Cardinality Types (OneOrMore) -------------------
+
+<OneOrMore_Product.category> CLOSED {
+    rdf:first @<Product.category>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Product.category> 
+}
+
+<OneOrMore_Product.manufacturer_Organization> CLOSED {
+    rdf:first @<Product.manufacturer> AND {fhir:link 
+			@<Organization> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Product.manufacturer_Organization> 
+}
+
+<OneOrMore_Product.note> CLOSED {
+    rdf:first @<Product.note>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Product.note> 
+}
+
+<OneOrMore_Product.instance.identifier> CLOSED {
+    rdf:first @<Product.instance.identifier>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Product.instance.identifier> 
+}
+
+#---------------------- Reference Types -------------------
+
+#---------------------- Value Sets ------------------------

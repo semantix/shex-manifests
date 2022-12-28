@@ -1,0 +1,324 @@
+﻿PREFIX fhir: <http://hl7.org/fhir/> 
+PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+BASE <http://hl7.org/fhir/shape/>
+
+
+start=@<EvidenceReport> AND {fhir:nodeRole [fhir:treeRoot]}
+
+
+# A EvidenceReport
+<EvidenceReport> EXTENDS @<MetadataResource> CLOSED {   
+
+    a [fhir:EvidenceReport];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:url @<EvidenceReport.url>?;        # Canonical identifier for this 
+                                            # EvidenceReport, represented as a 
+                                            # globally unique URI 
+    fhir:status @<EvidenceReport.status>;   # draft | active | retired | unknown
+    fhir:useContext @<OneOrMore_EvidenceReport.useContext>?;  # The context that the content is 
+                                            # intended to support 
+    fhir:identifier @<OneOrMore_EvidenceReport.identifier>?;  # Unique identifier for the evidence 
+                                            # report 
+    fhir:relatedIdentifier @<OneOrMore_EvidenceReport.relatedIdentifier>?;  # Identifiers for articles that may 
+                                            # relate to more than one evidence 
+                                            # report 
+    fhir:citeAs ((@<Reference>  AND {fhir:link @<Citation> })  OR 
+    			@<markdown> )  AND { rdf:type IRI } ?;  # Citation for this report
+    fhir:type @<EvidenceReport.type>?;      # Kind of report
+    fhir:note @<OneOrMore_EvidenceReport.note>?;  # Used for footnotes and annotations
+    fhir:relatedArtifact @<OneOrMore_EvidenceReport.relatedArtifact>?;  # Link, description or reference to 
+                                            # artifact associated with the 
+                                            # report 
+    fhir:subject @<EvidenceReport.subject>;  # Focus of the report
+    fhir:publisher @<EvidenceReport.publisher>?;  # Name of the publisher 
+                                            # (organization or individual) 
+    fhir:contact @<OneOrMore_EvidenceReport.contact>?;  # Contact details for the publisher
+    fhir:author @<OneOrMore_EvidenceReport.author>?;  # Who authored the content
+    fhir:editor @<OneOrMore_EvidenceReport.editor>?;  # Who edited the content
+    fhir:reviewer @<OneOrMore_EvidenceReport.reviewer>?;  # Who reviewed the content
+    fhir:endorser @<OneOrMore_EvidenceReport.endorser>?;  # Who endorsed the content
+    fhir:relatesTo @<OneOrMore_EvidenceReport.relatesTo>?;  # Relationships to other 
+                                            # compositions/documents 
+    fhir:section @<OneOrMore_EvidenceReport.section>?;  # Composition is broken into sections
+} AND (
+
+# Constraint: UniqueKey:cnl-0
+# Human readable:Name should be usable as an identifier for the module by machine processing applications such as code generation
+# XPath:not(exists(f:name/@value)) or matches(f:name/@value, '[A-Z]([A-Za-z0-9_]){0,254}')
+# Constraint:name.exists() implies name.matches('[A-Z]([A-Za-z0-9_]){0,254}')
+# ShEx:
+
+{ fhir:name . } AND { fhir:name { fhir:v /'[A-Z]([A-Za-z0-9_]){0,254}'/ }  }
+
+)
+ 
+
+# Relationships to other compositions/documents
+<EvidenceReport.relatesTo> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:code @<EvidenceReport.relatesTo.code>;  # replaces | amends | appends | 
+                                            # transforms | replacedWith | 
+                                            # amendedWith | appendedWith | 
+                                            # transformedWith 
+    fhir:target @<EvidenceReport.relatesTo.target>;  # Target of the relationship
+}  
+
+# Focus of the report
+<EvidenceReport.subject> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:characteristic @<OneOrMore_EvidenceReport.subject.characteristic>?;  # Characteristic
+    fhir:note @<OneOrMore_EvidenceReport.subject.note>?;  # Footnotes and/or explanatory notes
+}  
+
+# Nested Section
+<EvidenceReport.section.section> CLOSED {   
+}  
+
+# Composition is broken into sections
+<EvidenceReport.section> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:title @<EvidenceReport.section.title>?;  # Label for section (e.g. for ToC)
+    fhir:focus @<EvidenceReport.section.focus>?;  # Classification of section 
+                                            # (recommended) 
+    fhir:focusReference @<EvidenceReport.section.focusReference> AND {fhir:link 
+    			@<Resource> }?;  # Classification of section by 
+                                            # Resource 
+    fhir:author @<OneOrMore_EvidenceReport.section.author_Device_OR_Group_OR_Organization_OR_Person>?;  # Who and/or what authored the 
+                                            # section 
+    fhir:text @<EvidenceReport.section.text>?;  # Text summary of the section, for 
+                                            # human interpretation 
+    fhir:mode @<EvidenceReport.section.mode>?;  # working | snapshot | changes
+    fhir:orderedBy @<EvidenceReport.section.orderedBy>?;  # Order of section entries
+    fhir:entryClassifier @<OneOrMore_EvidenceReport.section.entryClassifier>?;  # Extensible classifiers as content
+    fhir:entryReference @<OneOrMore_EvidenceReport.section.entryReference_Resource>?;  # Reference to resources as content
+    fhir:entryQuantity @<OneOrMore_EvidenceReport.section.entryQuantity>?;  # Quantity as content
+    fhir:emptyReason @<EvidenceReport.section.emptyReason>?;  # Why the section is empty
+    fhir:section @<OneOrMore_EvidenceReport.section>?;  # Nested Section
+}  
+
+# Characteristic
+<EvidenceReport.subject.characteristic> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:code @<EvidenceReport.subject.characteristic.code>;  # Characteristic code
+    fhir:value ((@<Reference>  AND {fhir:link @<Resource> })  OR 
+    			@<CodeableConcept>  OR 
+    			@<boolean>  OR 
+    			@<Quantity>  OR 
+    			@<Range> )  AND { rdf:type IRI } ;  # Characteristic value
+    fhir:exclude @<EvidenceReport.subject.characteristic.exclude>?;  # Is used to express not the 
+                                            # characteristic 
+    fhir:period @<EvidenceReport.subject.characteristic.period>?;  # Timeframe for the characteristic
+}  
+
+# Target of the relationship
+<EvidenceReport.relatesTo.target> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:url @<EvidenceReport.relatesTo.target.url>?;  # Target of the relationship URL
+    fhir:identifier @<EvidenceReport.relatesTo.target.identifier>?;  # Target of the relationship 
+                                            # Identifier 
+    fhir:display @<EvidenceReport.relatesTo.target.display>?;  # Target of the relationship Display
+    fhir:resource @<EvidenceReport.relatesTo.target.resource> AND {fhir:link 
+    			@<Resource> }?;  # Target of the relationship 
+                                            # Resource reference 
+}  
+
+#---------------------- Data Types -------------------
+
+# Primitive Type boolean
+<boolean> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:boolean];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v @<boolean.value>?;               # Primitive value for boolean
+}  
+
+# A reference from one resource to another
+<Reference> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Reference];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:link IRI?;
+    fhir:reference @<Reference.reference>?;  # Literal reference, Relative, 
+                                            # internal or absolute URL 
+    fhir:type @<Reference.type>?;           # Type the reference refers to (e.g. 
+                                            # "Patient") 
+    fhir:identifier @<Reference.identifier>?;  # Logical reference, when literal 
+                                            # reference is not known 
+    fhir:display @<Reference.display>?;     # Text alternative for the resource
+} AND (
+
+# Constraint: UniqueKey:ref-1
+# Human readable:SHALL have a contained resource if a local reference is provided
+# XPath:not(starts-with(f:reference/@value, '#')) or exists(ancestor::*[self::f:entry or self::f:parameter]/f:resource/f:*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')]|/*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')])
+# Constraint:reference.startsWith('#').not() or (reference.substring(1).trace('url') in %rootResource.contained.id.trace('ids')) or (reference='#' and %rootResource!=%resource)
+# ShEx:
+
+
+)
+ 
+
+# Primitive Type markdown
+<markdown> EXTENDS @<string> CLOSED {   
+
+    a [fhir:markdown];
+    fhir:nodeRole [fhir:treeRoot]?;
+}  
+
+# A measured or measurable amount
+<Quantity> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Quantity];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:value @<Quantity.value>?;          # Numerical value (with implicit 
+                                            # precision) 
+    fhir:comparator @<Quantity.comparator>?;  # < | <= | >= | > | ad - how to 
+                                            # understand the value 
+    fhir:unit @<Quantity.unit>?;            # Unit representation
+    fhir:system @<Quantity.system>?;        # System that defines coded unit form
+    fhir:code @<Quantity.code>?;            # Coded form of the unit
+} AND (
+
+# Constraint: UniqueKey:qty-3
+# Human readable:If a code for the unit is present, the system SHALL also be present
+# XPath:not(exists(f:code)) or exists(f:system)
+# Constraint:code.empty() or system.exists()
+# ShEx:
+
+ NOT { fhir:code {fhir:v .} }  OR { fhir:system . }
+
+)
+ 
+
+# Set of values bounded by low and high
+<Range> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Range];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:low @<Range.low>?;                 # Low limit
+    fhir:high @<Range.high>?;               # High limit
+} AND (
+
+# Constraint: UniqueKey:rng-2
+# Human readable:If present, low SHALL have a lower value than high
+# XPath:not(exists(f:low/f:value/@value)) or not(exists(f:high/f:value/@value)) or (number(f:low/f:value/@value) <= number(f:high/f:value/@value))
+# Constraint:low.value.empty() or high.value.empty() or (low <= high)
+# ShEx:
+
+ NOT { fhir:low fhir:value {fhir:v .} }  OR  NOT { fhir:high fhir:value {fhir:v .} }  OR ({ fhir:low { fhir:v MaxInclusive { fhir:high } }  })
+
+)
+ 
+
+# Concept - reference to a terminology or just  text
+<CodeableConcept> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:CodeableConcept];
+    fhir:nodeRole [fhir:treeRoot]?;
+    a NONLITERAL*;
+    fhir:coding @<OneOrMore_CodeableConcept.coding>?;  # Code defined by a terminology 
+                                            # system 
+    fhir:text @<CodeableConcept.text>?;     # Plain text representation of the 
+                                            # concept 
+}  
+
+#---------------------- Cardinality Types (OneOrMore) -------------------
+
+<OneOrMore_EvidenceReport.useContext> CLOSED {
+    rdf:first @<EvidenceReport.useContext>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_EvidenceReport.useContext> 
+}
+
+<OneOrMore_EvidenceReport.identifier> CLOSED {
+    rdf:first @<EvidenceReport.identifier>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_EvidenceReport.identifier> 
+}
+
+<OneOrMore_EvidenceReport.relatedIdentifier> CLOSED {
+    rdf:first @<EvidenceReport.relatedIdentifier>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_EvidenceReport.relatedIdentifier> 
+}
+
+<OneOrMore_EvidenceReport.note> CLOSED {
+    rdf:first @<EvidenceReport.note>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_EvidenceReport.note> 
+}
+
+<OneOrMore_EvidenceReport.relatedArtifact> CLOSED {
+    rdf:first @<EvidenceReport.relatedArtifact>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_EvidenceReport.relatedArtifact> 
+}
+
+<OneOrMore_EvidenceReport.contact> CLOSED {
+    rdf:first @<EvidenceReport.contact>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_EvidenceReport.contact> 
+}
+
+<OneOrMore_EvidenceReport.author> CLOSED {
+    rdf:first @<EvidenceReport.author>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_EvidenceReport.author> 
+}
+
+<OneOrMore_EvidenceReport.editor> CLOSED {
+    rdf:first @<EvidenceReport.editor>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_EvidenceReport.editor> 
+}
+
+<OneOrMore_EvidenceReport.reviewer> CLOSED {
+    rdf:first @<EvidenceReport.reviewer>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_EvidenceReport.reviewer> 
+}
+
+<OneOrMore_EvidenceReport.endorser> CLOSED {
+    rdf:first @<EvidenceReport.endorser>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_EvidenceReport.endorser> 
+}
+
+<OneOrMore_EvidenceReport.relatesTo> CLOSED {
+    rdf:first @<EvidenceReport.relatesTo>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_EvidenceReport.relatesTo> 
+}
+
+<OneOrMore_EvidenceReport.section> CLOSED {
+    rdf:first @<EvidenceReport.section>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_EvidenceReport.section> 
+}
+
+<OneOrMore_EvidenceReport.subject.characteristic> CLOSED {
+    rdf:first @<EvidenceReport.subject.characteristic>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_EvidenceReport.subject.characteristic> 
+}
+
+<OneOrMore_EvidenceReport.subject.note> CLOSED {
+    rdf:first @<EvidenceReport.subject.note>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_EvidenceReport.subject.note> 
+}
+
+<OneOrMore_EvidenceReport.section.author_Device_OR_Group_OR_Organization_OR_Person> CLOSED {
+    rdf:first @<EvidenceReport.section.author> AND {fhir:link 
+			@<Device> OR 
+			@<Group> OR 
+			@<Organization> OR 
+			@<Person> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_EvidenceReport.section.author_Device_OR_Group_OR_Organization_OR_Person> 
+}
+
+<OneOrMore_EvidenceReport.section.entryClassifier> CLOSED {
+    rdf:first @<EvidenceReport.section.entryClassifier>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_EvidenceReport.section.entryClassifier> 
+}
+
+<OneOrMore_EvidenceReport.section.entryReference_Resource> CLOSED {
+    rdf:first @<EvidenceReport.section.entryReference> AND {fhir:link 
+			@<Resource> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_EvidenceReport.section.entryReference_Resource> 
+}
+
+<OneOrMore_EvidenceReport.section.entryQuantity> CLOSED {
+    rdf:first @<EvidenceReport.section.entryQuantity>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_EvidenceReport.section.entryQuantity> 
+}
+
+<OneOrMore_CodeableConcept.coding> CLOSED {
+    rdf:first @<CodeableConcept.coding>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_CodeableConcept.coding> 
+}
+
+#---------------------- Reference Types -------------------
+
+#---------------------- Value Sets ------------------------

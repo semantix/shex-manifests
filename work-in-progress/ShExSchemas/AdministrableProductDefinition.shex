@@ -1,0 +1,482 @@
+﻿PREFIX fhir: <http://hl7.org/fhir/> 
+PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+BASE <http://hl7.org/fhir/shape/>
+
+
+start=@<AdministrableProductDefinition> AND {fhir:nodeRole [fhir:treeRoot]}
+
+
+# A medicinal product in the final form, suitable for administration - after any mixing of multiple components
+<AdministrableProductDefinition> EXTENDS @<DomainResource> CLOSED {   
+
+    a [fhir:AdministrableProductDefinition];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:identifier @<OneOrMore_Identifier>?;  # An identifier for the 
+                                            # administrable product 
+    fhir:status @<code> AND
+    	{fhir:value @fhirvs:publication-status};  # draft | active | retired | unknown
+    fhir:formOf @<OneOrMore_Reference_MedicinalProductDefinition>?;  # References a product from which 
+                                            # one or more of the constituent 
+                                            # parts of that product can be 
+                                            # prepared and used as described by 
+                                            # this administrable product 
+    fhir:administrableDoseForm @<CodeableConcept>?;  # The dose form of the final product 
+                                            # after necessary reconstitution or 
+                                            # processing 
+    fhir:unitOfPresentation @<CodeableConcept>?;  # The presentation type in which 
+                                            # this item is given to a patient. 
+                                            # e.g. for a spray - 'puff' 
+    fhir:producedFrom @<OneOrMore_Reference_ManufacturedItemDefinition>?;  # Indicates the specific 
+                                            # manufactured items that are part 
+                                            # of the 'formOf' product that are 
+                                            # used in the preparation of this 
+                                            # specific administrable form 
+    fhir:ingredient @<OneOrMore_CodeableConcept>?;  # The ingredients of this 
+                                            # administrable medicinal product. 
+                                            # This is only needed if the 
+                                            # ingredients are not specified 
+                                            # either using 
+                                            # ManufacturedItemDefiniton, or 
+                                            # using by incoming references from 
+                                            # the Ingredient resource 
+    fhir:device @<Reference> AND {fhir:link 
+    			@<DeviceDefinition> }?;  # A device that is integral to the 
+                                            # medicinal product, in effect being 
+                                            # considered as an "ingredient" of 
+                                            # the medicinal product 
+    fhir:property @<OneOrMore_AdministrableProductDefinition.property>?;  # Characteristics e.g. a product's 
+                                            # onset of action 
+    fhir:routeOfAdministration @<OneOrMore_AdministrableProductDefinition.routeOfAdministration>;  # The path by which the product is 
+                                            # taken into or makes contact with 
+                                            # the body 
+} AND (
+
+# Constraint: UniqueKey:apd-1
+# Human readable:RouteOfAdministration cannot be used when the 'formOf' product already uses MedicinalProductDefinition.route (and vice versa)
+# XPath:count(f:AdministrableProductDefinition/f:routeOfAdministration/f:code|//f:MedicinalProductDefinition[f:id/@value=current()/ancestor::f:AdministrableProductDefinition/f:formOf/f:reference/@value]/f:route) < 2
+# Constraint:(AdministrableProductDefinition.routeOfAdministration.code.count() + AdministrableProductDefinition.formOf.resolve().route.count())  < 2
+# ShEx:
+
+( count( fhir:AdministrableProductDefinition fhir:routeOfAdministration fhir:code ) SHEX_Plus_SHEX  count( fhir:AdministrableProductDefinition fhir:formOf  resolve(  ) fhir:route )) SHEX_LessThan_SHEX 2
+
+)
+ 
+
+# The path by which the product is taken into or makes contact with the body
+<AdministrableProductDefinition.routeOfAdministration> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:code @<CodeableConcept>;           # Coded expression for the route
+    fhir:firstDose @<Quantity>?;            # The first dose (dose quantity) 
+                                            # administered can be specified for 
+                                            # the product 
+    fhir:maxSingleDose @<Quantity>?;        # The maximum single dose that can 
+                                            # be administered 
+    fhir:maxDosePerDay @<Quantity>?;        # The maximum dose quantity to be 
+                                            # administered in any one 24-h 
+                                            # period 
+    fhir:maxDosePerTreatmentPeriod @<Ratio>?;  # The maximum dose per treatment 
+                                            # period that can be administered 
+    fhir:maxTreatmentPeriod @<Duration>?;   # The maximum treatment period 
+                                            # during which the product can be 
+                                            # administered 
+    fhir:targetSpecies @<OneOrMore_AdministrableProductDefinition.routeOfAdministration.targetSpecies>?;  # A species for which this route 
+                                            # applies 
+}  
+
+# Characteristics e.g. a product's onset of action
+<AdministrableProductDefinition.property> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:type @<CodeableConcept>;           # A code expressing the type of 
+                                            # characteristic 
+    fhir:value (@<CodeableConcept>  OR 
+    			@<Quantity>  OR 
+    			@<date>  OR 
+    			@<boolean>  OR 
+    			@<Attachment> )  AND { rdf:type IRI } ?;  # A value for the characteristic
+    fhir:status @<CodeableConcept>?;        # The status of characteristic e.g. 
+                                            # assigned or pending 
+}  
+
+# A species specific time during which consumption of animal product is not appropriate
+<AdministrableProductDefinition.routeOfAdministration.targetSpecies.withdrawalPeriod> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:tissue @<CodeableConcept>;         # The type of tissue for which the 
+                                            # withdrawal period applies, e.g. 
+                                            # meat, milk 
+    fhir:value @<Quantity>;                 # A value for the time
+    fhir:supportingInformation @<string>?;  # Extra information about the 
+                                            # withdrawal period 
+}  
+
+# A species for which this route applies
+<AdministrableProductDefinition.routeOfAdministration.targetSpecies> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:code @<CodeableConcept>;           # Coded expression for the species
+    fhir:withdrawalPeriod @<OneOrMore_AdministrableProductDefinition.routeOfAdministration.targetSpecies.withdrawalPeriod>?;  # A species specific time during 
+                                            # which consumption of animal 
+                                            # product is not appropriate 
+}  
+
+#---------------------- Data Types -------------------
+
+# Primitive Type date
+<date> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:date];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v xsd:gYear OR xsd:gYearMonth OR xsd:date?;  # Primitive value for date
+}  
+
+# An identifier intended for computation
+<Identifier> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Identifier];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:use @<code> AND
+    	{fhir:value @fhirvs:identifier-use}?;  # usual | official | temp | 
+                                            # secondary | old (If known) 
+    fhir:type @<CodeableConcept>?;          # Description of identifier
+    fhir:system @<uri>?;                    # The namespace for the identifier 
+                                            # value 
+    fhir:value @<string>?;                  # The value that is unique
+    fhir:period @<Period>?;                 # Time period when id is/was valid 
+                                            # for use 
+    fhir:assigner @<Reference> AND {fhir:link 
+    			@<Organization> }?;  # Organization that issued id (may 
+                                            # be just text) 
+}  
+
+# Primitive Type code
+<code> EXTENDS @<string> CLOSED {   
+
+    a [fhir:code];
+    fhir:nodeRole [fhir:treeRoot]?;
+}  
+
+# Primitive Type boolean
+<boolean> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:boolean];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v xsd:boolean?;                    # Primitive value for boolean
+}  
+
+# Primitive Type string
+<string> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:string];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v xsd:string MAXLENGTH 1048576?;   # Primitive value for string
+}  
+
+# A reference from one resource to another
+<Reference> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Reference];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:link IRI?;
+    fhir:reference @<string>?;              # Literal reference, Relative, 
+                                            # internal or absolute URL 
+    fhir:type @<uri>?;                      # Type the reference refers to (e.g. 
+                                            # "Patient") 
+    fhir:identifier @<Identifier>?;         # Logical reference, when literal 
+                                            # reference is not known 
+    fhir:display @<string>?;                # Text alternative for the resource
+} AND (
+
+# Constraint: UniqueKey:ref-1
+# Human readable:SHALL have a contained resource if a local reference is provided
+# XPath:not(starts-with(f:reference/@value, '#')) or exists(ancestor::*[self::f:entry or self::f:parameter]/f:resource/f:*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')]|/*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')])
+# Constraint:reference.startsWith('#').not() or (reference.substring(1).trace('url') in %rootResource.contained.id.trace('ids')) or (reference='#' and %rootResource!=%resource)
+# ShEx:
+
+ NOT { fhir:reference  SHEX_startsWith_SHEX ('#') } OR ({ fhir:reference SHEX_substring_SHEX (1) SHEX_trace_SHEX ('url') } { fhir:v ['%rootResource'.contained.id SHEX_trace_SHEX ('ids')] } ) OR (({ fhir:reference { fhir:v ['#'] }  }) AND ('%rootResource' { fhir:v [ . -'%resource'] }))
+
+)
+ 
+
+# A measured or measurable amount
+<Quantity> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Quantity];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:value @<decimal>?;                 # Numerical value (with implicit 
+                                            # precision) 
+    fhir:comparator @<code> AND
+    	{fhir:value @fhirvs:quantity-comparator}?;  # < | <= | >= | > | ad - how to 
+                                            # understand the value 
+    fhir:unit @<string>?;                   # Unit representation
+    fhir:system @<uri>?;                    # System that defines coded unit form
+    fhir:code @<code>?;                     # Coded form of the unit
+} AND (
+
+# Constraint: UniqueKey:qty-3
+# Human readable:If a code for the unit is present, the system SHALL also be present
+# XPath:not(exists(f:code)) or exists(f:system)
+# Constraint:code.empty() or system.exists()
+# ShEx:
+
+ NOT { fhir:code {fhir:v .} }  OR { fhir:system . }
+
+)
+ 
+
+# A ratio of two Quantity values - a numerator and a denominator
+<Ratio> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Ratio];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:numerator @<Quantity>?;            # Numerator value
+    fhir:denominator @<SimpleQuantity>?;    # Denominator value
+} AND (
+
+# Constraint: UniqueKey:rat-1
+# Human readable:Numerator and denominator SHALL both be present, or both are absent. If both are absent, there SHALL be some extension present
+# XPath:(count(f:numerator) = count(f:denominator)) and ((count(f:numerator) > 0) or (count(f:extension) > 0))
+# Constraint:(numerator.empty() xor denominator.exists()) and (numerator.exists() or extension.exists())
+# ShEx:
+
+( NOT { fhir:numerator {fhir:v .} }  SHEX_Xor_SHEX { fhir:denominator . }) AND ({ fhir:numerator . } OR { fhir:extension . })
+
+)
+ 
+
+# A length of time
+<Duration> EXTENDS @<Quantity> CLOSED {   
+
+    a [fhir:Duration];
+    fhir:nodeRole [fhir:treeRoot]?;
+} AND (
+
+# Constraint: UniqueKey:drt-1
+# Human readable:There SHALL be a code if there is a value and it SHALL be an expression of time.  If system is present, it SHALL be UCUM.
+# XPath:(f:code or not(f:value)) and (not(exists(f:system)) or f:system/@value='http://unitsofmeasure.org')
+# Constraint:code.exists() implies ((system = %ucum) and value.exists())
+# ShEx:
+
+{ fhir:code . } SHEX_Implies_SHEX (({ fhir:system { fhir:v ['%ucum'] }  }) AND { fhir:value . })
+
+)
+ 
+
+# Content in a format defined elsewhere
+<Attachment> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Attachment];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:contentType @<code> AND
+    	{fhir:value @fhirvs:mimetypes}?;  # Mime type of the content, with 
+                                            # charset etc. 
+    fhir:language @<code>?;                 # Human language of the content 
+                                            # (BCP-47) 
+    fhir:data @<base64Binary>?;             # Data inline, base64ed
+    fhir:url @<url>?;                       # Uri where the data can be found
+    fhir:size @<integer64>?;                # Number of bytes of content (if url 
+                                            # provided) 
+    fhir:hash @<base64Binary>?;             # Hash of the data (sha-1, base64ed)
+    fhir:title @<string>?;                  # Label to display in place of the 
+                                            # data 
+    fhir:creation @<dateTime>?;             # Date attachment was first created
+    fhir:height @<positiveInt>?;            # Height of the image in pixels 
+                                            # (photo/video) 
+    fhir:width @<positiveInt>?;             # Width of the image in pixels 
+                                            # (photo/video) 
+    fhir:frames @<positiveInt>?;            # Number of frames if > 1 (photo)
+    fhir:duration @<decimal>?;              # Length in seconds (audio / video)
+    fhir:pages @<positiveInt>?;             # Number of printed pages
+} AND (
+
+# Constraint: UniqueKey:att-1
+# Human readable:If the Attachment has data, it SHALL have a contentType
+# XPath:not(exists(f:data)) or exists(f:contentType)
+# Constraint:data.empty() or contentType.exists()
+# ShEx:
+
+ NOT { fhir:data {fhir:v .} }  OR { fhir:contentType . }
+
+)
+ 
+
+# Concept - reference to a terminology or just  text
+<CodeableConcept> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:CodeableConcept];
+    fhir:nodeRole [fhir:treeRoot]?;
+    a NONLITERAL*;
+    fhir:coding @<OneOrMore_Coding>?;       # Code defined by a terminology 
+                                            # system 
+    fhir:text @<string>?;                   # Plain text representation of the 
+                                            # concept 
+}  
+
+# Primitive Type dateTime
+<dateTime> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:dateTime];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v xsd:gYear OR xsd:gYearMonth OR xsd:date OR xsd:dateTime?;  # Primitive value for dateTime
+}  
+
+# Primitive Type integer64
+<integer64> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:integer64];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v xsd:long MININCLUSIVE -9223372036854775808 MAXINCLUSIVE 9223372036854775807?;  # Primitive value for integer64
+}  
+
+# A fixed quantity (no comparator)
+<SimpleQuantity> EXTENDS @<Quantity> CLOSED {   
+
+    a [fhir:SimpleQuantity];
+    fhir:nodeRole [fhir:treeRoot]?;
+} AND (
+
+# Constraint: UniqueKey:sqty-1
+# Human readable:The comparator is not used on a SimpleQuantity
+# XPath:not(exists(f:comparator))
+# Constraint:comparator.empty()
+# ShEx:
+
+ NOT { fhir:comparator {fhir:v .} } 
+
+)
+ 
+
+# Time range defined by start and end date/time
+<Period> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Period];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:start @<dateTime>?;                # Starting time with inclusive 
+                                            # boundary 
+    fhir:end @<dateTime>?;                  # End time with inclusive boundary, 
+                                            # if not ongoing 
+} AND (
+
+# Constraint: UniqueKey:per-1
+# Human readable:If present, start SHALL have a lower or equal value than end
+# XPath:not(exists(f:start/@value)) or not(exists(f:end/@value)) or (xs:dateTime(f:start/@value) <= xs:dateTime(f:end/@value))
+# Constraint:start.hasValue().not() or end.hasValue().not() or (start <= end)
+# ShEx:
+
+ NOT { fhir:start  . } OR  NOT { fhir:end  . } OR ({ fhir:start { fhir:v MaxInclusive { fhir:end } }  })
+
+)
+ 
+
+# Primitive Type uri
+<uri> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:uri];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v xsd:anyURI?;                     # Primitive value for uri
+}  
+
+# Primitive Type url
+<url> EXTENDS @<uri> CLOSED {   
+
+    a [fhir:url];
+    fhir:nodeRole [fhir:treeRoot]?;
+}  
+
+# Primitive Type base64Binary
+<base64Binary> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:base64Binary];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v xsd:base64Binary?;               # Primitive value for base64Binary
+}  
+
+# A reference to a code defined by a terminology system
+<Coding> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Coding];
+    fhir:nodeRole [fhir:treeRoot]?;
+    a NONLITERAL?;
+    fhir:system @<uri>?;                    # Identity of the terminology system
+    fhir:version @<string>?;                # Version of the system - if relevant
+    fhir:code @<code>?;                     # Symbol in syntax defined by the 
+                                            # system 
+    fhir:display @<string>?;                # Representation defined by the 
+                                            # system 
+    fhir:userSelected @<boolean>?;          # If this coding was chosen directly 
+                                            # by the user 
+}  
+
+# Primitive Type positiveInt
+<positiveInt> EXTENDS @<integer> CLOSED {   
+
+    a [fhir:positiveInt];
+    fhir:nodeRole [fhir:treeRoot]?;
+}  
+
+# Primitive Type decimal
+<decimal> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:decimal];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v xsd:decimal OR xsd:double?;      # Primitive value for decimal
+}  
+
+#---------------------- Cardinality Types (OneOrMore) -------------------
+
+<OneOrMore_Identifier> CLOSED {
+    rdf:first @<Identifier>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Identifier> 
+}
+
+<OneOrMore_Reference_MedicinalProductDefinition> CLOSED {
+    rdf:first @<Reference> AND {fhir:link 
+			@<MedicinalProductDefinition> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Reference_MedicinalProductDefinition> 
+}
+
+<OneOrMore_Reference_ManufacturedItemDefinition> CLOSED {
+    rdf:first @<Reference> AND {fhir:link 
+			@<ManufacturedItemDefinition> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Reference_ManufacturedItemDefinition> 
+}
+
+<OneOrMore_CodeableConcept> CLOSED {
+    rdf:first @<CodeableConcept>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_CodeableConcept> 
+}
+
+<OneOrMore_AdministrableProductDefinition.property> CLOSED {
+    rdf:first @<AdministrableProductDefinition.property>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_AdministrableProductDefinition.property> 
+}
+
+<OneOrMore_AdministrableProductDefinition.routeOfAdministration> CLOSED {
+    rdf:first @<AdministrableProductDefinition.routeOfAdministration>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_AdministrableProductDefinition.routeOfAdministration> 
+}
+
+<OneOrMore_AdministrableProductDefinition.routeOfAdministration.targetSpecies> CLOSED {
+    rdf:first @<AdministrableProductDefinition.routeOfAdministration.targetSpecies>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_AdministrableProductDefinition.routeOfAdministration.targetSpecies> 
+}
+
+<OneOrMore_AdministrableProductDefinition.routeOfAdministration.targetSpecies.withdrawalPeriod> CLOSED {
+    rdf:first @<AdministrableProductDefinition.routeOfAdministration.targetSpecies.withdrawalPeriod>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_AdministrableProductDefinition.routeOfAdministration.targetSpecies.withdrawalPeriod> 
+}
+
+<OneOrMore_Coding> CLOSED {
+    rdf:first @<Coding>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Coding> 
+}
+
+#---------------------- Reference Types -------------------
+
+#---------------------- Value Sets ------------------------
+
+# Identifies the purpose for this identifier, if known .
+fhirvs:identifier-use ["usual" "official" "temp" "secondary" "old"]
+
+# The lifecycle status of an artifact.
+fhirvs:publication-status ["draft" "active" "retired" "unknown"]
+
+# This value set includes all possible codes from BCP-13 (http://tools.ietf.org/html/bcp13)
+fhirvs:mimetypes EXTERNAL
+
+# How the Quantity should be understood and represented.
+fhirvs:quantity-comparator ["<" "<=" ">=" ">" "ad"]

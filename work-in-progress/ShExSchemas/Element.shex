@@ -1,0 +1,40 @@
+﻿PREFIX fhir: <http://hl7.org/fhir/> 
+PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+BASE <http://hl7.org/fhir/shape/>
+
+
+# Base for all elements
+<Element> EXTENDS @<Base> CLOSED {   
+
+    a [fhir:Element];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v @<Element.id>?;                  # Unique id for inter-element 
+                                            # referencing 
+    fhir:extension @<OneOrMore_Element.extension>?;  # Additional content defined by 
+                                            # implementations 
+} AND (
+
+# Constraint: UniqueKey:ele-1
+# Human readable:All FHIR elements must have a @value or children
+# XPath:@value|f:*|h:div
+# Constraint:hasValue() or (children().count() > id.count())
+# ShEx:
+
+ . OR ( count(  children(  ) ) { fhir:v MinExclusive  count( fhir:id ) } )
+
+)
+ 
+
+#---------------------- Data Types -------------------
+
+#---------------------- Cardinality Types (OneOrMore) -------------------
+
+<OneOrMore_Element.extension> CLOSED {
+    rdf:first @<Element.extension>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Element.extension> 
+}
+
+#---------------------- Reference Types -------------------
+
+#---------------------- Value Sets ------------------------

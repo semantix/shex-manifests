@@ -1,0 +1,137 @@
+﻿PREFIX fhir: <http://hl7.org/fhir/> 
+PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+BASE <http://hl7.org/fhir/shape/>
+
+
+# Definition Pattern
+<Definition> CLOSED {   
+
+    a [fhir:Definition];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:url @<Definition.url>?;            # Logical canonical URL to reference 
+                                            # this {{title}} (globally unique) 
+    fhir:identifier @<Definition.identifier>?;  # Business Identifier for {{title}}
+    fhir:version @<Definition.version>?;    # Business version of the {{title}}
+    fhir:title @<Definition.title>?;        # Name for this {{title}} (Human 
+                                            # friendly) 
+    fhir:derivedFromCanonical @<OneOrMore_Definition.derivedFromCanonical>?;  # Based on FHIR protocol or 
+                                            # definition 
+    fhir:derivedFromUri @<OneOrMore_Definition.derivedFromUri>?;  # Based on external protocol or 
+                                            # definition 
+    fhir:partOf @<OneOrMore_Definition.partOf>?;  # Part of referenced definition
+    fhir:replaces @<OneOrMore_Definition.replaces>?;  # Request(s) replaced by this request
+    fhir:status @<Definition.status>;       # draft | active | retired | unknown
+    fhir:experimental @<Definition.experimental>?;  # If for testing purposes, not real 
+                                            # usage 
+    fhir:subject (@<CodeableConcept>  OR 
+    			(@<Reference>  AND {fhir:link @<Group> }) )  AND { rdf:type IRI } ?;  # Type of individual the defined 
+                                            # service is for 
+    fhir:date @<Definition.date>?;          # Date status first applied
+    fhir:publisher @<Definition.publisher> AND {fhir:link 
+    			@<Organization> OR 
+    			@<Practitioner> OR 
+    			@<PractitionerRole> }?;  # The name of the individual or 
+                                            # organization that published the 
+                                            # {{title}} 
+    fhir:contact @<OneOrMore_Definition.contact>?;  # Contact details for the publisher
+    fhir:description @<Definition.description>?;  # Natural language description of 
+                                            # the {{title}} 
+    fhir:useContext @<OneOrMore_Definition.useContext>?;  # Content intends to support these 
+                                            # contexts 
+    fhir:jurisdiction @<OneOrMore_Definition.jurisdiction>?;  # Intended jurisdiction for 
+                                            # {{title}} (if applicable) 
+    fhir:purpose @<Definition.purpose>?;    # Why this {{title}} is defined
+    fhir:copyright @<Definition.copyright>?;  # Use and/or publishing restrictions
+    fhir:approvalDate @<Definition.approvalDate>?;  # When {{title}} approved by 
+                                            # publisher 
+    fhir:lastReviewDate @<Definition.lastReviewDate>?;  # Last review date for the {{title}}
+    fhir:effectivePeriod @<Definition.effectivePeriod>?;  # The effective date range for the 
+                                            # {{title}} 
+    fhir:performerType @<Definition.performerType>?;  # Desired kind of service performer
+}  
+
+#---------------------- Data Types -------------------
+
+# A reference from one resource to another
+<Reference> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Reference];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:link IRI?;
+    fhir:reference @<Reference.reference>?;  # Literal reference, Relative, 
+                                            # internal or absolute URL 
+    fhir:type @<Reference.type>?;           # Type the reference refers to (e.g. 
+                                            # "Patient") 
+    fhir:identifier @<Reference.identifier>?;  # Logical reference, when literal 
+                                            # reference is not known 
+    fhir:display @<Reference.display>?;     # Text alternative for the resource
+} AND (
+
+# Constraint: UniqueKey:ref-1
+# Human readable:SHALL have a contained resource if a local reference is provided
+# XPath:not(starts-with(f:reference/@value, '#')) or exists(ancestor::*[self::f:entry or self::f:parameter]/f:resource/f:*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')]|/*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')])
+# Constraint:reference.startsWith('#').not() or (reference.substring(1).trace('url') in %rootResource.contained.id.trace('ids')) or (reference='#' and %rootResource!=%resource)
+# ShEx:
+
+
+)
+ 
+
+# Concept - reference to a terminology or just  text
+<CodeableConcept> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:CodeableConcept];
+    fhir:nodeRole [fhir:treeRoot]?;
+    a NONLITERAL*;
+    fhir:coding @<OneOrMore_CodeableConcept.coding>?;  # Code defined by a terminology 
+                                            # system 
+    fhir:text @<CodeableConcept.text>?;     # Plain text representation of the 
+                                            # concept 
+}  
+
+#---------------------- Cardinality Types (OneOrMore) -------------------
+
+<OneOrMore_Definition.derivedFromCanonical> CLOSED {
+    rdf:first @<Definition.derivedFromCanonical>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Definition.derivedFromCanonical> 
+}
+
+<OneOrMore_Definition.derivedFromUri> CLOSED {
+    rdf:first @<Definition.derivedFromUri>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Definition.derivedFromUri> 
+}
+
+<OneOrMore_Definition.partOf> CLOSED {
+    rdf:first @<Definition.partOf>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Definition.partOf> 
+}
+
+<OneOrMore_Definition.replaces> CLOSED {
+    rdf:first @<Definition.replaces>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Definition.replaces> 
+}
+
+<OneOrMore_Definition.contact> CLOSED {
+    rdf:first @<Definition.contact>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Definition.contact> 
+}
+
+<OneOrMore_Definition.useContext> CLOSED {
+    rdf:first @<Definition.useContext>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Definition.useContext> 
+}
+
+<OneOrMore_Definition.jurisdiction> CLOSED {
+    rdf:first @<Definition.jurisdiction>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Definition.jurisdiction> 
+}
+
+<OneOrMore_CodeableConcept.coding> CLOSED {
+    rdf:first @<CodeableConcept.coding>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_CodeableConcept.coding> 
+}
+
+#---------------------- Reference Types -------------------
+
+#---------------------- Value Sets ------------------------

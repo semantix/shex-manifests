@@ -1,0 +1,40 @@
+﻿PREFIX fhir: <http://hl7.org/fhir/> 
+PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+BASE <http://hl7.org/fhir/shape/>
+
+
+# Details of a Technology mediated contact point (phone, fax, email, etc.)
+<ContactPoint> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:ContactPoint];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:system @<ContactPoint.system>?;    # phone | fax | email | pager | url 
+                                            # | sms | other 
+    fhir:value @<ContactPoint.value>?;      # The actual contact point details
+    fhir:use @<ContactPoint.use>?;          # home | work | temp | old | mobile 
+                                            # - purpose of this contact point 
+    fhir:rank @<ContactPoint.rank>?;        # Specify preferred order of use (1 
+                                            # = highest) 
+    fhir:period @<ContactPoint.period>?;    # Time period when the contact point 
+                                            # was/is in use 
+} AND (
+
+# Constraint: UniqueKey:cpt-2
+# Human readable:A system is required if a value is provided.
+# XPath:not(exists(f:value)) or exists(f:system)
+# Constraint:value.empty() or system.exists()
+# ShEx:
+
+ NOT { fhir:value {fhir:v .} }  OR { fhir:system . }
+
+)
+ 
+
+#---------------------- Data Types -------------------
+
+#---------------------- Cardinality Types (OneOrMore) -------------------
+
+#---------------------- Reference Types -------------------
+
+#---------------------- Value Sets ------------------------

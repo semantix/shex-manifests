@@ -1,0 +1,645 @@
+﻿PREFIX fhir: <http://hl7.org/fhir/> 
+PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+BASE <http://hl7.org/fhir/shape/>
+
+
+start=@<TerminologyCapabilities> AND {fhir:nodeRole [fhir:treeRoot]}
+
+
+# A statement of system capabilities
+<TerminologyCapabilities> EXTENDS @<CanonicalResource> CLOSED {   
+
+    a [fhir:TerminologyCapabilities];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:url @<uri>?;                       # Canonical identifier for this 
+                                            # terminology capabilities, 
+                                            # represented as a URI (globally 
+                                            # unique) 
+    fhir:identifier @<OneOrMore_Identifier>?;  # Additional identifier for the 
+                                            # terminology capabilities 
+    fhir:version @<string>?;                # Business version of the 
+                                            # terminology capabilities 
+    fhir:name @<string>?;                   # Name for this terminology 
+                                            # capabilities (computer friendly) 
+    fhir:title @<string>?;                  # Name for this terminology 
+                                            # capabilities (human friendly) 
+    fhir:status @<code> AND
+    	{fhir:value @fhirvs:publication-status};  # draft | active | retired | unknown
+    fhir:experimental @<boolean>?;          # For testing purposes, not real 
+                                            # usage 
+    fhir:date @<dateTime>;                  # Date last changed
+    fhir:publisher @<string>?;              # Name of the publisher 
+                                            # (organization or individual) 
+    fhir:contact @<OneOrMore_ContactDetail>?;  # Contact details for the publisher
+    fhir:description @<markdown>?;          # Natural language description of 
+                                            # the terminology capabilities 
+    fhir:useContext @<OneOrMore_UsageContext>?;  # The context that the content is 
+                                            # intended to support 
+    fhir:jurisdiction @<OneOrMore_CodeableConcept>?;  # Intended jurisdiction for 
+                                            # terminology capabilities (if 
+                                            # applicable) 
+    fhir:purpose @<markdown>?;              # Why this terminology capabilities 
+                                            # is defined 
+    fhir:copyright @<markdown>?;            # Use and/or publishing restrictions
+    fhir:kind @<code> AND
+    	{fhir:value @fhirvs:capability-statement-kind};  # instance | capability | 
+                                            # requirements 
+    fhir:software @<TerminologyCapabilities.software>?;  # Software that is covered by this 
+                                            # terminology capability statement 
+    fhir:implementation @<TerminologyCapabilities.implementation>?;  # If this describes a specific 
+                                            # instance 
+    fhir:lockedDate @<boolean>?;            # Whether lockedDate is supported
+    fhir:codeSystem @<OneOrMore_TerminologyCapabilities.codeSystem>?;  # A code system supported by the 
+                                            # server 
+    fhir:expansion @<TerminologyCapabilities.expansion>?;  # Information about the 
+                                            # [ValueSet/$expand](valueset-oper-
+                                            # ation-expand.html) operation 
+    fhir:codeSearch @<code> AND
+    	{fhir:value @fhirvs:code-search-support}?;  # explicit | all
+    fhir:validateCode @<TerminologyCapabilities.validateCode>?;  # Information about the 
+                                            # [ValueSet/$validate-code](values-
+                                            # et-operation-validate-code.html) 
+                                            # operation 
+    fhir:translation @<TerminologyCapabilities.translation>?;  # Information about the 
+                                            # [ConceptMap/$translate](conceptm-
+                                            # ap-operation-translate.html) 
+                                            # operation 
+    fhir:closure @<TerminologyCapabilities.closure>?;  # Information about the 
+                                            # [ConceptMap/$closure](conceptmap-
+                                            # -operation-closure.html) operation 
+} AND (
+
+# Constraint: UniqueKey:cnl-0
+# Human readable:Name should be usable as an identifier for the module by machine processing applications such as code generation
+# XPath:not(exists(f:name/@value)) or matches(f:name/@value, '[A-Z]([A-Za-z0-9_]){0,254}')
+# Constraint:name.exists() implies name.matches('[A-Z]([A-Za-z0-9_]){0,254}')
+# ShEx:
+
+{ fhir:name . } SHEX_Implies_SHEX { fhir:name SHEX_matches_SHEX ('[A-Z]([A-Za-z0-9_]){0,254}') }
+
+) AND (
+
+# Constraint: UniqueKey:tcp-3
+# Human readable:If kind = instance, implementation must be present and software may be present
+# XPath:not(f:kind/@value='instance') or exists(f:implementation)
+# Constraint:(kind != 'instance') or implementation.exists()
+# ShEx:
+
+({ fhir:kind { fhir:v [ . -'instance'] } }) OR { fhir:implementation . }
+
+) AND (
+
+# Constraint: UniqueKey:tcp-2
+# Human readable:A Capability Statement SHALL have at least one of description, software, or implementation element.
+# XPath:count(f:software | f:implementation | f:description) > 0
+# Constraint:(description.count() + software.count() + implementation.count()) > 0
+# ShEx:
+
+( count( fhir:description ) SHEX_Plus_SHEX  count( fhir:software ) SHEX_Plus_SHEX  count( fhir:implementation )) { fhir:v MinExclusive 0 } 
+
+) AND (
+
+# Constraint: UniqueKey:tcp-5
+# Human readable:If kind = requirements, implementation and software must be absent
+# XPath:not(f:kind/@value='instance') or (not(exists(f:implementation)) and not(exists(f:software)))
+# Constraint:(kind!='requirements') or (implementation.exists().not() and software.exists().not())
+# ShEx:
+
+({ fhir:kind { fhir:v [ . -'requirements'] } }) OR ( NOT { fhir:implementation  . } AND  NOT { fhir:software  . })
+
+) AND (
+
+# Constraint: UniqueKey:tcp-4
+# Human readable:If kind = capability, implementation must be absent, software must be present
+# XPath: not(f:kind/@value='instance') or (not(exists(f:implementation)) and exists(f:software))
+# Constraint:(kind != 'capability') or (implementation.exists().not() and software.exists())
+# ShEx:
+
+({ fhir:kind { fhir:v [ . -'capability'] } }) OR ( NOT { fhir:implementation  . } AND { fhir:software . })
+
+) AND (
+
+# Constraint: UniqueKey:tcp-1
+# Human readable:If there is more than one version, a version code must be defined
+# XPath:(count(f:version) <= 1) or not(exists(f:version[not(f:code)]))
+# Constraint:version.count() > 1 implies version.all(code.exists())
+# ShEx:
+
+( count( fhir:version ) { fhir:v MinExclusive 1 } ) SHEX_Implies_SHEX { fhir:version SHEX_all_SHEX (fhir:code .) }
+
+)
+ 
+
+# Supported expansion parameter
+<TerminologyCapabilities.expansion.parameter> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:name @<code>;                      # Name of the supported expansion 
+                                            # parameter 
+    fhir:documentation @<string>?;          # Description of support for 
+                                            # parameter 
+}  
+
+# Information about the [ValueSet/$validate-code](valueset-operation-validate-code.html) operation
+<TerminologyCapabilities.validateCode> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:translations @<boolean>;           # Whether translations are validated
+}  
+
+# Version of Code System supported
+<TerminologyCapabilities.codeSystem.version> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:code @<string>?;                   # Version identifier for this version
+    fhir:isDefault @<boolean>?;             # If this is the default version for 
+                                            # this code system 
+    fhir:compositional @<boolean>?;         # If compositional grammar is 
+                                            # supported 
+    fhir:language @<OneOrMore_code>?;       # Language Displays supported
+    fhir:filter @<OneOrMore_TerminologyCapabilities.codeSystem.version.filter>?;  # Filter Properties supported
+    fhir:property @<OneOrMore_code>?;       # Properties supported for $lookup
+}  
+
+# Software that is covered by this terminology capability statement
+<TerminologyCapabilities.software> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:name @<string>;                    # A name the software is known by
+    fhir:version @<string>?;                # Version covered by this statement
+}  
+
+# If this describes a specific instance
+<TerminologyCapabilities.implementation> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:description @<string>;             # Describes this specific instance
+    fhir:url @<url>?;                       # Base URL for the implementation
+}  
+
+# A code system supported by the server
+<TerminologyCapabilities.codeSystem> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:uri @<canonical>?;                 # Canonical identifier for the code 
+                                            # system, represented as a URI 
+    fhir:version @<OneOrMore_TerminologyCapabilities.codeSystem.version>?;  # Version of Code System supported
+    fhir:subsumption @<boolean>?;           # Whether subsumption is supported
+} AND (
+
+# Constraint: UniqueKey:cnl-0
+# Human readable:Name should be usable as an identifier for the module by machine processing applications such as code generation
+# XPath:not(exists(f:name/@value)) or matches(f:name/@value, '[A-Z]([A-Za-z0-9_]){0,254}')
+# Constraint:name.exists() implies name.matches('[A-Z]([A-Za-z0-9_]){0,254}')
+# ShEx:
+
+{ fhir:name . } SHEX_Implies_SHEX { fhir:name SHEX_matches_SHEX ('[A-Z]([A-Za-z0-9_]){0,254}') }
+
+) AND (
+
+# Constraint: UniqueKey:tcp-3
+# Human readable:If kind = instance, implementation must be present and software may be present
+# XPath:not(f:kind/@value='instance') or exists(f:implementation)
+# Constraint:(kind != 'instance') or implementation.exists()
+# ShEx:
+
+({ fhir:kind { fhir:v [ . -'instance'] } }) OR { fhir:implementation . }
+
+) AND (
+
+# Constraint: UniqueKey:tcp-2
+# Human readable:A Capability Statement SHALL have at least one of description, software, or implementation element.
+# XPath:count(f:software | f:implementation | f:description) > 0
+# Constraint:(description.count() + software.count() + implementation.count()) > 0
+# ShEx:
+
+( count( fhir:description ) SHEX_Plus_SHEX  count( fhir:software ) SHEX_Plus_SHEX  count( fhir:implementation )) { fhir:v MinExclusive 0 } 
+
+) AND (
+
+# Constraint: UniqueKey:tcp-5
+# Human readable:If kind = requirements, implementation and software must be absent
+# XPath:not(f:kind/@value='instance') or (not(exists(f:implementation)) and not(exists(f:software)))
+# Constraint:(kind!='requirements') or (implementation.exists().not() and software.exists().not())
+# ShEx:
+
+({ fhir:kind { fhir:v [ . -'requirements'] } }) OR ( NOT { fhir:implementation  . } AND  NOT { fhir:software  . })
+
+) AND (
+
+# Constraint: UniqueKey:tcp-4
+# Human readable:If kind = capability, implementation must be absent, software must be present
+# XPath: not(f:kind/@value='instance') or (not(exists(f:implementation)) and exists(f:software))
+# Constraint:(kind != 'capability') or (implementation.exists().not() and software.exists())
+# ShEx:
+
+({ fhir:kind { fhir:v [ . -'capability'] } }) OR ( NOT { fhir:implementation  . } AND { fhir:software . })
+
+) AND (
+
+# Constraint: UniqueKey:tcp-1
+# Human readable:If there is more than one version, a version code must be defined
+# XPath:(count(f:version) <= 1) or not(exists(f:version[not(f:code)]))
+# Constraint:version.count() > 1 implies version.all(code.exists())
+# ShEx:
+
+( count( fhir:version ) { fhir:v MinExclusive 1 } ) SHEX_Implies_SHEX { fhir:version SHEX_all_SHEX (fhir:code .) }
+
+)
+ 
+
+# Filter Properties supported
+<TerminologyCapabilities.codeSystem.version.filter> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:code @<code>;                      # Code of the property supported
+    fhir:op @<OneOrMore_code>;              # Operations supported for the 
+                                            # property 
+}  
+
+# Information about the [ConceptMap/$translate](conceptmap-operation-translate.html) operation
+<TerminologyCapabilities.translation> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:needsMap @<boolean>;               # Whether the client must identify 
+                                            # the map 
+}  
+
+# Information about the [ConceptMap/$closure](conceptmap-operation-closure.html) operation
+<TerminologyCapabilities.closure> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:translation @<boolean>?;           # If cross-system closure is 
+                                            # supported 
+}  
+
+# Information about the [ValueSet/$expand](valueset-operation-expand.html) operation
+<TerminologyCapabilities.expansion> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:hierarchical @<boolean>?;          # Whether the server can return 
+                                            # nested value sets 
+    fhir:paging @<boolean>?;                # Whether the server supports paging 
+                                            # on expansion 
+    fhir:incomplete @<boolean>?;            # Allow request for incomplete 
+                                            # expansions? 
+    fhir:parameter @<OneOrMore_TerminologyCapabilities.expansion.parameter>?;  # Supported expansion parameter
+    fhir:textFilter @<markdown>?;           # Documentation about text searching 
+                                            # works 
+}  
+
+#---------------------- Data Types -------------------
+
+# Primitive Type dateTime
+<dateTime> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:dateTime];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v xsd:gYear OR xsd:gYearMonth OR xsd:date OR xsd:dateTime?;  # Primitive value for dateTime
+}  
+
+# Primitive Type code
+<code> EXTENDS @<string> CLOSED {   
+
+    a [fhir:code];
+    fhir:nodeRole [fhir:treeRoot]?;
+}  
+
+# Primitive Type string
+<string> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:string];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v xsd:string MAXLENGTH 1048576?;   # Primitive value for string
+}  
+
+# Primitive Type canonical
+<canonical> EXTENDS @<uri> CLOSED {   
+
+    a [fhir:canonical];
+    fhir:nodeRole [fhir:treeRoot]?;
+}  
+
+# Primitive Type uri
+<uri> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:uri];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v xsd:anyURI?;                     # Primitive value for uri
+}  
+
+# Primitive Type url
+<url> EXTENDS @<uri> CLOSED {   
+
+    a [fhir:url];
+    fhir:nodeRole [fhir:treeRoot]?;
+}  
+
+# Contact information
+<ContactDetail> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:ContactDetail];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:name @<string>?;                   # Name of an individual to contact
+    fhir:telecom @<OneOrMore_ContactPoint>?;  # Contact details for individual or 
+                                            # organization 
+}  
+
+# An identifier intended for computation
+<Identifier> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Identifier];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:use @<code> AND
+    	{fhir:value @fhirvs:identifier-use}?;  # usual | official | temp | 
+                                            # secondary | old (If known) 
+    fhir:type @<CodeableConcept>?;          # Description of identifier
+    fhir:system @<uri>?;                    # The namespace for the identifier 
+                                            # value 
+    fhir:value @<string>?;                  # The value that is unique
+    fhir:period @<Period>?;                 # Time period when id is/was valid 
+                                            # for use 
+    fhir:assigner @<Reference> AND {fhir:link 
+    			@<Organization> }?;  # Organization that issued id (may 
+                                            # be just text) 
+}  
+
+# Primitive Type boolean
+<boolean> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:boolean];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v xsd:boolean?;                    # Primitive value for boolean
+}  
+
+# Describes the context of use for a conformance or knowledge resource
+<UsageContext> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:UsageContext];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:code @<Coding>;                    # Type of context being specified
+    fhir:value (@<CodeableConcept>  OR 
+    			@<Quantity>  OR 
+    			@<Range>  OR 
+    			(@<Reference>  AND {fhir:link @<PlanDefinition> OR 
+    			 @<ResearchStudy> OR 
+    			 @<InsurancePlan> OR 
+    			 @<HealthcareService> OR 
+    			 @<Group> OR 
+    			 @<Location> OR 
+    			 @<Organization> }) )  AND { rdf:type IRI } ;  # Value that defines the context
+}  
+
+# Primitive Type markdown
+<markdown> EXTENDS @<string> CLOSED {   
+
+    a [fhir:markdown];
+    fhir:nodeRole [fhir:treeRoot]?;
+}  
+
+# Concept - reference to a terminology or just  text
+<CodeableConcept> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:CodeableConcept];
+    fhir:nodeRole [fhir:treeRoot]?;
+    a NONLITERAL*;
+    fhir:coding @<OneOrMore_Coding>?;       # Code defined by a terminology 
+                                            # system 
+    fhir:text @<string>?;                   # Plain text representation of the 
+                                            # concept 
+}  
+
+# A reference from one resource to another
+<Reference> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Reference];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:link IRI?;
+    fhir:reference @<string>?;              # Literal reference, Relative, 
+                                            # internal or absolute URL 
+    fhir:type @<uri>?;                      # Type the reference refers to (e.g. 
+                                            # "Patient") 
+    fhir:identifier @<Identifier>?;         # Logical reference, when literal 
+                                            # reference is not known 
+    fhir:display @<string>?;                # Text alternative for the resource
+} AND (
+
+# Constraint: UniqueKey:ref-1
+# Human readable:SHALL have a contained resource if a local reference is provided
+# XPath:not(starts-with(f:reference/@value, '#')) or exists(ancestor::*[self::f:entry or self::f:parameter]/f:resource/f:*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')]|/*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')])
+# Constraint:reference.startsWith('#').not() or (reference.substring(1).trace('url') in %rootResource.contained.id.trace('ids')) or (reference='#' and %rootResource!=%resource)
+# ShEx:
+
+ NOT { fhir:reference  SHEX_startsWith_SHEX ('#') } OR ({ fhir:reference SHEX_substring_SHEX (1) SHEX_trace_SHEX ('url') } { fhir:v ['%rootResource'.contained.id SHEX_trace_SHEX ('ids')] } ) OR (({ fhir:reference { fhir:v ['#'] }  }) AND ('%rootResource' { fhir:v [ . -'%resource'] }))
+
+)
+ 
+
+# Time range defined by start and end date/time
+<Period> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Period];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:start @<dateTime>?;                # Starting time with inclusive 
+                                            # boundary 
+    fhir:end @<dateTime>?;                  # End time with inclusive boundary, 
+                                            # if not ongoing 
+} AND (
+
+# Constraint: UniqueKey:per-1
+# Human readable:If present, start SHALL have a lower or equal value than end
+# XPath:not(exists(f:start/@value)) or not(exists(f:end/@value)) or (xs:dateTime(f:start/@value) <= xs:dateTime(f:end/@value))
+# Constraint:start.hasValue().not() or end.hasValue().not() or (start <= end)
+# ShEx:
+
+ NOT { fhir:start  . } OR  NOT { fhir:end  . } OR ({ fhir:start { fhir:v MaxInclusive { fhir:end } }  })
+
+)
+ 
+
+# A measured or measurable amount
+<Quantity> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Quantity];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:value @<decimal>?;                 # Numerical value (with implicit 
+                                            # precision) 
+    fhir:comparator @<code> AND
+    	{fhir:value @fhirvs:quantity-comparator}?;  # < | <= | >= | > | ad - how to 
+                                            # understand the value 
+    fhir:unit @<string>?;                   # Unit representation
+    fhir:system @<uri>?;                    # System that defines coded unit form
+    fhir:code @<code>?;                     # Coded form of the unit
+} AND (
+
+# Constraint: UniqueKey:qty-3
+# Human readable:If a code for the unit is present, the system SHALL also be present
+# XPath:not(exists(f:code)) or exists(f:system)
+# Constraint:code.empty() or system.exists()
+# ShEx:
+
+ NOT { fhir:code {fhir:v .} }  OR { fhir:system . }
+
+)
+ 
+
+# Set of values bounded by low and high
+<Range> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Range];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:low @<SimpleQuantity>?;            # Low limit
+    fhir:high @<SimpleQuantity>?;           # High limit
+} AND (
+
+# Constraint: UniqueKey:rng-2
+# Human readable:If present, low SHALL have a lower value than high
+# XPath:not(exists(f:low/f:value/@value)) or not(exists(f:high/f:value/@value)) or (number(f:low/f:value/@value) <= number(f:high/f:value/@value))
+# Constraint:low.value.empty() or high.value.empty() or (low <= high)
+# ShEx:
+
+ NOT { fhir:low fhir:value {fhir:v .} }  OR  NOT { fhir:high fhir:value {fhir:v .} }  OR ({ fhir:low { fhir:v MaxInclusive { fhir:high } }  })
+
+)
+ 
+
+# Details of a Technology mediated contact point (phone, fax, email, etc.)
+<ContactPoint> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:ContactPoint];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:system @<code> AND
+    	{fhir:value @fhirvs:contact-point-system}?;  # phone | fax | email | pager | url 
+                                            # | sms | other 
+    fhir:value @<string>?;                  # The actual contact point details
+    fhir:use @<code> AND
+    	{fhir:value @fhirvs:contact-point-use}?;  # home | work | temp | old | mobile 
+                                            # - purpose of this contact point 
+    fhir:rank @<positiveInt>?;              # Specify preferred order of use (1 
+                                            # = highest) 
+    fhir:period @<Period>?;                 # Time period when the contact point 
+                                            # was/is in use 
+} AND (
+
+# Constraint: UniqueKey:cpt-2
+# Human readable:A system is required if a value is provided.
+# XPath:not(exists(f:value)) or exists(f:system)
+# Constraint:value.empty() or system.exists()
+# ShEx:
+
+ NOT { fhir:value {fhir:v .} }  OR { fhir:system . }
+
+)
+ 
+
+# A reference to a code defined by a terminology system
+<Coding> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Coding];
+    fhir:nodeRole [fhir:treeRoot]?;
+    a NONLITERAL?;
+    fhir:system @<uri>?;                    # Identity of the terminology system
+    fhir:version @<string>?;                # Version of the system - if relevant
+    fhir:code @<code>?;                     # Symbol in syntax defined by the 
+                                            # system 
+    fhir:display @<string>?;                # Representation defined by the 
+                                            # system 
+    fhir:userSelected @<boolean>?;          # If this coding was chosen directly 
+                                            # by the user 
+}  
+
+# A fixed quantity (no comparator)
+<SimpleQuantity> EXTENDS @<Quantity> CLOSED {   
+
+    a [fhir:SimpleQuantity];
+    fhir:nodeRole [fhir:treeRoot]?;
+} AND (
+
+# Constraint: UniqueKey:sqty-1
+# Human readable:The comparator is not used on a SimpleQuantity
+# XPath:not(exists(f:comparator))
+# Constraint:comparator.empty()
+# ShEx:
+
+ NOT { fhir:comparator {fhir:v .} } 
+
+)
+ 
+
+# Primitive Type positiveInt
+<positiveInt> EXTENDS @<integer> CLOSED {   
+
+    a [fhir:positiveInt];
+    fhir:nodeRole [fhir:treeRoot]?;
+}  
+
+# Primitive Type decimal
+<decimal> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:decimal];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v xsd:decimal OR xsd:double?;      # Primitive value for decimal
+}  
+
+#---------------------- Cardinality Types (OneOrMore) -------------------
+
+<OneOrMore_Identifier> CLOSED {
+    rdf:first @<Identifier>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Identifier> 
+}
+
+<OneOrMore_ContactDetail> CLOSED {
+    rdf:first @<ContactDetail>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ContactDetail> 
+}
+
+<OneOrMore_UsageContext> CLOSED {
+    rdf:first @<UsageContext>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_UsageContext> 
+}
+
+<OneOrMore_CodeableConcept> CLOSED {
+    rdf:first @<CodeableConcept>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_CodeableConcept> 
+}
+
+<OneOrMore_TerminologyCapabilities.codeSystem> CLOSED {
+    rdf:first @<TerminologyCapabilities.codeSystem>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_TerminologyCapabilities.codeSystem> 
+}
+
+<OneOrMore_code> CLOSED {
+    rdf:first @<code>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_code> 
+}
+
+<OneOrMore_TerminologyCapabilities.codeSystem.version.filter> CLOSED {
+    rdf:first @<TerminologyCapabilities.codeSystem.version.filter>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_TerminologyCapabilities.codeSystem.version.filter> 
+}
+
+<OneOrMore_TerminologyCapabilities.codeSystem.version> CLOSED {
+    rdf:first @<TerminologyCapabilities.codeSystem.version>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_TerminologyCapabilities.codeSystem.version> 
+}
+
+<OneOrMore_TerminologyCapabilities.expansion.parameter> CLOSED {
+    rdf:first @<TerminologyCapabilities.expansion.parameter>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_TerminologyCapabilities.expansion.parameter> 
+}
+
+<OneOrMore_ContactPoint> CLOSED {
+    rdf:first @<ContactPoint>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ContactPoint> 
+}
+
+<OneOrMore_Coding> CLOSED {
+    rdf:first @<Coding>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Coding> 
+}
+
+#---------------------- Reference Types -------------------
+
+#---------------------- Value Sets ------------------------
+
+# Identifies the purpose for this identifier, if known .
+fhirvs:identifier-use ["usual" "official" "temp" "secondary" "old"]
+
+# The lifecycle status of an artifact.
+fhirvs:publication-status ["draft" "active" "retired" "unknown"]
+
+# Use of contact point.
+fhirvs:contact-point-use ["home" "work" "temp" "old" "mobile"]
+
+# The degree to which the server supports the code search parameter on ValueSet, if it is supported.
+fhirvs:code-search-support ["explicit" "all"]
+
+# Telecommunications form for contact point.
+fhirvs:contact-point-system ["phone" "fax" "email" "pager" "url" "sms" "other"]
+
+# How a capability statement is intended to be used.
+fhirvs:capability-statement-kind ["instance" "capability" "requirements"]
+
+# How the Quantity should be understood and represented.
+fhirvs:quantity-comparator ["<" "<=" ">=" ">" "ad"]

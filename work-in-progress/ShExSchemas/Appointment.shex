@@ -1,0 +1,285 @@
+﻿PREFIX fhir: <http://hl7.org/fhir/> 
+PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+BASE <http://hl7.org/fhir/shape/>
+
+
+start=@<Appointment> AND {fhir:nodeRole [fhir:treeRoot]}
+
+
+# A booking of a healthcare event among patient(s), practitioner(s), related person(s) and/or device(s) for a specific date/time. This may result in one or more Encounter(s)
+<Appointment> EXTENDS @<DomainResource> CLOSED {   
+
+    a [fhir:Appointment];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:identifier @<OneOrMore_Appointment.identifier>?;  # External Ids for this item
+    fhir:status @<Appointment.status>;      # proposed | pending | booked | 
+                                            # arrived | fulfilled | cancelled | 
+                                            # noshow | entered-in-error | 
+                                            # checked-in | waitlist 
+    fhir:cancellationReason @<Appointment.cancellationReason>?;  # The coded reason for the 
+                                            # appointment being cancelled 
+    fhir:serviceCategory @<OneOrMore_Appointment.serviceCategory>?;  # A broad categorization of the 
+                                            # service that is to be performed 
+                                            # during this appointment 
+    fhir:serviceType @<OneOrMore_Appointment.serviceType>?;  # The specific service that is to be 
+                                            # performed during this appointment 
+    fhir:specialty @<OneOrMore_Appointment.specialty>?;  # The specialty of a practitioner 
+                                            # that would be required to perform 
+                                            # the service requested in this 
+                                            # appointment 
+    fhir:appointmentType @<Appointment.appointmentType>?;  # The style of appointment or 
+                                            # patient that has been booked in 
+                                            # the slot (not service type) 
+    fhir:reason @<OneOrMore_Appointment.reason>?;  # Reason this appointment is 
+                                            # scheduled 
+    fhir:priority @<Appointment.priority>?;  # Used to make informed decisions if 
+                                            # needing to re-prioritize 
+    fhir:description @<Appointment.description>?;  # Shown on a subject line in a 
+                                            # meeting request, or appointment 
+                                            # list 
+    fhir:replaces @<OneOrMore_Appointment.replaces_Appointment>?;  # Appointment replaced by this 
+                                            # Appointment 
+    fhir:supportingInformation @<OneOrMore_Appointment.supportingInformation_Resource>?;  # Additional information to support 
+                                            # the appointment 
+    fhir:start @<Appointment.start>?;       # When appointment is to take place
+    fhir:end @<Appointment.end>?;           # When appointment is to conclude
+    fhir:minutesDuration @<Appointment.minutesDuration>?;  # Can be less than start/end (e.g. 
+                                            # estimate) 
+    fhir:slot @<OneOrMore_Appointment.slot_Slot>?;  # The slots that this appointment is 
+                                            # filling 
+    fhir:account @<OneOrMore_Appointment.account_Account>?;  # The set of accounts that may be 
+                                            # used for billing for this 
+                                            # Appointment 
+    fhir:created @<Appointment.created>?;   # The date that this appointment was 
+                                            # initially created 
+    fhir:note @<OneOrMore_Appointment.note>?;  # Additional comments
+    fhir:patientInstruction @<OneOrMore_Appointment.patientInstruction>?;  # Detailed information and 
+                                            # instructions for the patient 
+    fhir:basedOn @<OneOrMore_Appointment.basedOn_CarePlan_OR_DeviceRequest_OR_MedicationRequest_OR_ServiceRequest>?;  # The request this appointment is 
+                                            # allocated to assess 
+    fhir:subject @<Appointment.subject> AND {fhir:link 
+    			@<Group> OR 
+    			@<Patient> }?;  # The patient or group associated 
+                                            # with the appointment 
+    fhir:participant @<OneOrMore_Appointment.participant>;  # Participants involved in 
+                                            # appointment 
+    fhir:requestedPeriod @<OneOrMore_Appointment.requestedPeriod>?;  # Potential date/time interval(s) 
+                                            # requested to allocate the 
+                                            # appointment within 
+} AND (
+
+# Constraint: UniqueKey:app-5
+# Human readable:The start must be less than or equal to the end
+# XPath:f:start <= f:end or not(start.exists() and end.exists())
+# Constraint:start.exists() implies start <= end
+# ShEx:
+
+{ fhir:start . } AND ({ fhir:start { fhir:v MaxInclusive { fhir:end } }  })
+
+) AND (
+
+# Constraint: UniqueKey:app-4
+# Human readable:Cancellation reason is only used for appointments that have been cancelled, or no-show
+# XPath:not(exists(f:cancellationReason)) or f:status/@value=('no-show', 'cancelled')
+# Constraint:cancellationReason.exists() implies (status='no-show' or status='cancelled')
+# ShEx:
+
+{ fhir:cancellationReason . } AND (({ fhir:status { fhir:v ['no-show'] }  }) OR ({ fhir:status { fhir:v ['cancelled'] }  }))
+
+) AND (
+
+# Constraint: UniqueKey:app-3
+# Human readable:Only proposed or cancelled appointments can be missing start/end dates
+# XPath:((exists(f:start) and exists(f:end)) or (f:status/@value='proposed') or (f:status/@value='cancelled') or (f:status/@value='waitlist'))
+# Constraint:(start.exists() and end.exists()) or (status in ('proposed' | 'cancelled' | 'waitlist'))
+# ShEx:
+
+({ fhir:start . } AND { fhir:end . }) OR ({ fhir:status { fhir:v [('proposed' | 'cancelled' | 'waitlist')] }  })
+
+) AND (
+
+# Constraint: UniqueKey:app-2
+# Human readable:Either start and end are specified, or neither
+# XPath:((exists(f:start) and exists(f:end)) or (not(exists(f:start)) and not(exists(f:end))))
+# Constraint:start.exists() = end.exists()
+# ShEx:
+
+{ fhir:start . } { fhir:v [{ fhir:end . }] } 
+
+) AND (
+
+# Constraint: UniqueKey:app-1
+# Human readable:Either the type or actor on the participant SHALL be specified
+# XPath:(exists(f:type) or exists(f:actor))
+# Constraint:type.exists() or actor.exists()
+# ShEx:
+
+{ fhir:type . } OR { fhir:actor . }
+
+)
+ 
+
+# Participants involved in appointment
+<Appointment.participant> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:type @<OneOrMore_Appointment.participant.type>?;  # Role of participant in the 
+                                            # appointment 
+    fhir:period @<Appointment.participant.period>?;  # Participation period of the actor
+    fhir:actor @<Appointment.participant.actor> AND {fhir:link 
+    			@<CareTeam> OR 
+    			@<Device> OR 
+    			@<Group> OR 
+    			@<HealthcareService> OR 
+    			@<Location> OR 
+    			@<Patient> OR 
+    			@<Practitioner> OR 
+    			@<PractitionerRole> OR 
+    			@<RelatedPerson> }?;  # Person, Location/HealthcareService 
+                                            # or Device 
+    fhir:required @<Appointment.participant.required>?;  # The participant is required to 
+                                            # attend (optional when false) 
+    fhir:status @<Appointment.participant.status>;  # accepted | declined | tentative | 
+                                            # needs-action 
+} AND (
+
+# Constraint: UniqueKey:app-5
+# Human readable:The start must be less than or equal to the end
+# XPath:f:start <= f:end or not(start.exists() and end.exists())
+# Constraint:start.exists() implies start <= end
+# ShEx:
+
+{ fhir:start . } AND ({ fhir:start { fhir:v MaxInclusive { fhir:end } }  })
+
+) AND (
+
+# Constraint: UniqueKey:app-4
+# Human readable:Cancellation reason is only used for appointments that have been cancelled, or no-show
+# XPath:not(exists(f:cancellationReason)) or f:status/@value=('no-show', 'cancelled')
+# Constraint:cancellationReason.exists() implies (status='no-show' or status='cancelled')
+# ShEx:
+
+{ fhir:cancellationReason . } AND (({ fhir:status { fhir:v ['no-show'] }  }) OR ({ fhir:status { fhir:v ['cancelled'] }  }))
+
+) AND (
+
+# Constraint: UniqueKey:app-3
+# Human readable:Only proposed or cancelled appointments can be missing start/end dates
+# XPath:((exists(f:start) and exists(f:end)) or (f:status/@value='proposed') or (f:status/@value='cancelled') or (f:status/@value='waitlist'))
+# Constraint:(start.exists() and end.exists()) or (status in ('proposed' | 'cancelled' | 'waitlist'))
+# ShEx:
+
+({ fhir:start . } AND { fhir:end . }) OR ({ fhir:status { fhir:v [('proposed' | 'cancelled' | 'waitlist')] }  })
+
+) AND (
+
+# Constraint: UniqueKey:app-2
+# Human readable:Either start and end are specified, or neither
+# XPath:((exists(f:start) and exists(f:end)) or (not(exists(f:start)) and not(exists(f:end))))
+# Constraint:start.exists() = end.exists()
+# ShEx:
+
+{ fhir:start . } { fhir:v [{ fhir:end . }] } 
+
+) AND (
+
+# Constraint: UniqueKey:app-1
+# Human readable:Either the type or actor on the participant SHALL be specified
+# XPath:(exists(f:type) or exists(f:actor))
+# Constraint:type.exists() or actor.exists()
+# ShEx:
+
+{ fhir:type . } OR { fhir:actor . }
+
+)
+ 
+
+#---------------------- Data Types -------------------
+
+#---------------------- Cardinality Types (OneOrMore) -------------------
+
+<OneOrMore_Appointment.identifier> CLOSED {
+    rdf:first @<Appointment.identifier>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Appointment.identifier> 
+}
+
+<OneOrMore_Appointment.serviceCategory> CLOSED {
+    rdf:first @<Appointment.serviceCategory>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Appointment.serviceCategory> 
+}
+
+<OneOrMore_Appointment.serviceType> CLOSED {
+    rdf:first @<Appointment.serviceType>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Appointment.serviceType> 
+}
+
+<OneOrMore_Appointment.specialty> CLOSED {
+    rdf:first @<Appointment.specialty>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Appointment.specialty> 
+}
+
+<OneOrMore_Appointment.reason> CLOSED {
+    rdf:first @<Appointment.reason>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Appointment.reason> 
+}
+
+<OneOrMore_Appointment.replaces_Appointment> CLOSED {
+    rdf:first @<Appointment.replaces> AND {fhir:link 
+			@<Appointment> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Appointment.replaces_Appointment> 
+}
+
+<OneOrMore_Appointment.supportingInformation_Resource> CLOSED {
+    rdf:first @<Appointment.supportingInformation> AND {fhir:link 
+			@<Resource> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Appointment.supportingInformation_Resource> 
+}
+
+<OneOrMore_Appointment.slot_Slot> CLOSED {
+    rdf:first @<Appointment.slot> AND {fhir:link 
+			@<Slot> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Appointment.slot_Slot> 
+}
+
+<OneOrMore_Appointment.account_Account> CLOSED {
+    rdf:first @<Appointment.account> AND {fhir:link 
+			@<Account> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Appointment.account_Account> 
+}
+
+<OneOrMore_Appointment.note> CLOSED {
+    rdf:first @<Appointment.note>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Appointment.note> 
+}
+
+<OneOrMore_Appointment.patientInstruction> CLOSED {
+    rdf:first @<Appointment.patientInstruction>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Appointment.patientInstruction> 
+}
+
+<OneOrMore_Appointment.basedOn_CarePlan_OR_DeviceRequest_OR_MedicationRequest_OR_ServiceRequest> CLOSED {
+    rdf:first @<Appointment.basedOn> AND {fhir:link 
+			@<CarePlan> OR 
+			@<DeviceRequest> OR 
+			@<MedicationRequest> OR 
+			@<ServiceRequest> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Appointment.basedOn_CarePlan_OR_DeviceRequest_OR_MedicationRequest_OR_ServiceRequest> 
+}
+
+<OneOrMore_Appointment.participant> CLOSED {
+    rdf:first @<Appointment.participant>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Appointment.participant> 
+}
+
+<OneOrMore_Appointment.requestedPeriod> CLOSED {
+    rdf:first @<Appointment.requestedPeriod>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Appointment.requestedPeriod> 
+}
+
+<OneOrMore_Appointment.participant.type> CLOSED {
+    rdf:first @<Appointment.participant.type>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Appointment.participant.type> 
+}
+
+#---------------------- Reference Types -------------------
+
+#---------------------- Value Sets ------------------------

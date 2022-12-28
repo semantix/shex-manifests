@@ -1,0 +1,2455 @@
+﻿PREFIX fhir: <http://hl7.org/fhir/> 
+PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+BASE <http://hl7.org/fhir/shape/>
+
+
+# Definition of an element in a resource or extension
+<ElementDefinition> EXTENDS @<BackboneType> CLOSED {   
+
+    a [fhir:ElementDefinition];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:path @<string>;                    # Path of the element in the 
+                                            # hierarchy of elements 
+    fhir:representation @<OneOrMore_code> AND
+    	{fhir:value @fhirvs:property-representation}?;  # xmlAttr | xmlText | typeAttr | 
+                                            # cdaText | xhtml 
+    fhir:sliceName @<string>?;              # Name for this particular element 
+                                            # (in a set of slices) 
+    fhir:sliceIsConstraining @<boolean>?;   # If this slice definition 
+                                            # constrains an inherited slice 
+                                            # definition (or not) 
+    fhir:label @<string>?;                  # Name for element to display with 
+                                            # or prompt for element 
+    fhir:code @<OneOrMore_Coding>?;         # Corresponding codes in 
+                                            # terminologies 
+    fhir:slicing @<ElementDefinition.slicing>?;  # This element is sliced - slices 
+                                            # follow 
+    fhir:short @<string>?;                  # Concise definition for 
+                                            # space-constrained presentation 
+    fhir:definition @<markdown>?;           # Full formal definition as 
+                                            # narrative text 
+    fhir:comment @<markdown>?;              # Comments about the use of this 
+                                            # element 
+    fhir:requirements @<markdown>?;         # Why this resource has been created
+    fhir:alias @<OneOrMore_string>?;        # Other names
+    fhir:min @<unsignedInt>?;               # Minimum Cardinality
+    fhir:max @<string>?;                    # Maximum Cardinality (a number or *)
+    fhir:base @<ElementDefinition.base>?;   # Base definition information for 
+                                            # tools 
+    fhir:contentReference @<uri>?;          # Reference to definition of content 
+                                            # for the element 
+    fhir:type @<OneOrMore_ElementDefinition.type>?;  # Data type and Profile for this 
+                                            # element 
+    fhir:defaultValue (@<base64Binary>  OR 
+    			@<boolean>  OR 
+    			@<canonical>  OR 
+    			@<code>  OR 
+    			@<date>  OR 
+    			@<dateTime>  OR 
+    			@<decimal>  OR 
+    			@<id>  OR 
+    			@<instant>  OR 
+    			@<integer>  OR 
+    			@<integer64>  OR 
+    			@<markdown>  OR 
+    			@<oid>  OR 
+    			@<positiveInt>  OR 
+    			@<string>  OR 
+    			@<time>  OR 
+    			@<unsignedInt>  OR 
+    			@<uri>  OR 
+    			@<url>  OR 
+    			@<uuid>  OR 
+    			@<Address>  OR 
+    			@<Age>  OR 
+    			@<Annotation>  OR 
+    			@<Attachment>  OR 
+    			@<CodeableConcept>  OR 
+    			@<CodeableReference>  OR 
+    			@<Coding>  OR 
+    			@<ContactPoint>  OR 
+    			@<Count>  OR 
+    			@<Distance>  OR 
+    			@<Duration>  OR 
+    			@<HumanName>  OR 
+    			@<Identifier>  OR 
+    			@<Money>  OR 
+    			@<Period>  OR 
+    			@<Quantity>  OR 
+    			@<Range>  OR 
+    			@<Ratio>  OR 
+    			@<RatioRange>  OR 
+    			@<Reference>  OR 
+    			@<SampledData>  OR 
+    			@<Signature>  OR 
+    			@<Timing>  OR 
+    			@<ContactDetail>  OR 
+    			@<Contributor>  OR 
+    			@<DataRequirement>  OR 
+    			@<Expression>  OR 
+    			@<ParameterDefinition>  OR 
+    			@<RelatedArtifact>  OR 
+    			@<TriggerDefinition>  OR 
+    			@<UsageContext>  OR 
+    			@<Dosage>  OR 
+    			@<Meta> )  AND { rdf:type IRI } ?;  # Specified value if missing from 
+                                            # instance 
+    fhir:meaningWhenMissing @<markdown>?;   # Implicit meaning when this element 
+                                            # is missing 
+    fhir:orderMeaning @<string>?;           # What the order of the elements 
+                                            # means 
+    fhir:fixed (@<base64Binary>  OR 
+    			@<boolean>  OR 
+    			@<canonical>  OR 
+    			@<code>  OR 
+    			@<date>  OR 
+    			@<dateTime>  OR 
+    			@<decimal>  OR 
+    			@<id>  OR 
+    			@<instant>  OR 
+    			@<integer>  OR 
+    			@<integer64>  OR 
+    			@<markdown>  OR 
+    			@<oid>  OR 
+    			@<positiveInt>  OR 
+    			@<string>  OR 
+    			@<time>  OR 
+    			@<unsignedInt>  OR 
+    			@<uri>  OR 
+    			@<url>  OR 
+    			@<uuid>  OR 
+    			@<Address>  OR 
+    			@<Age>  OR 
+    			@<Annotation>  OR 
+    			@<Attachment>  OR 
+    			@<CodeableConcept>  OR 
+    			@<CodeableReference>  OR 
+    			@<Coding>  OR 
+    			@<ContactPoint>  OR 
+    			@<Count>  OR 
+    			@<Distance>  OR 
+    			@<Duration>  OR 
+    			@<HumanName>  OR 
+    			@<Identifier>  OR 
+    			@<Money>  OR 
+    			@<Period>  OR 
+    			@<Quantity>  OR 
+    			@<Range>  OR 
+    			@<Ratio>  OR 
+    			@<RatioRange>  OR 
+    			@<Reference>  OR 
+    			@<SampledData>  OR 
+    			@<Signature>  OR 
+    			@<Timing>  OR 
+    			@<ContactDetail>  OR 
+    			@<Contributor>  OR 
+    			@<DataRequirement>  OR 
+    			@<Expression>  OR 
+    			@<ParameterDefinition>  OR 
+    			@<RelatedArtifact>  OR 
+    			@<TriggerDefinition>  OR 
+    			@<UsageContext>  OR 
+    			@<Dosage>  OR 
+    			@<Meta> )  AND { rdf:type IRI } ?;  # Value must be exactly this
+    fhir:pattern (@<base64Binary>  OR 
+    			@<boolean>  OR 
+    			@<canonical>  OR 
+    			@<code>  OR 
+    			@<date>  OR 
+    			@<dateTime>  OR 
+    			@<decimal>  OR 
+    			@<id>  OR 
+    			@<instant>  OR 
+    			@<integer>  OR 
+    			@<integer64>  OR 
+    			@<markdown>  OR 
+    			@<oid>  OR 
+    			@<positiveInt>  OR 
+    			@<string>  OR 
+    			@<time>  OR 
+    			@<unsignedInt>  OR 
+    			@<uri>  OR 
+    			@<url>  OR 
+    			@<uuid>  OR 
+    			@<Address>  OR 
+    			@<Age>  OR 
+    			@<Annotation>  OR 
+    			@<Attachment>  OR 
+    			@<CodeableConcept>  OR 
+    			@<CodeableReference>  OR 
+    			@<Coding>  OR 
+    			@<ContactPoint>  OR 
+    			@<Count>  OR 
+    			@<Distance>  OR 
+    			@<Duration>  OR 
+    			@<HumanName>  OR 
+    			@<Identifier>  OR 
+    			@<Money>  OR 
+    			@<Period>  OR 
+    			@<Quantity>  OR 
+    			@<Range>  OR 
+    			@<Ratio>  OR 
+    			@<RatioRange>  OR 
+    			@<Reference>  OR 
+    			@<SampledData>  OR 
+    			@<Signature>  OR 
+    			@<Timing>  OR 
+    			@<ContactDetail>  OR 
+    			@<Contributor>  OR 
+    			@<DataRequirement>  OR 
+    			@<Expression>  OR 
+    			@<ParameterDefinition>  OR 
+    			@<RelatedArtifact>  OR 
+    			@<TriggerDefinition>  OR 
+    			@<UsageContext>  OR 
+    			@<Dosage>  OR 
+    			@<Meta> )  AND { rdf:type IRI } ?;  # Value must have at least these 
+                                            # property values 
+    fhir:example @<OneOrMore_ElementDefinition.example>?;  # Example value (as defined for type)
+    fhir:minValue (@<date>  OR 
+    			@<dateTime>  OR 
+    			@<instant>  OR 
+    			@<time>  OR 
+    			@<decimal>  OR 
+    			@<integer>  OR 
+    			@<integer64>  OR 
+    			@<positiveInt>  OR 
+    			@<unsignedInt>  OR 
+    			@<Quantity> )  AND { rdf:type IRI } ?;  # Minimum Allowed Value (for some 
+                                            # types) 
+    fhir:maxValue (@<date>  OR 
+    			@<dateTime>  OR 
+    			@<instant>  OR 
+    			@<time>  OR 
+    			@<decimal>  OR 
+    			@<integer>  OR 
+    			@<integer64>  OR 
+    			@<positiveInt>  OR 
+    			@<unsignedInt>  OR 
+    			@<Quantity> )  AND { rdf:type IRI } ?;  # Maximum Allowed Value (for some 
+                                            # types) 
+    fhir:maxLength @<integer>?;             # Max length for strings
+    fhir:condition @<OneOrMore_id>?;        # Reference to invariant about 
+                                            # presence 
+    fhir:constraint @<OneOrMore_ElementDefinition.constraint>?;  # Condition that must evaluate to 
+                                            # true 
+    fhir:mustSupport @<boolean>?;           # If the element must be supported
+    fhir:isModifier @<boolean>?;            # If this modifies the meaning of 
+                                            # other elements 
+    fhir:isModifierReason @<string>?;       # Reason that this element is marked 
+                                            # as a modifier 
+    fhir:isSummary @<boolean>?;             # Include when _summary = true?
+    fhir:binding @<ElementDefinition.binding>?;  # ValueSet details if this is coded
+    fhir:mapping @<OneOrMore_ElementDefinition.mapping>?;  # Map element to another set of 
+                                            # definitions 
+} AND (
+
+# Constraint: UniqueKey:eld-3
+# Human readable:Max SHALL be a number or "*"
+# XPath:@value='*' or (normalize-space(@value)!='' and normalize-space(translate(@value, '0123456789',''))='')
+# Constraint:empty() or ($this = '*') or (toInteger() >= 0)
+# ShEx:
+
+ NOT {  {fhir:v .} }  OR ({ fhir:$this { fhir:v ['*'] }  }) OR ( toInteger(  ) { fhir:v MinInclusive 0 } )
+
+) AND (
+
+# Constraint: UniqueKey:eld-19
+# Human readable:Element names cannot include some special characters
+# XPath:matches(f:path/@value, '^[^\s\.,:;\'&quot;\/|?!@#$%&*()\[\]{}]{1,64}(\.[^\s\.,:;\'&quot;\/|?!@#$%&*()\[\]{}]{1,64}(\[x\])?(\:[^\s\.]+)?)*$')
+# Constraint:path.matches('^[^\\s\\.,:;\\\'"\\/|?!@#$%&*()\\[\\]{}]{1,64}(\\.[^\\s\\.,:;\\\'"\\/|?!@#$%&*()\\[\\]{}]{1,64}(\\[x\\])?(\\:[^\\s\\.]+)?)*$')
+# ShEx:
+
+{ fhir:path SHEX_matches_SHEX ('^[^\s\.,:;\'"\/|?!@#$%&*()\[\]{}]{1,64}(\.[^\s\.,:;\'"\/|?!@#$%&*()\[\]{}]{1,64}(\[x\])?(\:[^\s\.]+)?)*$') }
+
+) AND (
+
+# Constraint: UniqueKey:eld-2
+# Human readable:Min <= Max
+# XPath:not(exists(f:min)) or not(exists(f:max)) or (not(f:max/@value) and not(f:min/@value)) or (f:max/@value = '*') or (number(f:max/@value) >= f:min/@value)
+# Constraint:min.empty() or max.empty() or (max = '*') or iif(max != '*', min <= max.toInteger())
+# ShEx:
+
+ NOT { fhir:min {fhir:v .} }  OR  NOT { fhir:max {fhir:v .} }  OR ({ fhir:max { fhir:v ['*'] }  }) OR  SHEX_iif_SHEX ({ fhir:max { fhir:v [ . -'*'] } }, { fhir:min { fhir:v MaxInclusive  toInteger( fhir:max ) }  })
+
+) AND (
+
+# Constraint: UniqueKey:eld-5
+# Human readable:if the element definition has a contentReference, it cannot have type, defaultValue, fixed, pattern, example, minValue, maxValue, maxLength, or binding
+# XPath:not(exists(f:contentReference) and (exists(f:type) or exists(f:*[starts-with(local-name(.), 'value')]) or exists(f:*[starts-with(local-name(.), 'defaultValue')])  or exists(f:*[starts-with(local-name(.), 'fixed')]) or exists(f:*[starts-with(local-name(.), 'pattern')]) or exists(f:*[starts-with(local-name(.), 'example')]) or exists(f:*[starts-with(local-name(.), 'f:minValue')]) or exists(f:*[starts-with(local-name(.), 'f:maxValue')]) or exists(f:maxLength) or exists(f:binding)))
+# Constraint:contentReference.empty() or (type.empty() and defaultValue.empty() and fixed.empty() and pattern.empty() and example.empty() and minValue.empty() and maxValue.empty() and maxLength.empty() and binding.empty())
+# ShEx:
+
+ NOT { fhir:contentReference {fhir:v .} }  OR ( NOT { fhir:type {fhir:v .} }  AND  NOT { fhir:defaultValue {fhir:v .} }  AND  NOT { fhir:fixed {fhir:v .} }  AND  NOT { fhir:pattern {fhir:v .} }  AND  NOT { fhir:example {fhir:v .} }  AND  NOT { fhir:minValue {fhir:v .} }  AND  NOT { fhir:maxValue {fhir:v .} }  AND  NOT { fhir:maxLength {fhir:v .} }  AND  NOT { fhir:binding {fhir:v .} } )
+
+) AND (
+
+# Constraint: UniqueKey:eld-7
+# Human readable:Pattern may only be specified if there is one type
+# XPath:not(exists(f:*[starts-with(local-name(.), 'pattern')])) or (count(f:type)<=1)
+# Constraint:pattern.empty() or (type.count() <= 1)
+# ShEx:
+
+ NOT { fhir:pattern {fhir:v .} }  OR ( count( fhir:type ) { fhir:v MaxInclusive 1 } )
+
+) AND (
+
+# Constraint: UniqueKey:eld-6
+# Human readable:Fixed value may only be specified if there is one type
+# XPath:not(exists(f:*[starts-with(local-name(.), 'fixed')])) or (count(f:type)<=1)
+# Constraint:fixed.empty() or (type.count()  <= 1)
+# ShEx:
+
+ NOT { fhir:fixed {fhir:v .} }  OR ( count( fhir:type ) { fhir:v MaxInclusive 1 } )
+
+) AND (
+
+# Constraint: UniqueKey:eld-11
+# Human readable:Binding can only be present for coded elements, string, and uri
+# XPath:not(exists(f:binding)) or (count(f:type/f:code) = 0) or  f:type/f:code/@value=('code','Coding','CodeableConcept','Quantity','string', 'uri', 'Duration')
+# Constraint:binding.empty() or type.code.empty() or type.select((code = 'code') or (code = 'Coding') or (code='CodeableConcept') or (code = 'Quantity') or (code = 'string') or (code = 'uri') or (code = 'Duration')).exists()
+# ShEx:
+
+ NOT { fhir:binding {fhir:v .} }  OR  NOT { fhir:type fhir:code {fhir:v .} }  OR { fhir:type SHEX_select_SHEX (fhir:code { fhir:v ['code'] }  OR fhir:code { fhir:v ['Coding'] }  OR fhir:code { fhir:v ['CodeableConcept'] }  OR fhir:code { fhir:v ['Quantity'] }  OR fhir:code { fhir:v ['string'] }  OR fhir:code { fhir:v ['uri'] }  OR fhir:code { fhir:v ['Duration'] } ) . }
+
+) AND (
+
+# Constraint: UniqueKey:eld-22
+# Human readable:sliceIsConstraining can only appear if slicename is present
+# XPath:exists(f:sliceName) or not(exists(f:sliceIsConstraining))
+# Constraint:sliceIsConstraining.exists() implies sliceName.exists()
+# ShEx:
+
+{ fhir:sliceIsConstraining . } SHEX_Implies_SHEX { fhir:sliceName . }
+
+) AND (
+
+# Constraint: UniqueKey:eld-8
+# Human readable:Pattern and fixed are mutually exclusive
+# XPath:not(exists(f:*[starts-with(local-name(.), 'pattern')])) or not(exists(f:*[starts-with(local-name(.), 'fixed')]))
+# Constraint:pattern.empty() or fixed.empty()
+# ShEx:
+
+ NOT { fhir:pattern {fhir:v .} }  OR  NOT { fhir:fixed {fhir:v .} } 
+
+) AND (
+
+# Constraint: UniqueKey:eld-14
+# Human readable:Constraints must be unique by key
+# XPath:count(f:constraint) = count(distinct-values(f:constraint/f:key/@value))
+# Constraint:constraint.select(key).isDistinct()
+# ShEx:
+
+ isDistinct( fhir:constraint  SHEX_select_SHEX (fhir:key) )
+
+) AND (
+
+# Constraint: UniqueKey:eld-13
+# Human readable:Types must be unique by code
+# XPath:not(exists(for $type in f:type return $type/preceding-sibling::f:type[f:code/@value=$type/f:code/@value]))
+# Constraint:type.select(code).isDistinct()
+# ShEx:
+
+ isDistinct( fhir:type  SHEX_select_SHEX (fhir:code) )
+
+) AND (
+
+# Constraint: UniqueKey:eld-16
+# Human readable:sliceName must be composed of proper tokens separated by "/"
+# XPath:not(exists(f:sliceName/@value)) or matches(f:sliceName/@value, '^[a-zA-Z0-9\/\-_\[\]\@]+$')
+# Constraint:sliceName.empty() or sliceName.matches('^[a-zA-Z0-9\\/\\-_\\[\\]\\@]+$')
+# ShEx:
+
+ NOT { fhir:sliceName {fhir:v .} }  OR { fhir:sliceName SHEX_matches_SHEX ('^[a-zA-Z0-9\/\-_\[\]\@]+$') }
+
+) AND (
+
+# Constraint: UniqueKey:eld-15
+# Human readable:default value and meaningWhenMissing are mutually exclusive
+# XPath:not(exists(f:*[starts-with(local-name(.), 'fixed')])) or not(exists(f:meaningWhenMissing))
+# Constraint:defaultValue.empty() or meaningWhenMissing.empty()
+# ShEx:
+
+ NOT { fhir:defaultValue {fhir:v .} }  OR  NOT { fhir:meaningWhenMissing {fhir:v .} } 
+
+) AND (
+
+# Constraint: UniqueKey:eld-18
+# Human readable:Must have a modifier reason if isModifier = true
+# XPath:not(f:isModifier/@value = 'true') or exists(f:isModifierReason)
+# Constraint:(isModifier.exists() and isModifier) implies isModifierReason.exists()
+# ShEx:
+
+({ fhir:isModifier . } AND { fhir:isModifier }) SHEX_Implies_SHEX { fhir:isModifierReason . }
+
+) AND (
+
+# Constraint: UniqueKey:eld-20
+# Human readable:Element names should be simple alphanumerics with a max of 64 characters, or code generation tools may be broken
+# XPath:matches(f:path/@value, '^[A-Za-z][A-Za-z0-9]*(\.[a-z][A-Za-z0-9]*(\[x])?)*$')
+# Constraint:path.matches('^[A-Za-z][A-Za-z0-9]*(\\.[a-z][A-Za-z0-9]*(\\[x])?)*$')
+# ShEx:
+
+{ fhir:path SHEX_matches_SHEX ('^[A-Za-z][A-Za-z0-9]*(\.[a-z][A-Za-z0-9]*(\[x])?)*$') }
+
+) AND (
+
+# Constraint: UniqueKey:eld-4
+# Human readable:Aggregation may only be specified if one of the allowed types for the element is a reference
+# XPath:not(exists(f:aggregation)) or exists(f:code[@value = 'Reference'])
+# Constraint:aggregation.empty() or (code = 'Reference')
+# ShEx:
+
+ NOT { fhir:aggregation {fhir:v .} }  OR ({ fhir:code { fhir:v ['Reference'] }  })
+
+) AND (
+
+# Constraint: UniqueKey:eld-17
+# Human readable:targetProfile is only allowed if the type is Reference or canonical
+# XPath:not(exists(f:targetProfile)) or (f:code/@value = ('Reference', 'canonical', 'CodeableReference'))
+# Constraint:(code='Reference' or code = 'canonical' or code = 'CodeableReference') or targetProfile.empty()
+# ShEx:
+
+(({ fhir:code { fhir:v ['Reference'] }  }) OR ({ fhir:code { fhir:v ['canonical'] }  }) OR ({ fhir:code { fhir:v ['CodeableReference'] }  })) OR  NOT { fhir:targetProfile {fhir:v .} } 
+
+) AND (
+
+# Constraint: UniqueKey:eld-21
+# Human readable:Constraints should have an expression or else validators will not be able to enforce them
+# XPath:exists(f:expression/@value)
+# Constraint:expression.exists()
+# ShEx:
+
+{ fhir:expression . }
+
+) AND (
+
+# Constraint: UniqueKey:eld-12
+# Human readable:ValueSet SHALL start with http:// or https:// or urn: or #
+# XPath:(starts-with(string(f:valueSet/@value), 'http:') or starts-with(string(f:valueSet/@value), 'https:') or starts-with(string(f:valueSet/@value), 'urn:') or starts-with(string(f:valueSet/@value), 'x'))
+# Constraint:valueSet.exists() implies (valueSet.startsWith('http:') or valueSet.startsWith('https') or valueSet.startsWith('urn:') or valueSet.startsWith('#'))
+# ShEx:
+
+{ fhir:valueSet . } SHEX_Implies_SHEX ({ fhir:valueSet SHEX_startsWith_SHEX ('http:') } OR { fhir:valueSet SHEX_startsWith_SHEX ('https') } OR { fhir:valueSet SHEX_startsWith_SHEX ('urn:') } OR { fhir:valueSet SHEX_startsWith_SHEX ('#') })
+
+)
+ 
+
+# Data type and Profile for this element
+<ElementDefinition.type> EXTENDS @<Element> CLOSED {   
+    fhir:code @<uri>;                       # Data type or Resource (reference 
+                                            # to definition) 
+    fhir:profile @<OneOrMore_canonical>?;   # Profiles (StructureDefinition or 
+                                            # IG) - one must apply 
+    fhir:targetProfile @<OneOrMore_canonical>?;  # Profile (StructureDefinition or 
+                                            # IG) on the Reference/canonical 
+                                            # target - one must apply 
+    fhir:aggregation @<OneOrMore_code> AND
+    	{fhir:value @fhirvs:resource-aggregation-mode}?;  # contained | referenced | bundled - 
+                                            # how aggregated 
+    fhir:versioning @<code> AND
+    	{fhir:value @fhirvs:reference-version-rules}?;  # either | independent | specific
+} AND (
+
+# Constraint: UniqueKey:eld-3
+# Human readable:Max SHALL be a number or "*"
+# XPath:@value='*' or (normalize-space(@value)!='' and normalize-space(translate(@value, '0123456789',''))='')
+# Constraint:empty() or ($this = '*') or (toInteger() >= 0)
+# ShEx:
+
+ NOT {  {fhir:v .} }  OR ({ fhir:$this { fhir:v ['*'] }  }) OR ( toInteger(  ) { fhir:v MinInclusive 0 } )
+
+) AND (
+
+# Constraint: UniqueKey:eld-19
+# Human readable:Element names cannot include some special characters
+# XPath:matches(f:path/@value, '^[^\s\.,:;\'&quot;\/|?!@#$%&*()\[\]{}]{1,64}(\.[^\s\.,:;\'&quot;\/|?!@#$%&*()\[\]{}]{1,64}(\[x\])?(\:[^\s\.]+)?)*$')
+# Constraint:path.matches('^[^\\s\\.,:;\\\'"\\/|?!@#$%&*()\\[\\]{}]{1,64}(\\.[^\\s\\.,:;\\\'"\\/|?!@#$%&*()\\[\\]{}]{1,64}(\\[x\\])?(\\:[^\\s\\.]+)?)*$')
+# ShEx:
+
+{ fhir:path SHEX_matches_SHEX ('^[^\s\.,:;\'"\/|?!@#$%&*()\[\]{}]{1,64}(\.[^\s\.,:;\'"\/|?!@#$%&*()\[\]{}]{1,64}(\[x\])?(\:[^\s\.]+)?)*$') }
+
+) AND (
+
+# Constraint: UniqueKey:eld-2
+# Human readable:Min <= Max
+# XPath:not(exists(f:min)) or not(exists(f:max)) or (not(f:max/@value) and not(f:min/@value)) or (f:max/@value = '*') or (number(f:max/@value) >= f:min/@value)
+# Constraint:min.empty() or max.empty() or (max = '*') or iif(max != '*', min <= max.toInteger())
+# ShEx:
+
+ NOT { fhir:min {fhir:v .} }  OR  NOT { fhir:max {fhir:v .} }  OR ({ fhir:max { fhir:v ['*'] }  }) OR  SHEX_iif_SHEX ({ fhir:max { fhir:v [ . -'*'] } }, { fhir:min { fhir:v MaxInclusive  toInteger( fhir:max ) }  })
+
+) AND (
+
+# Constraint: UniqueKey:eld-5
+# Human readable:if the element definition has a contentReference, it cannot have type, defaultValue, fixed, pattern, example, minValue, maxValue, maxLength, or binding
+# XPath:not(exists(f:contentReference) and (exists(f:type) or exists(f:*[starts-with(local-name(.), 'value')]) or exists(f:*[starts-with(local-name(.), 'defaultValue')])  or exists(f:*[starts-with(local-name(.), 'fixed')]) or exists(f:*[starts-with(local-name(.), 'pattern')]) or exists(f:*[starts-with(local-name(.), 'example')]) or exists(f:*[starts-with(local-name(.), 'f:minValue')]) or exists(f:*[starts-with(local-name(.), 'f:maxValue')]) or exists(f:maxLength) or exists(f:binding)))
+# Constraint:contentReference.empty() or (type.empty() and defaultValue.empty() and fixed.empty() and pattern.empty() and example.empty() and minValue.empty() and maxValue.empty() and maxLength.empty() and binding.empty())
+# ShEx:
+
+ NOT { fhir:contentReference {fhir:v .} }  OR ( NOT { fhir:type {fhir:v .} }  AND  NOT { fhir:defaultValue {fhir:v .} }  AND  NOT { fhir:fixed {fhir:v .} }  AND  NOT { fhir:pattern {fhir:v .} }  AND  NOT { fhir:example {fhir:v .} }  AND  NOT { fhir:minValue {fhir:v .} }  AND  NOT { fhir:maxValue {fhir:v .} }  AND  NOT { fhir:maxLength {fhir:v .} }  AND  NOT { fhir:binding {fhir:v .} } )
+
+) AND (
+
+# Constraint: UniqueKey:eld-7
+# Human readable:Pattern may only be specified if there is one type
+# XPath:not(exists(f:*[starts-with(local-name(.), 'pattern')])) or (count(f:type)<=1)
+# Constraint:pattern.empty() or (type.count() <= 1)
+# ShEx:
+
+ NOT { fhir:pattern {fhir:v .} }  OR ( count( fhir:type ) { fhir:v MaxInclusive 1 } )
+
+) AND (
+
+# Constraint: UniqueKey:eld-6
+# Human readable:Fixed value may only be specified if there is one type
+# XPath:not(exists(f:*[starts-with(local-name(.), 'fixed')])) or (count(f:type)<=1)
+# Constraint:fixed.empty() or (type.count()  <= 1)
+# ShEx:
+
+ NOT { fhir:fixed {fhir:v .} }  OR ( count( fhir:type ) { fhir:v MaxInclusive 1 } )
+
+) AND (
+
+# Constraint: UniqueKey:eld-11
+# Human readable:Binding can only be present for coded elements, string, and uri
+# XPath:not(exists(f:binding)) or (count(f:type/f:code) = 0) or  f:type/f:code/@value=('code','Coding','CodeableConcept','Quantity','string', 'uri', 'Duration')
+# Constraint:binding.empty() or type.code.empty() or type.select((code = 'code') or (code = 'Coding') or (code='CodeableConcept') or (code = 'Quantity') or (code = 'string') or (code = 'uri') or (code = 'Duration')).exists()
+# ShEx:
+
+ NOT { fhir:binding {fhir:v .} }  OR  NOT { fhir:type fhir:code {fhir:v .} }  OR { fhir:type SHEX_select_SHEX (fhir:code { fhir:v ['code'] }  OR fhir:code { fhir:v ['Coding'] }  OR fhir:code { fhir:v ['CodeableConcept'] }  OR fhir:code { fhir:v ['Quantity'] }  OR fhir:code { fhir:v ['string'] }  OR fhir:code { fhir:v ['uri'] }  OR fhir:code { fhir:v ['Duration'] } ) . }
+
+) AND (
+
+# Constraint: UniqueKey:eld-22
+# Human readable:sliceIsConstraining can only appear if slicename is present
+# XPath:exists(f:sliceName) or not(exists(f:sliceIsConstraining))
+# Constraint:sliceIsConstraining.exists() implies sliceName.exists()
+# ShEx:
+
+{ fhir:sliceIsConstraining . } SHEX_Implies_SHEX { fhir:sliceName . }
+
+) AND (
+
+# Constraint: UniqueKey:eld-8
+# Human readable:Pattern and fixed are mutually exclusive
+# XPath:not(exists(f:*[starts-with(local-name(.), 'pattern')])) or not(exists(f:*[starts-with(local-name(.), 'fixed')]))
+# Constraint:pattern.empty() or fixed.empty()
+# ShEx:
+
+ NOT { fhir:pattern {fhir:v .} }  OR  NOT { fhir:fixed {fhir:v .} } 
+
+) AND (
+
+# Constraint: UniqueKey:eld-14
+# Human readable:Constraints must be unique by key
+# XPath:count(f:constraint) = count(distinct-values(f:constraint/f:key/@value))
+# Constraint:constraint.select(key).isDistinct()
+# ShEx:
+
+ isDistinct( fhir:constraint  SHEX_select_SHEX (fhir:key) )
+
+) AND (
+
+# Constraint: UniqueKey:eld-13
+# Human readable:Types must be unique by code
+# XPath:not(exists(for $type in f:type return $type/preceding-sibling::f:type[f:code/@value=$type/f:code/@value]))
+# Constraint:type.select(code).isDistinct()
+# ShEx:
+
+ isDistinct( fhir:type  SHEX_select_SHEX (fhir:code) )
+
+) AND (
+
+# Constraint: UniqueKey:eld-16
+# Human readable:sliceName must be composed of proper tokens separated by "/"
+# XPath:not(exists(f:sliceName/@value)) or matches(f:sliceName/@value, '^[a-zA-Z0-9\/\-_\[\]\@]+$')
+# Constraint:sliceName.empty() or sliceName.matches('^[a-zA-Z0-9\\/\\-_\\[\\]\\@]+$')
+# ShEx:
+
+ NOT { fhir:sliceName {fhir:v .} }  OR { fhir:sliceName SHEX_matches_SHEX ('^[a-zA-Z0-9\/\-_\[\]\@]+$') }
+
+) AND (
+
+# Constraint: UniqueKey:eld-15
+# Human readable:default value and meaningWhenMissing are mutually exclusive
+# XPath:not(exists(f:*[starts-with(local-name(.), 'fixed')])) or not(exists(f:meaningWhenMissing))
+# Constraint:defaultValue.empty() or meaningWhenMissing.empty()
+# ShEx:
+
+ NOT { fhir:defaultValue {fhir:v .} }  OR  NOT { fhir:meaningWhenMissing {fhir:v .} } 
+
+) AND (
+
+# Constraint: UniqueKey:eld-18
+# Human readable:Must have a modifier reason if isModifier = true
+# XPath:not(f:isModifier/@value = 'true') or exists(f:isModifierReason)
+# Constraint:(isModifier.exists() and isModifier) implies isModifierReason.exists()
+# ShEx:
+
+({ fhir:isModifier . } AND { fhir:isModifier }) SHEX_Implies_SHEX { fhir:isModifierReason . }
+
+) AND (
+
+# Constraint: UniqueKey:eld-20
+# Human readable:Element names should be simple alphanumerics with a max of 64 characters, or code generation tools may be broken
+# XPath:matches(f:path/@value, '^[A-Za-z][A-Za-z0-9]*(\.[a-z][A-Za-z0-9]*(\[x])?)*$')
+# Constraint:path.matches('^[A-Za-z][A-Za-z0-9]*(\\.[a-z][A-Za-z0-9]*(\\[x])?)*$')
+# ShEx:
+
+{ fhir:path SHEX_matches_SHEX ('^[A-Za-z][A-Za-z0-9]*(\.[a-z][A-Za-z0-9]*(\[x])?)*$') }
+
+) AND (
+
+# Constraint: UniqueKey:eld-4
+# Human readable:Aggregation may only be specified if one of the allowed types for the element is a reference
+# XPath:not(exists(f:aggregation)) or exists(f:code[@value = 'Reference'])
+# Constraint:aggregation.empty() or (code = 'Reference')
+# ShEx:
+
+ NOT { fhir:aggregation {fhir:v .} }  OR ({ fhir:code { fhir:v ['Reference'] }  })
+
+) AND (
+
+# Constraint: UniqueKey:eld-17
+# Human readable:targetProfile is only allowed if the type is Reference or canonical
+# XPath:not(exists(f:targetProfile)) or (f:code/@value = ('Reference', 'canonical', 'CodeableReference'))
+# Constraint:(code='Reference' or code = 'canonical' or code = 'CodeableReference') or targetProfile.empty()
+# ShEx:
+
+(({ fhir:code { fhir:v ['Reference'] }  }) OR ({ fhir:code { fhir:v ['canonical'] }  }) OR ({ fhir:code { fhir:v ['CodeableReference'] }  })) OR  NOT { fhir:targetProfile {fhir:v .} } 
+
+) AND (
+
+# Constraint: UniqueKey:eld-21
+# Human readable:Constraints should have an expression or else validators will not be able to enforce them
+# XPath:exists(f:expression/@value)
+# Constraint:expression.exists()
+# ShEx:
+
+{ fhir:expression . }
+
+) AND (
+
+# Constraint: UniqueKey:eld-12
+# Human readable:ValueSet SHALL start with http:// or https:// or urn: or #
+# XPath:(starts-with(string(f:valueSet/@value), 'http:') or starts-with(string(f:valueSet/@value), 'https:') or starts-with(string(f:valueSet/@value), 'urn:') or starts-with(string(f:valueSet/@value), 'x'))
+# Constraint:valueSet.exists() implies (valueSet.startsWith('http:') or valueSet.startsWith('https') or valueSet.startsWith('urn:') or valueSet.startsWith('#'))
+# ShEx:
+
+{ fhir:valueSet . } SHEX_Implies_SHEX ({ fhir:valueSet SHEX_startsWith_SHEX ('http:') } OR { fhir:valueSet SHEX_startsWith_SHEX ('https') } OR { fhir:valueSet SHEX_startsWith_SHEX ('urn:') } OR { fhir:valueSet SHEX_startsWith_SHEX ('#') })
+
+)
+ 
+
+# Map element to another set of definitions
+<ElementDefinition.mapping> EXTENDS @<Element> CLOSED {   
+    fhir:identity @<id>;                    # Reference to mapping declaration
+    fhir:language @<code> AND
+    	{fhir:value @fhirvs:mimetypes}?;  # Computable language of mapping
+    fhir:map @<string>;                     # Details of the mapping
+    fhir:comment @<string>?;                # Comments about the mapping or its 
+                                            # use 
+}  
+
+# Condition that must evaluate to true
+<ElementDefinition.constraint> EXTENDS @<Element> CLOSED {   
+    fhir:key @<id>;                         # Target of 'condition' reference 
+                                            # above 
+    fhir:requirements @<string>?;           # Why this constraint is necessary 
+                                            # or appropriate 
+    fhir:severity @<code> AND
+    	{fhir:value @fhirvs:constraint-severity};  # error | warning
+    fhir:human @<string>;                   # Human description of constraint
+    fhir:expression @<string>?;             # FHIRPath expression of constraint
+    fhir:xpath @<string>?;                  # XPath expression of constraint
+    fhir:source @<canonical>?;              # Reference to original source of 
+                                            # constraint 
+} AND (
+
+# Constraint: UniqueKey:eld-3
+# Human readable:Max SHALL be a number or "*"
+# XPath:@value='*' or (normalize-space(@value)!='' and normalize-space(translate(@value, '0123456789',''))='')
+# Constraint:empty() or ($this = '*') or (toInteger() >= 0)
+# ShEx:
+
+ NOT {  {fhir:v .} }  OR ({ fhir:$this { fhir:v ['*'] }  }) OR ( toInteger(  ) { fhir:v MinInclusive 0 } )
+
+) AND (
+
+# Constraint: UniqueKey:eld-19
+# Human readable:Element names cannot include some special characters
+# XPath:matches(f:path/@value, '^[^\s\.,:;\'&quot;\/|?!@#$%&*()\[\]{}]{1,64}(\.[^\s\.,:;\'&quot;\/|?!@#$%&*()\[\]{}]{1,64}(\[x\])?(\:[^\s\.]+)?)*$')
+# Constraint:path.matches('^[^\\s\\.,:;\\\'"\\/|?!@#$%&*()\\[\\]{}]{1,64}(\\.[^\\s\\.,:;\\\'"\\/|?!@#$%&*()\\[\\]{}]{1,64}(\\[x\\])?(\\:[^\\s\\.]+)?)*$')
+# ShEx:
+
+{ fhir:path SHEX_matches_SHEX ('^[^\s\.,:;\'"\/|?!@#$%&*()\[\]{}]{1,64}(\.[^\s\.,:;\'"\/|?!@#$%&*()\[\]{}]{1,64}(\[x\])?(\:[^\s\.]+)?)*$') }
+
+) AND (
+
+# Constraint: UniqueKey:eld-2
+# Human readable:Min <= Max
+# XPath:not(exists(f:min)) or not(exists(f:max)) or (not(f:max/@value) and not(f:min/@value)) or (f:max/@value = '*') or (number(f:max/@value) >= f:min/@value)
+# Constraint:min.empty() or max.empty() or (max = '*') or iif(max != '*', min <= max.toInteger())
+# ShEx:
+
+ NOT { fhir:min {fhir:v .} }  OR  NOT { fhir:max {fhir:v .} }  OR ({ fhir:max { fhir:v ['*'] }  }) OR  SHEX_iif_SHEX ({ fhir:max { fhir:v [ . -'*'] } }, { fhir:min { fhir:v MaxInclusive  toInteger( fhir:max ) }  })
+
+) AND (
+
+# Constraint: UniqueKey:eld-5
+# Human readable:if the element definition has a contentReference, it cannot have type, defaultValue, fixed, pattern, example, minValue, maxValue, maxLength, or binding
+# XPath:not(exists(f:contentReference) and (exists(f:type) or exists(f:*[starts-with(local-name(.), 'value')]) or exists(f:*[starts-with(local-name(.), 'defaultValue')])  or exists(f:*[starts-with(local-name(.), 'fixed')]) or exists(f:*[starts-with(local-name(.), 'pattern')]) or exists(f:*[starts-with(local-name(.), 'example')]) or exists(f:*[starts-with(local-name(.), 'f:minValue')]) or exists(f:*[starts-with(local-name(.), 'f:maxValue')]) or exists(f:maxLength) or exists(f:binding)))
+# Constraint:contentReference.empty() or (type.empty() and defaultValue.empty() and fixed.empty() and pattern.empty() and example.empty() and minValue.empty() and maxValue.empty() and maxLength.empty() and binding.empty())
+# ShEx:
+
+ NOT { fhir:contentReference {fhir:v .} }  OR ( NOT { fhir:type {fhir:v .} }  AND  NOT { fhir:defaultValue {fhir:v .} }  AND  NOT { fhir:fixed {fhir:v .} }  AND  NOT { fhir:pattern {fhir:v .} }  AND  NOT { fhir:example {fhir:v .} }  AND  NOT { fhir:minValue {fhir:v .} }  AND  NOT { fhir:maxValue {fhir:v .} }  AND  NOT { fhir:maxLength {fhir:v .} }  AND  NOT { fhir:binding {fhir:v .} } )
+
+) AND (
+
+# Constraint: UniqueKey:eld-7
+# Human readable:Pattern may only be specified if there is one type
+# XPath:not(exists(f:*[starts-with(local-name(.), 'pattern')])) or (count(f:type)<=1)
+# Constraint:pattern.empty() or (type.count() <= 1)
+# ShEx:
+
+ NOT { fhir:pattern {fhir:v .} }  OR ( count( fhir:type ) { fhir:v MaxInclusive 1 } )
+
+) AND (
+
+# Constraint: UniqueKey:eld-6
+# Human readable:Fixed value may only be specified if there is one type
+# XPath:not(exists(f:*[starts-with(local-name(.), 'fixed')])) or (count(f:type)<=1)
+# Constraint:fixed.empty() or (type.count()  <= 1)
+# ShEx:
+
+ NOT { fhir:fixed {fhir:v .} }  OR ( count( fhir:type ) { fhir:v MaxInclusive 1 } )
+
+) AND (
+
+# Constraint: UniqueKey:eld-11
+# Human readable:Binding can only be present for coded elements, string, and uri
+# XPath:not(exists(f:binding)) or (count(f:type/f:code) = 0) or  f:type/f:code/@value=('code','Coding','CodeableConcept','Quantity','string', 'uri', 'Duration')
+# Constraint:binding.empty() or type.code.empty() or type.select((code = 'code') or (code = 'Coding') or (code='CodeableConcept') or (code = 'Quantity') or (code = 'string') or (code = 'uri') or (code = 'Duration')).exists()
+# ShEx:
+
+ NOT { fhir:binding {fhir:v .} }  OR  NOT { fhir:type fhir:code {fhir:v .} }  OR { fhir:type SHEX_select_SHEX (fhir:code { fhir:v ['code'] }  OR fhir:code { fhir:v ['Coding'] }  OR fhir:code { fhir:v ['CodeableConcept'] }  OR fhir:code { fhir:v ['Quantity'] }  OR fhir:code { fhir:v ['string'] }  OR fhir:code { fhir:v ['uri'] }  OR fhir:code { fhir:v ['Duration'] } ) . }
+
+) AND (
+
+# Constraint: UniqueKey:eld-22
+# Human readable:sliceIsConstraining can only appear if slicename is present
+# XPath:exists(f:sliceName) or not(exists(f:sliceIsConstraining))
+# Constraint:sliceIsConstraining.exists() implies sliceName.exists()
+# ShEx:
+
+{ fhir:sliceIsConstraining . } SHEX_Implies_SHEX { fhir:sliceName . }
+
+) AND (
+
+# Constraint: UniqueKey:eld-8
+# Human readable:Pattern and fixed are mutually exclusive
+# XPath:not(exists(f:*[starts-with(local-name(.), 'pattern')])) or not(exists(f:*[starts-with(local-name(.), 'fixed')]))
+# Constraint:pattern.empty() or fixed.empty()
+# ShEx:
+
+ NOT { fhir:pattern {fhir:v .} }  OR  NOT { fhir:fixed {fhir:v .} } 
+
+) AND (
+
+# Constraint: UniqueKey:eld-14
+# Human readable:Constraints must be unique by key
+# XPath:count(f:constraint) = count(distinct-values(f:constraint/f:key/@value))
+# Constraint:constraint.select(key).isDistinct()
+# ShEx:
+
+ isDistinct( fhir:constraint  SHEX_select_SHEX (fhir:key) )
+
+) AND (
+
+# Constraint: UniqueKey:eld-13
+# Human readable:Types must be unique by code
+# XPath:not(exists(for $type in f:type return $type/preceding-sibling::f:type[f:code/@value=$type/f:code/@value]))
+# Constraint:type.select(code).isDistinct()
+# ShEx:
+
+ isDistinct( fhir:type  SHEX_select_SHEX (fhir:code) )
+
+) AND (
+
+# Constraint: UniqueKey:eld-16
+# Human readable:sliceName must be composed of proper tokens separated by "/"
+# XPath:not(exists(f:sliceName/@value)) or matches(f:sliceName/@value, '^[a-zA-Z0-9\/\-_\[\]\@]+$')
+# Constraint:sliceName.empty() or sliceName.matches('^[a-zA-Z0-9\\/\\-_\\[\\]\\@]+$')
+# ShEx:
+
+ NOT { fhir:sliceName {fhir:v .} }  OR { fhir:sliceName SHEX_matches_SHEX ('^[a-zA-Z0-9\/\-_\[\]\@]+$') }
+
+) AND (
+
+# Constraint: UniqueKey:eld-15
+# Human readable:default value and meaningWhenMissing are mutually exclusive
+# XPath:not(exists(f:*[starts-with(local-name(.), 'fixed')])) or not(exists(f:meaningWhenMissing))
+# Constraint:defaultValue.empty() or meaningWhenMissing.empty()
+# ShEx:
+
+ NOT { fhir:defaultValue {fhir:v .} }  OR  NOT { fhir:meaningWhenMissing {fhir:v .} } 
+
+) AND (
+
+# Constraint: UniqueKey:eld-18
+# Human readable:Must have a modifier reason if isModifier = true
+# XPath:not(f:isModifier/@value = 'true') or exists(f:isModifierReason)
+# Constraint:(isModifier.exists() and isModifier) implies isModifierReason.exists()
+# ShEx:
+
+({ fhir:isModifier . } AND { fhir:isModifier }) SHEX_Implies_SHEX { fhir:isModifierReason . }
+
+) AND (
+
+# Constraint: UniqueKey:eld-20
+# Human readable:Element names should be simple alphanumerics with a max of 64 characters, or code generation tools may be broken
+# XPath:matches(f:path/@value, '^[A-Za-z][A-Za-z0-9]*(\.[a-z][A-Za-z0-9]*(\[x])?)*$')
+# Constraint:path.matches('^[A-Za-z][A-Za-z0-9]*(\\.[a-z][A-Za-z0-9]*(\\[x])?)*$')
+# ShEx:
+
+{ fhir:path SHEX_matches_SHEX ('^[A-Za-z][A-Za-z0-9]*(\.[a-z][A-Za-z0-9]*(\[x])?)*$') }
+
+) AND (
+
+# Constraint: UniqueKey:eld-4
+# Human readable:Aggregation may only be specified if one of the allowed types for the element is a reference
+# XPath:not(exists(f:aggregation)) or exists(f:code[@value = 'Reference'])
+# Constraint:aggregation.empty() or (code = 'Reference')
+# ShEx:
+
+ NOT { fhir:aggregation {fhir:v .} }  OR ({ fhir:code { fhir:v ['Reference'] }  })
+
+) AND (
+
+# Constraint: UniqueKey:eld-17
+# Human readable:targetProfile is only allowed if the type is Reference or canonical
+# XPath:not(exists(f:targetProfile)) or (f:code/@value = ('Reference', 'canonical', 'CodeableReference'))
+# Constraint:(code='Reference' or code = 'canonical' or code = 'CodeableReference') or targetProfile.empty()
+# ShEx:
+
+(({ fhir:code { fhir:v ['Reference'] }  }) OR ({ fhir:code { fhir:v ['canonical'] }  }) OR ({ fhir:code { fhir:v ['CodeableReference'] }  })) OR  NOT { fhir:targetProfile {fhir:v .} } 
+
+) AND (
+
+# Constraint: UniqueKey:eld-21
+# Human readable:Constraints should have an expression or else validators will not be able to enforce them
+# XPath:exists(f:expression/@value)
+# Constraint:expression.exists()
+# ShEx:
+
+{ fhir:expression . }
+
+) AND (
+
+# Constraint: UniqueKey:eld-12
+# Human readable:ValueSet SHALL start with http:// or https:// or urn: or #
+# XPath:(starts-with(string(f:valueSet/@value), 'http:') or starts-with(string(f:valueSet/@value), 'https:') or starts-with(string(f:valueSet/@value), 'urn:') or starts-with(string(f:valueSet/@value), 'x'))
+# Constraint:valueSet.exists() implies (valueSet.startsWith('http:') or valueSet.startsWith('https') or valueSet.startsWith('urn:') or valueSet.startsWith('#'))
+# ShEx:
+
+{ fhir:valueSet . } SHEX_Implies_SHEX ({ fhir:valueSet SHEX_startsWith_SHEX ('http:') } OR { fhir:valueSet SHEX_startsWith_SHEX ('https') } OR { fhir:valueSet SHEX_startsWith_SHEX ('urn:') } OR { fhir:valueSet SHEX_startsWith_SHEX ('#') })
+
+)
+ 
+
+# Base definition information for tools
+<ElementDefinition.base> EXTENDS @<Element> CLOSED {   
+    fhir:path @<string>;                    # Path that identifies the base 
+                                            # element 
+    fhir:min @<unsignedInt>;                # Min cardinality of the base element
+    fhir:max @<string>;                     # Max cardinality of the base element
+}  
+
+# ValueSet details if this is coded
+<ElementDefinition.binding> EXTENDS @<Element> CLOSED {   
+    fhir:strength @<code> AND
+    	{fhir:value @fhirvs:binding-strength};  # required | extensible | preferred 
+                                            # | example 
+    fhir:description @<string>?;            # Human explanation of the value set
+    fhir:valueSet @<canonical>?;            # Source of value set
+} AND (
+
+# Constraint: UniqueKey:eld-3
+# Human readable:Max SHALL be a number or "*"
+# XPath:@value='*' or (normalize-space(@value)!='' and normalize-space(translate(@value, '0123456789',''))='')
+# Constraint:empty() or ($this = '*') or (toInteger() >= 0)
+# ShEx:
+
+ NOT {  {fhir:v .} }  OR ({ fhir:$this { fhir:v ['*'] }  }) OR ( toInteger(  ) { fhir:v MinInclusive 0 } )
+
+) AND (
+
+# Constraint: UniqueKey:eld-19
+# Human readable:Element names cannot include some special characters
+# XPath:matches(f:path/@value, '^[^\s\.,:;\'&quot;\/|?!@#$%&*()\[\]{}]{1,64}(\.[^\s\.,:;\'&quot;\/|?!@#$%&*()\[\]{}]{1,64}(\[x\])?(\:[^\s\.]+)?)*$')
+# Constraint:path.matches('^[^\\s\\.,:;\\\'"\\/|?!@#$%&*()\\[\\]{}]{1,64}(\\.[^\\s\\.,:;\\\'"\\/|?!@#$%&*()\\[\\]{}]{1,64}(\\[x\\])?(\\:[^\\s\\.]+)?)*$')
+# ShEx:
+
+{ fhir:path SHEX_matches_SHEX ('^[^\s\.,:;\'"\/|?!@#$%&*()\[\]{}]{1,64}(\.[^\s\.,:;\'"\/|?!@#$%&*()\[\]{}]{1,64}(\[x\])?(\:[^\s\.]+)?)*$') }
+
+) AND (
+
+# Constraint: UniqueKey:eld-2
+# Human readable:Min <= Max
+# XPath:not(exists(f:min)) or not(exists(f:max)) or (not(f:max/@value) and not(f:min/@value)) or (f:max/@value = '*') or (number(f:max/@value) >= f:min/@value)
+# Constraint:min.empty() or max.empty() or (max = '*') or iif(max != '*', min <= max.toInteger())
+# ShEx:
+
+ NOT { fhir:min {fhir:v .} }  OR  NOT { fhir:max {fhir:v .} }  OR ({ fhir:max { fhir:v ['*'] }  }) OR  SHEX_iif_SHEX ({ fhir:max { fhir:v [ . -'*'] } }, { fhir:min { fhir:v MaxInclusive  toInteger( fhir:max ) }  })
+
+) AND (
+
+# Constraint: UniqueKey:eld-5
+# Human readable:if the element definition has a contentReference, it cannot have type, defaultValue, fixed, pattern, example, minValue, maxValue, maxLength, or binding
+# XPath:not(exists(f:contentReference) and (exists(f:type) or exists(f:*[starts-with(local-name(.), 'value')]) or exists(f:*[starts-with(local-name(.), 'defaultValue')])  or exists(f:*[starts-with(local-name(.), 'fixed')]) or exists(f:*[starts-with(local-name(.), 'pattern')]) or exists(f:*[starts-with(local-name(.), 'example')]) or exists(f:*[starts-with(local-name(.), 'f:minValue')]) or exists(f:*[starts-with(local-name(.), 'f:maxValue')]) or exists(f:maxLength) or exists(f:binding)))
+# Constraint:contentReference.empty() or (type.empty() and defaultValue.empty() and fixed.empty() and pattern.empty() and example.empty() and minValue.empty() and maxValue.empty() and maxLength.empty() and binding.empty())
+# ShEx:
+
+ NOT { fhir:contentReference {fhir:v .} }  OR ( NOT { fhir:type {fhir:v .} }  AND  NOT { fhir:defaultValue {fhir:v .} }  AND  NOT { fhir:fixed {fhir:v .} }  AND  NOT { fhir:pattern {fhir:v .} }  AND  NOT { fhir:example {fhir:v .} }  AND  NOT { fhir:minValue {fhir:v .} }  AND  NOT { fhir:maxValue {fhir:v .} }  AND  NOT { fhir:maxLength {fhir:v .} }  AND  NOT { fhir:binding {fhir:v .} } )
+
+) AND (
+
+# Constraint: UniqueKey:eld-7
+# Human readable:Pattern may only be specified if there is one type
+# XPath:not(exists(f:*[starts-with(local-name(.), 'pattern')])) or (count(f:type)<=1)
+# Constraint:pattern.empty() or (type.count() <= 1)
+# ShEx:
+
+ NOT { fhir:pattern {fhir:v .} }  OR ( count( fhir:type ) { fhir:v MaxInclusive 1 } )
+
+) AND (
+
+# Constraint: UniqueKey:eld-6
+# Human readable:Fixed value may only be specified if there is one type
+# XPath:not(exists(f:*[starts-with(local-name(.), 'fixed')])) or (count(f:type)<=1)
+# Constraint:fixed.empty() or (type.count()  <= 1)
+# ShEx:
+
+ NOT { fhir:fixed {fhir:v .} }  OR ( count( fhir:type ) { fhir:v MaxInclusive 1 } )
+
+) AND (
+
+# Constraint: UniqueKey:eld-11
+# Human readable:Binding can only be present for coded elements, string, and uri
+# XPath:not(exists(f:binding)) or (count(f:type/f:code) = 0) or  f:type/f:code/@value=('code','Coding','CodeableConcept','Quantity','string', 'uri', 'Duration')
+# Constraint:binding.empty() or type.code.empty() or type.select((code = 'code') or (code = 'Coding') or (code='CodeableConcept') or (code = 'Quantity') or (code = 'string') or (code = 'uri') or (code = 'Duration')).exists()
+# ShEx:
+
+ NOT { fhir:binding {fhir:v .} }  OR  NOT { fhir:type fhir:code {fhir:v .} }  OR { fhir:type SHEX_select_SHEX (fhir:code { fhir:v ['code'] }  OR fhir:code { fhir:v ['Coding'] }  OR fhir:code { fhir:v ['CodeableConcept'] }  OR fhir:code { fhir:v ['Quantity'] }  OR fhir:code { fhir:v ['string'] }  OR fhir:code { fhir:v ['uri'] }  OR fhir:code { fhir:v ['Duration'] } ) . }
+
+) AND (
+
+# Constraint: UniqueKey:eld-22
+# Human readable:sliceIsConstraining can only appear if slicename is present
+# XPath:exists(f:sliceName) or not(exists(f:sliceIsConstraining))
+# Constraint:sliceIsConstraining.exists() implies sliceName.exists()
+# ShEx:
+
+{ fhir:sliceIsConstraining . } SHEX_Implies_SHEX { fhir:sliceName . }
+
+) AND (
+
+# Constraint: UniqueKey:eld-8
+# Human readable:Pattern and fixed are mutually exclusive
+# XPath:not(exists(f:*[starts-with(local-name(.), 'pattern')])) or not(exists(f:*[starts-with(local-name(.), 'fixed')]))
+# Constraint:pattern.empty() or fixed.empty()
+# ShEx:
+
+ NOT { fhir:pattern {fhir:v .} }  OR  NOT { fhir:fixed {fhir:v .} } 
+
+) AND (
+
+# Constraint: UniqueKey:eld-14
+# Human readable:Constraints must be unique by key
+# XPath:count(f:constraint) = count(distinct-values(f:constraint/f:key/@value))
+# Constraint:constraint.select(key).isDistinct()
+# ShEx:
+
+ isDistinct( fhir:constraint  SHEX_select_SHEX (fhir:key) )
+
+) AND (
+
+# Constraint: UniqueKey:eld-13
+# Human readable:Types must be unique by code
+# XPath:not(exists(for $type in f:type return $type/preceding-sibling::f:type[f:code/@value=$type/f:code/@value]))
+# Constraint:type.select(code).isDistinct()
+# ShEx:
+
+ isDistinct( fhir:type  SHEX_select_SHEX (fhir:code) )
+
+) AND (
+
+# Constraint: UniqueKey:eld-16
+# Human readable:sliceName must be composed of proper tokens separated by "/"
+# XPath:not(exists(f:sliceName/@value)) or matches(f:sliceName/@value, '^[a-zA-Z0-9\/\-_\[\]\@]+$')
+# Constraint:sliceName.empty() or sliceName.matches('^[a-zA-Z0-9\\/\\-_\\[\\]\\@]+$')
+# ShEx:
+
+ NOT { fhir:sliceName {fhir:v .} }  OR { fhir:sliceName SHEX_matches_SHEX ('^[a-zA-Z0-9\/\-_\[\]\@]+$') }
+
+) AND (
+
+# Constraint: UniqueKey:eld-15
+# Human readable:default value and meaningWhenMissing are mutually exclusive
+# XPath:not(exists(f:*[starts-with(local-name(.), 'fixed')])) or not(exists(f:meaningWhenMissing))
+# Constraint:defaultValue.empty() or meaningWhenMissing.empty()
+# ShEx:
+
+ NOT { fhir:defaultValue {fhir:v .} }  OR  NOT { fhir:meaningWhenMissing {fhir:v .} } 
+
+) AND (
+
+# Constraint: UniqueKey:eld-18
+# Human readable:Must have a modifier reason if isModifier = true
+# XPath:not(f:isModifier/@value = 'true') or exists(f:isModifierReason)
+# Constraint:(isModifier.exists() and isModifier) implies isModifierReason.exists()
+# ShEx:
+
+({ fhir:isModifier . } AND { fhir:isModifier }) SHEX_Implies_SHEX { fhir:isModifierReason . }
+
+) AND (
+
+# Constraint: UniqueKey:eld-20
+# Human readable:Element names should be simple alphanumerics with a max of 64 characters, or code generation tools may be broken
+# XPath:matches(f:path/@value, '^[A-Za-z][A-Za-z0-9]*(\.[a-z][A-Za-z0-9]*(\[x])?)*$')
+# Constraint:path.matches('^[A-Za-z][A-Za-z0-9]*(\\.[a-z][A-Za-z0-9]*(\\[x])?)*$')
+# ShEx:
+
+{ fhir:path SHEX_matches_SHEX ('^[A-Za-z][A-Za-z0-9]*(\.[a-z][A-Za-z0-9]*(\[x])?)*$') }
+
+) AND (
+
+# Constraint: UniqueKey:eld-4
+# Human readable:Aggregation may only be specified if one of the allowed types for the element is a reference
+# XPath:not(exists(f:aggregation)) or exists(f:code[@value = 'Reference'])
+# Constraint:aggregation.empty() or (code = 'Reference')
+# ShEx:
+
+ NOT { fhir:aggregation {fhir:v .} }  OR ({ fhir:code { fhir:v ['Reference'] }  })
+
+) AND (
+
+# Constraint: UniqueKey:eld-17
+# Human readable:targetProfile is only allowed if the type is Reference or canonical
+# XPath:not(exists(f:targetProfile)) or (f:code/@value = ('Reference', 'canonical', 'CodeableReference'))
+# Constraint:(code='Reference' or code = 'canonical' or code = 'CodeableReference') or targetProfile.empty()
+# ShEx:
+
+(({ fhir:code { fhir:v ['Reference'] }  }) OR ({ fhir:code { fhir:v ['canonical'] }  }) OR ({ fhir:code { fhir:v ['CodeableReference'] }  })) OR  NOT { fhir:targetProfile {fhir:v .} } 
+
+) AND (
+
+# Constraint: UniqueKey:eld-21
+# Human readable:Constraints should have an expression or else validators will not be able to enforce them
+# XPath:exists(f:expression/@value)
+# Constraint:expression.exists()
+# ShEx:
+
+{ fhir:expression . }
+
+) AND (
+
+# Constraint: UniqueKey:eld-12
+# Human readable:ValueSet SHALL start with http:// or https:// or urn: or #
+# XPath:(starts-with(string(f:valueSet/@value), 'http:') or starts-with(string(f:valueSet/@value), 'https:') or starts-with(string(f:valueSet/@value), 'urn:') or starts-with(string(f:valueSet/@value), 'x'))
+# Constraint:valueSet.exists() implies (valueSet.startsWith('http:') or valueSet.startsWith('https') or valueSet.startsWith('urn:') or valueSet.startsWith('#'))
+# ShEx:
+
+{ fhir:valueSet . } SHEX_Implies_SHEX ({ fhir:valueSet SHEX_startsWith_SHEX ('http:') } OR { fhir:valueSet SHEX_startsWith_SHEX ('https') } OR { fhir:valueSet SHEX_startsWith_SHEX ('urn:') } OR { fhir:valueSet SHEX_startsWith_SHEX ('#') })
+
+)
+ 
+
+# Element values that are used to distinguish the slices
+<ElementDefinition.slicing.discriminator> EXTENDS @<Element> CLOSED {   
+    fhir:type @<code> AND
+    	{fhir:value @fhirvs:discriminator-type};  # value | exists | pattern | type | 
+                                            # profile 
+    fhir:path @<string>;                    # Path to element value
+}  
+
+# This element is sliced - slices follow
+<ElementDefinition.slicing> EXTENDS @<Element> CLOSED {   
+    fhir:discriminator @<OneOrMore_ElementDefinition.slicing.discriminator>?;  # Element values that are used to 
+                                            # distinguish the slices 
+    fhir:description @<string>?;            # Text description of how slicing 
+                                            # works (or not) 
+    fhir:ordered @<boolean>?;               # If elements must be in same order 
+                                            # as slices 
+    fhir:rules @<code> AND
+    	{fhir:value @fhirvs:resource-slicing-rules};  # closed | open | openAtEnd
+}  
+
+# Example value (as defined for type)
+<ElementDefinition.example> EXTENDS @<Element> CLOSED {   
+    fhir:label @<string>;                   # Describes the purpose of this 
+                                            # example 
+    fhir:value (@<base64Binary>  OR 
+    			@<boolean>  OR 
+    			@<canonical>  OR 
+    			@<code>  OR 
+    			@<date>  OR 
+    			@<dateTime>  OR 
+    			@<decimal>  OR 
+    			@<id>  OR 
+    			@<instant>  OR 
+    			@<integer>  OR 
+    			@<integer64>  OR 
+    			@<markdown>  OR 
+    			@<oid>  OR 
+    			@<positiveInt>  OR 
+    			@<string>  OR 
+    			@<time>  OR 
+    			@<unsignedInt>  OR 
+    			@<uri>  OR 
+    			@<url>  OR 
+    			@<uuid>  OR 
+    			@<Address>  OR 
+    			@<Age>  OR 
+    			@<Annotation>  OR 
+    			@<Attachment>  OR 
+    			@<CodeableConcept>  OR 
+    			@<CodeableReference>  OR 
+    			@<Coding>  OR 
+    			@<ContactPoint>  OR 
+    			@<Count>  OR 
+    			@<Distance>  OR 
+    			@<Duration>  OR 
+    			@<HumanName>  OR 
+    			@<Identifier>  OR 
+    			@<Money>  OR 
+    			@<Period>  OR 
+    			@<Quantity>  OR 
+    			@<Range>  OR 
+    			@<Ratio>  OR 
+    			@<RatioRange>  OR 
+    			@<Reference>  OR 
+    			@<SampledData>  OR 
+    			@<Signature>  OR 
+    			@<Timing>  OR 
+    			@<ContactDetail>  OR 
+    			@<Contributor>  OR 
+    			@<DataRequirement>  OR 
+    			@<Expression>  OR 
+    			@<ParameterDefinition>  OR 
+    			@<RelatedArtifact>  OR 
+    			@<TriggerDefinition>  OR 
+    			@<UsageContext>  OR 
+    			@<Dosage>  OR 
+    			@<Meta> )  AND { rdf:type IRI } ;  # Value of Example (one of allowed 
+                                            # types) 
+}  
+
+#---------------------- Data Types -------------------
+
+# Primitive Type date
+<date> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:date];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v xsd:gYear OR xsd:gYearMonth OR xsd:date?;  # Primitive value for date
+}  
+
+# Metadata about a resource
+<Meta> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Meta];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:versionId @<id>?;                  # Version specific identifier
+    fhir:lastUpdated @<instant>?;           # When the resource version last 
+                                            # changed 
+    fhir:source @<uri>?;                    # Identifies where the resource 
+                                            # comes from 
+    fhir:profile @<OneOrMore_canonical>?;   # Profiles this resource claims to 
+                                            # conform to 
+    fhir:security @<OneOrMore_Coding>?;     # Security Labels applied to this 
+                                            # resource 
+    fhir:tag @<OneOrMore_Coding>?;          # Tags applied to this resource
+}  
+
+# An address expressed using postal conventions (as opposed to GPS or other location definition formats)
+<Address> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Address];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:use @<code> AND
+    	{fhir:value @fhirvs:address-use}?;  # home | work | temp | old | billing 
+                                            # - purpose of this address 
+    fhir:type @<code> AND
+    	{fhir:value @fhirvs:address-type}?;  # postal | physical | both
+    fhir:text @<string>?;                   # Text representation of the address
+    fhir:line @<OneOrMore_string>?;         # Street name, number, direction & 
+                                            # P.O. Box etc. 
+    fhir:city @<string>?;                   # Name of city, town etc.
+    fhir:district @<string>?;               # District name (aka county)
+    fhir:state @<string>?;                  # Sub-unit of country (abbreviations 
+                                            # ok) 
+    fhir:postalCode @<string>?;             # Postal code for area
+    fhir:country @<string>?;                # Country (e.g. may be ISO 3166 2 or 
+                                            # 3 letter code) 
+    fhir:period @<Period>?;                 # Time period when address was/is in 
+                                            # use 
+}  
+
+# Content in a format defined elsewhere
+<Attachment> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Attachment];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:contentType @<code> AND
+    	{fhir:value @fhirvs:mimetypes}?;  # Mime type of the content, with 
+                                            # charset etc. 
+    fhir:language @<code>?;                 # Human language of the content 
+                                            # (BCP-47) 
+    fhir:data @<base64Binary>?;             # Data inline, base64ed
+    fhir:url @<url>?;                       # Uri where the data can be found
+    fhir:size @<integer64>?;                # Number of bytes of content (if url 
+                                            # provided) 
+    fhir:hash @<base64Binary>?;             # Hash of the data (sha-1, base64ed)
+    fhir:title @<string>?;                  # Label to display in place of the 
+                                            # data 
+    fhir:creation @<dateTime>?;             # Date attachment was first created
+    fhir:height @<positiveInt>?;            # Height of the image in pixels 
+                                            # (photo/video) 
+    fhir:width @<positiveInt>?;             # Width of the image in pixels 
+                                            # (photo/video) 
+    fhir:frames @<positiveInt>?;            # Number of frames if > 1 (photo)
+    fhir:duration @<decimal>?;              # Length in seconds (audio / video)
+    fhir:pages @<positiveInt>?;             # Number of printed pages
+} AND (
+
+# Constraint: UniqueKey:att-1
+# Human readable:If the Attachment has data, it SHALL have a contentType
+# XPath:not(exists(f:data)) or exists(f:contentType)
+# Constraint:data.empty() or contentType.exists()
+# ShEx:
+
+ NOT { fhir:data {fhir:v .} }  OR { fhir:contentType . }
+
+)
+ 
+
+# Primitive Type integer
+<integer> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:integer];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v xsd:int MININCLUSIVE -2147483648 MAXINCLUSIVE 2147483647?;  # Primitive value for integer
+}  
+
+# A measured or measurable amount
+<Count> EXTENDS @<Quantity> CLOSED {   
+
+    a [fhir:Count];
+    fhir:nodeRole [fhir:treeRoot]?;
+} AND (
+
+# Constraint: UniqueKey:cnt-3
+# Human readable:There SHALL be a code with a value of "1" if there is a value. If system is present, it SHALL be UCUM.  If present, the value SHALL be a whole number.
+# XPath:(f:code or not(f:value)) and (not(exists(f:system)) or (f:system/@value='http://unitsofmeasure.org' and f:code/@value='1')) and not(contains(f:value/@value, '.'))
+# Constraint:(code.exists() or value.empty()) and (system.empty() or system = %ucum) and (code.empty() or code = '1') and (value.empty() or value.hasValue().not() or value.toString().contains('.').not())
+# ShEx:
+
+({ fhir:code . } OR  NOT { fhir:value {fhir:v .} } ) AND ( NOT { fhir:system {fhir:v .} }  OR ({ fhir:system { fhir:v ['%ucum'] }  })) AND ( NOT { fhir:code {fhir:v .} }  OR ({ fhir:code { fhir:v ['1'] }  })) AND ( NOT { fhir:value {fhir:v .} }  OR  NOT { fhir:value  . } OR  NOT { fhir:value  toString(  )  SHEX_contains_SHEX ('.') })
+
+)
+ 
+
+# Describes a required data item
+<DataRequirement> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:DataRequirement];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:type @<code> AND
+    	{fhir:value @fhirvs:all-types};  # The type of the required data
+    fhir:profile @<OneOrMore_canonical>?;   # The profile of the required data
+    fhir:subject (@<CodeableConcept>  OR 
+    			(@<Reference>  AND {fhir:link @<Group> }) )  AND { rdf:type IRI } ?;  # E.g. Patient, Practitioner, 
+                                            # RelatedPerson, Organization, 
+                                            # Location, Device 
+    fhir:mustSupport @<OneOrMore_string>?;  # Indicates specific structure 
+                                            # elements that are referenced by 
+                                            # the knowledge module 
+    fhir:codeFilter @<OneOrMore_DataRequirement.codeFilter>?;  # What codes are expected
+    fhir:dateFilter @<OneOrMore_DataRequirement.dateFilter>?;  # What dates/date ranges are expected
+    fhir:limit @<positiveInt>?;             # Number of results
+    fhir:sort @<OneOrMore_DataRequirement.sort>?;  # Order of the results
+} AND (
+
+# Constraint: UniqueKey:drq-1
+# Human readable:Either a path or a searchParam must be provided, but not both
+# XPath:(exists(f:path) and not(exists(f:searchParam))) or (not(exists(f:path)) and exists(f:searchParam))
+# Constraint:path.exists() xor searchParam.exists()
+# ShEx:
+
+{ fhir:path . } SHEX_Xor_SHEX { fhir:searchParam . }
+
+) AND (
+
+# Constraint: UniqueKey:drq-2
+# Human readable:Either a path or a searchParam must be provided, but not both
+# XPath:(exists(f:path) and not(exists(f:searchParam))) or (not(exists(f:path)) and exists(f:searchParam))
+# Constraint:path.exists() xor searchParam.exists()
+# ShEx:
+
+{ fhir:path . } SHEX_Xor_SHEX { fhir:searchParam . }
+
+)
+ 
+
+# How the medication is/was taken or should be taken
+<Dosage> EXTENDS @<BackboneType> CLOSED {   
+
+    a [fhir:Dosage];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:sequence @<integer>?;              # The order of the dosage 
+                                            # instructions 
+    fhir:text @<string>?;                   # Free text dosage instructions e.g. 
+                                            # SIG 
+    fhir:additionalInstruction @<OneOrMore_CodeableConcept>?;  # Supplemental instruction or 
+                                            # warnings to the patient - e.g. 
+                                            # "with meals", "may cause 
+                                            # drowsiness" 
+    fhir:patientInstruction @<string>?;     # Patient or consumer oriented 
+                                            # instructions 
+    fhir:timing @<Timing>?;                 # When medication should be 
+                                            # administered 
+    fhir:asNeeded @<boolean>?;              # Take "as needed"
+    fhir:asNeededFor @<OneOrMore_CodeableConcept>?;  # Take "as needed" (for x)
+    fhir:site @<CodeableConcept>?;          # Body site to administer to
+    fhir:route @<CodeableConcept>?;         # How drug should enter body
+    fhir:method @<CodeableConcept>?;        # Technique for administering 
+                                            # medication 
+    fhir:doseAndRate @<OneOrMore_Dosage.doseAndRate>?;  # Amount of medication administered, 
+                                            # to be administered or typical 
+                                            # amount to be administered 
+    fhir:maxDosePerPeriod @<OneOrMore_Ratio>?;  # Upper limit on medication per unit 
+                                            # of time 
+    fhir:maxDosePerAdministration @<SimpleQuantity>?;  # Upper limit on medication per 
+                                            # administration 
+    fhir:maxDosePerLifetime @<SimpleQuantity>?;  # Upper limit on medication per 
+                                            # lifetime of the patient 
+} AND (
+
+# Constraint: UniqueKey:dosage-1
+# Human readable:AsNeededFor can only be set if AsNeeded is empty or true
+# XPath:not(exists(f:asneededfor)) or (not(exists(f:asneeded)) or (f:asneeded/@value = 'true')
+# Constraint:asNeededFor.empty() or asNeeded.empty() or asNeeded
+# ShEx:
+
+ NOT { fhir:asNeededFor {fhir:v .} }  OR  NOT { fhir:asNeeded {fhir:v .} }  OR { fhir:asNeeded }
+
+)
+ 
+
+# Primitive Type uuid
+<uuid> EXTENDS @<uri> CLOSED {   
+
+    a [fhir:uuid];
+    fhir:nodeRole [fhir:treeRoot]?;
+}  
+
+# An identifier intended for computation
+<Identifier> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Identifier];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:use @<code> AND
+    	{fhir:value @fhirvs:identifier-use}?;  # usual | official | temp | 
+                                            # secondary | old (If known) 
+    fhir:type @<CodeableConcept>?;          # Description of identifier
+    fhir:system @<uri>?;                    # The namespace for the identifier 
+                                            # value 
+    fhir:value @<string>?;                  # The value that is unique
+    fhir:period @<Period>?;                 # Time period when id is/was valid 
+                                            # for use 
+    fhir:assigner @<Reference> AND {fhir:link 
+    			@<Organization> }?;  # Organization that issued id (may 
+                                            # be just text) 
+}  
+
+# Range of ratio values
+<RatioRange> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:RatioRange];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:lowNumerator @<SimpleQuantity>?;   # Low Numerator limit
+    fhir:highNumerator @<SimpleQuantity>?;  # High Numerator limit
+    fhir:denominator @<SimpleQuantity>?;    # Denominator value
+} AND (
+
+# Constraint: UniqueKey:inv-2
+# Human readable:If present, lowNumerator SHALL have a lower value than highNumerator
+# XPath:not(exists(f:lowNumerator/f:value/@value)) or not(exists(f:highNumerator/f:value/@value)) or (number(f:lowNumerator/f:value/@value) <= number(f:highNumerator/f:value/@value))
+# Constraint:lowNumerator.empty() or highNumerator.empty() or (lowNumerator <= highNumerator)
+# ShEx:
+
+ NOT { fhir:lowNumerator {fhir:v .} }  OR  NOT { fhir:highNumerator {fhir:v .} }  OR ({ fhir:lowNumerator { fhir:v MaxInclusive { fhir:highNumerator } }  })
+
+) AND (
+
+# Constraint: UniqueKey:inv-1
+# Human readable:One of lowNumerator or highNumerator and denominator SHALL be present, or all are absent. If all are absent, there SHALL be some extension present
+# XPath:(count(f:numerator) = count(f:denominator)) and ((count(f:numerator) > 0) or (count(f:extension) > 0))
+# Constraint:((lowNumerator.empty() and highNumerator.empty()) xor denominator.exists()) and (lowNumerator.exists() or extension.exists())
+# ShEx:
+
+(( NOT { fhir:lowNumerator {fhir:v .} }  AND  NOT { fhir:highNumerator {fhir:v .} } ) SHEX_Xor_SHEX { fhir:denominator . }) AND ({ fhir:lowNumerator . } OR { fhir:extension . })
+
+)
+ 
+
+# A reference to a code defined by a terminology system
+<Coding> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Coding];
+    fhir:nodeRole [fhir:treeRoot]?;
+    a NONLITERAL?;
+    fhir:system @<uri>?;                    # Identity of the terminology system
+    fhir:version @<string>?;                # Version of the system - if relevant
+    fhir:code @<code>?;                     # Symbol in syntax defined by the 
+                                            # system 
+    fhir:display @<string>?;                # Representation defined by the 
+                                            # system 
+    fhir:userSelected @<boolean>?;          # If this coding was chosen directly 
+                                            # by the user 
+}  
+
+# A series of measurements taken by a device
+<SampledData> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:SampledData];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:origin @<SimpleQuantity>;          # Zero value and units
+    fhir:period @<decimal>;                 # Number of milliseconds between 
+                                            # samples 
+    fhir:factor @<decimal>?;                # Multiply data by this before 
+                                            # adding to origin 
+    fhir:lowerLimit @<decimal>?;            # Lower limit of detection
+    fhir:upperLimit @<decimal>?;            # Upper limit of detection
+    fhir:dimensions @<positiveInt>;         # Number of sample points at each 
+                                            # time point 
+    fhir:data @<string>?;                   # Decimal values with spaces, or "E" 
+                                            # | "U" | "L" 
+}  
+
+# Primitive Type id
+<id> EXTENDS @<string> CLOSED {   
+
+    a [fhir:id];
+    fhir:nodeRole [fhir:treeRoot]?;
+}  
+
+# Primitive Type positiveInt
+<positiveInt> EXTENDS @<integer> CLOSED {   
+
+    a [fhir:positiveInt];
+    fhir:nodeRole [fhir:treeRoot]?;
+}  
+
+# A length - a value with a unit that is a physical distance
+<Distance> EXTENDS @<Quantity> CLOSED {   
+
+    a [fhir:Distance];
+    fhir:nodeRole [fhir:treeRoot]?;
+} AND (
+
+# Constraint: UniqueKey:dis-1
+# Human readable:There SHALL be a code if there is a value and it SHALL be an expression of length.  If system is present, it SHALL be UCUM.
+# XPath:(f:code or not(f:value)) and (not(exists(f:system)) or f:system/@value='http://unitsofmeasure.org')
+# Constraint:(code.exists() or value.empty()) and (system.empty() or system = %ucum)
+# ShEx:
+
+({ fhir:code . } OR  NOT { fhir:value {fhir:v .} } ) AND ( NOT { fhir:system {fhir:v .} }  OR ({ fhir:system { fhir:v ['%ucum'] }  }))
+
+)
+ 
+
+# Primitive Type integer64
+<integer64> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:integer64];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v xsd:long MININCLUSIVE -9223372036854775808 MAXINCLUSIVE 9223372036854775807?;  # Primitive value for integer64
+}  
+
+# Time range defined by start and end date/time
+<Period> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Period];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:start @<dateTime>?;                # Starting time with inclusive 
+                                            # boundary 
+    fhir:end @<dateTime>?;                  # End time with inclusive boundary, 
+                                            # if not ongoing 
+} AND (
+
+# Constraint: UniqueKey:per-1
+# Human readable:If present, start SHALL have a lower or equal value than end
+# XPath:not(exists(f:start/@value)) or not(exists(f:end/@value)) or (xs:dateTime(f:start/@value) <= xs:dateTime(f:end/@value))
+# Constraint:start.hasValue().not() or end.hasValue().not() or (start <= end)
+# ShEx:
+
+ NOT { fhir:start  . } OR  NOT { fhir:end  . } OR ({ fhir:start { fhir:v MaxInclusive { fhir:end } }  })
+
+)
+ 
+
+# A length of time
+<Duration> EXTENDS @<Quantity> CLOSED {   
+
+    a [fhir:Duration];
+    fhir:nodeRole [fhir:treeRoot]?;
+} AND (
+
+# Constraint: UniqueKey:drt-1
+# Human readable:There SHALL be a code if there is a value and it SHALL be an expression of time.  If system is present, it SHALL be UCUM.
+# XPath:(f:code or not(f:value)) and (not(exists(f:system)) or f:system/@value='http://unitsofmeasure.org')
+# Constraint:code.exists() implies ((system = %ucum) and value.exists())
+# ShEx:
+
+{ fhir:code . } SHEX_Implies_SHEX (({ fhir:system { fhir:v ['%ucum'] }  }) AND { fhir:value . })
+
+)
+ 
+
+# Primitive Type canonical
+<canonical> EXTENDS @<uri> CLOSED {   
+
+    a [fhir:canonical];
+    fhir:nodeRole [fhir:treeRoot]?;
+}  
+
+# Set of values bounded by low and high
+<Range> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Range];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:low @<SimpleQuantity>?;            # Low limit
+    fhir:high @<SimpleQuantity>?;           # High limit
+} AND (
+
+# Constraint: UniqueKey:rng-2
+# Human readable:If present, low SHALL have a lower value than high
+# XPath:not(exists(f:low/f:value/@value)) or not(exists(f:high/f:value/@value)) or (number(f:low/f:value/@value) <= number(f:high/f:value/@value))
+# Constraint:low.value.empty() or high.value.empty() or (low <= high)
+# ShEx:
+
+ NOT { fhir:low fhir:value {fhir:v .} }  OR  NOT { fhir:high fhir:value {fhir:v .} }  OR ({ fhir:low { fhir:v MaxInclusive { fhir:high } }  })
+
+)
+ 
+
+# Related artifacts for a knowledge resource
+<RelatedArtifact> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:RelatedArtifact];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:type @<code> AND
+    	{fhir:value @fhirvs:related-artifact-type};  # documentation | justification | 
+                                            # citation | predecessor | successor 
+                                            # | derived-from | depends-on | 
+                                            # composed-of | part-of | amends | 
+                                            # amended-with | appends | 
+                                            # appended-with | cites | cited-by | 
+                                            # comments-on | comment-in | 
+                                            # contains | contained-in | corrects 
+                                            # | correction-in | replaces | 
+                                            # replaced-with | retracts | 
+                                            # retracted-by | signs | similar-to 
+                                            # | supports | supported-with | 
+                                            # transforms | transformed-into | 
+                                            # transformed-with 
+    fhir:classifier @<OneOrMore_CodeableConcept>?;  # Additional classifiers
+    fhir:label @<string>?;                  # Short label
+    fhir:display @<string>?;                # Brief description of the related 
+                                            # artifact 
+    fhir:citation @<markdown>?;             # Bibliographic citation for the 
+                                            # artifact 
+    fhir:document @<Attachment>?;           # What document is being referenced
+    fhir:resource @<canonical>?;            # What artifact is being referenced
+    fhir:resourceReference @<Reference> AND {fhir:link 
+    			@<Resource> }?;  # What artifact, if not a 
+                                            # conformance resource 
+}  
+
+# Primitive Type base64Binary
+<base64Binary> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:base64Binary];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v xsd:base64Binary?;               # Primitive value for base64Binary
+}  
+
+# Describes the context of use for a conformance or knowledge resource
+<UsageContext> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:UsageContext];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:code @<Coding>;                    # Type of context being specified
+    fhir:value (@<CodeableConcept>  OR 
+    			@<Quantity>  OR 
+    			@<Range>  OR 
+    			(@<Reference>  AND {fhir:link @<PlanDefinition> OR 
+    			 @<ResearchStudy> OR 
+    			 @<InsurancePlan> OR 
+    			 @<HealthcareService> OR 
+    			 @<Group> OR 
+    			 @<Location> OR 
+    			 @<Organization> }) )  AND { rdf:type IRI } ;  # Value that defines the context
+}  
+
+# A timing schedule that specifies an event that may occur multiple times
+<Timing> EXTENDS @<BackboneType> CLOSED {   
+
+    a [fhir:Timing];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:event @<OneOrMore_dateTime>?;      # When the event occurs
+    fhir:repeat @<Timing.repeat>?;          # When the event is to occur
+    fhir:code @<CodeableConcept>?;          # C | BID | TID | QID | AM | PM | QD 
+                                            # | QOD | + 
+} AND (
+
+# Constraint: UniqueKey:tim-9
+# Human readable:If there's an offset, there must be a when (and not C, CM, CD, CV)
+# XPath:not(exists(f:offset)) or exists(f:when)
+# Constraint:offset.empty() or (when.exists() and ((when in ('C' | 'CM' | 'CD' | 'CV')).not()))
+# ShEx:
+
+ NOT { fhir:offset {fhir:v .} }  OR ({ fhir:when . } AND ( NOT { { fhir:when { fhir:v [('C' | 'CM' | 'CD' | 'CV')] }  } }))
+
+) AND (
+
+# Constraint: UniqueKey:tim-5
+# Human readable:period SHALL be a non-negative value
+# XPath:f:period/@value >= 0 or not(f:period/@value)
+# Constraint:period.exists() implies period >= 0
+# ShEx:
+
+{ fhir:period . } SHEX_Implies_SHEX ({ fhir:period { fhir:v MinInclusive 0 }  })
+
+) AND (
+
+# Constraint: UniqueKey:tim-6
+# Human readable:If there's a periodMax, there must be a period
+# XPath:not(exists(f:periodMax)) or exists(f:period)
+# Constraint:periodMax.empty() or period.exists()
+# ShEx:
+
+ NOT { fhir:periodMax {fhir:v .} }  OR { fhir:period . }
+
+) AND (
+
+# Constraint: UniqueKey:tim-7
+# Human readable:If there's a durationMax, there must be a duration
+# XPath:not(exists(f:durationMax)) or exists(f:duration)
+# Constraint:durationMax.empty() or duration.exists()
+# ShEx:
+
+ NOT { fhir:durationMax {fhir:v .} }  OR { fhir:duration . }
+
+) AND (
+
+# Constraint: UniqueKey:tim-8
+# Human readable:If there's a countMax, there must be a count
+# XPath:not(exists(f:countMax)) or exists(f:count)
+# Constraint:countMax.empty() or count.exists()
+# ShEx:
+
+ NOT { fhir:countMax {fhir:v .} }  OR { fhir:count . }
+
+) AND (
+
+# Constraint: UniqueKey:tim-1
+# Human readable:if there's a duration, there needs to be duration units
+# XPath:not(exists(f:duration)) or exists(f:durationUnit)
+# Constraint:duration.empty() or durationUnit.exists()
+# ShEx:
+
+ NOT { fhir:duration {fhir:v .} }  OR { fhir:durationUnit . }
+
+) AND (
+
+# Constraint: UniqueKey:tim-10
+# Human readable:If there's a timeOfDay, there cannot be a when, or vice versa
+# XPath:not(exists(f:timeOfDay)) or not(exists(f:when))
+# Constraint:timeOfDay.empty() or when.empty()
+# ShEx:
+
+ NOT { fhir:timeOfDay {fhir:v .} }  OR  NOT { fhir:when {fhir:v .} } 
+
+) AND (
+
+# Constraint: UniqueKey:tim-2
+# Human readable:if there's a period, there needs to be period units
+# XPath:not(exists(f:period)) or exists(f:periodUnit)
+# Constraint:period.empty() or periodUnit.exists()
+# ShEx:
+
+ NOT { fhir:period {fhir:v .} }  OR { fhir:periodUnit . }
+
+) AND (
+
+# Constraint: UniqueKey:tim-4
+# Human readable:duration SHALL be a non-negative value
+# XPath:f:duration/@value >= 0 or not(f:duration/@value)
+# Constraint:duration.exists() implies duration >= 0
+# ShEx:
+
+{ fhir:duration . } SHEX_Implies_SHEX ({ fhir:duration { fhir:v MinInclusive 0 }  })
+
+)
+ 
+
+# Primitive Type decimal
+<decimal> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:decimal];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v xsd:decimal OR xsd:double?;      # Primitive value for decimal
+}  
+
+# Concept - reference to a terminology or just  text
+<CodeableConcept> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:CodeableConcept];
+    fhir:nodeRole [fhir:treeRoot]?;
+    a NONLITERAL*;
+    fhir:coding @<OneOrMore_Coding>?;       # Code defined by a terminology 
+                                            # system 
+    fhir:text @<string>?;                   # Plain text representation of the 
+                                            # concept 
+}  
+
+# Definition of a parameter to a module
+<ParameterDefinition> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:ParameterDefinition];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:name @<code>?;                     # Name used to access the parameter 
+                                            # value 
+    fhir:use @<code> AND
+    	{fhir:value @fhirvs:operation-parameter-use};  # in | out
+    fhir:min @<integer>?;                   # Minimum cardinality
+    fhir:max @<string>?;                    # Maximum cardinality (a number of *)
+    fhir:documentation @<string>?;          # A brief description of the 
+                                            # parameter 
+    fhir:type @<code> AND
+    	{fhir:value @fhirvs:all-types};  # What type of value
+    fhir:profile @<canonical>?;             # What profile the value is expected 
+                                            # to be 
+}  
+
+# Primitive Type dateTime
+<dateTime> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:dateTime];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v xsd:gYear OR xsd:gYearMonth OR xsd:date OR xsd:dateTime?;  # Primitive value for dateTime
+}  
+
+# Primitive Type code
+<code> EXTENDS @<string> CLOSED {   
+
+    a [fhir:code];
+    fhir:nodeRole [fhir:treeRoot]?;
+}  
+
+# Primitive Type string
+<string> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:string];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v xsd:string MAXLENGTH 1048576?;   # Primitive value for string
+}  
+
+# Contributor information
+<Contributor> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Contributor];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:type @<code> AND
+    	{fhir:value @fhirvs:contributor-type};  # author | editor | reviewer | 
+                                            # endorser 
+    fhir:name @<string>;                    # Who contributed the content
+    fhir:contact @<OneOrMore_ContactDetail>?;  # Contact details of the contributor
+}  
+
+# Primitive Type oid
+<oid> EXTENDS @<uri> CLOSED {   
+
+    a [fhir:oid];
+    fhir:nodeRole [fhir:treeRoot]?;
+}  
+
+# Primitive Type instant
+<instant> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:instant];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v xsd:dateTime?;                   # Primitive value for instant
+}  
+
+# Details of a Technology mediated contact point (phone, fax, email, etc.)
+<ContactPoint> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:ContactPoint];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:system @<code> AND
+    	{fhir:value @fhirvs:contact-point-system}?;  # phone | fax | email | pager | url 
+                                            # | sms | other 
+    fhir:value @<string>?;                  # The actual contact point details
+    fhir:use @<code> AND
+    	{fhir:value @fhirvs:contact-point-use}?;  # home | work | temp | old | mobile 
+                                            # - purpose of this contact point 
+    fhir:rank @<positiveInt>?;              # Specify preferred order of use (1 
+                                            # = highest) 
+    fhir:period @<Period>?;                 # Time period when the contact point 
+                                            # was/is in use 
+} AND (
+
+# Constraint: UniqueKey:cpt-2
+# Human readable:A system is required if a value is provided.
+# XPath:not(exists(f:value)) or exists(f:system)
+# Constraint:value.empty() or system.exists()
+# ShEx:
+
+ NOT { fhir:value {fhir:v .} }  OR { fhir:system . }
+
+)
+ 
+
+# Name of a human - parts and usage
+<HumanName> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:HumanName];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:use @<code> AND
+    	{fhir:value @fhirvs:name-use}?;  # usual | official | temp | nickname 
+                                            # | anonymous | old | maiden 
+    fhir:text @<string>?;                   # Text representation of the full 
+                                            # name 
+    fhir:family @<string>?;                 # Family name (often called 
+                                            # 'Surname') 
+    fhir:given @<OneOrMore_string>?;        # Given names (not always 'first'). 
+                                            # Includes middle names 
+    fhir:prefix @<OneOrMore_string>?;       # Parts that come before the name
+    fhir:suffix @<OneOrMore_string>?;       # Parts that come after the name
+    fhir:period @<Period>?;                 # Time period when name was/is in use
+}  
+
+# An amount of economic utility in some recognized currency
+<Money> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Money];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:value @<decimal>?;                 # Numerical value (with implicit 
+                                            # precision) 
+    fhir:currency @<code> AND
+    	{fhir:value @fhirvs:currencies}?;  # ISO 4217 Currency Code
+}  
+
+# Primitive Type markdown
+<markdown> EXTENDS @<string> CLOSED {   
+
+    a [fhir:markdown];
+    fhir:nodeRole [fhir:treeRoot]?;
+}  
+
+# A ratio of two Quantity values - a numerator and a denominator
+<Ratio> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Ratio];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:numerator @<Quantity>?;            # Numerator value
+    fhir:denominator @<SimpleQuantity>?;    # Denominator value
+} AND (
+
+# Constraint: UniqueKey:rat-1
+# Human readable:Numerator and denominator SHALL both be present, or both are absent. If both are absent, there SHALL be some extension present
+# XPath:(count(f:numerator) = count(f:denominator)) and ((count(f:numerator) > 0) or (count(f:extension) > 0))
+# Constraint:(numerator.empty() xor denominator.exists()) and (numerator.exists() or extension.exists())
+# ShEx:
+
+( NOT { fhir:numerator {fhir:v .} }  SHEX_Xor_SHEX { fhir:denominator . }) AND ({ fhir:numerator . } OR { fhir:extension . })
+
+)
+ 
+
+# A duration of time during which an organism (or a process) has existed
+<Age> EXTENDS @<Quantity> CLOSED {   
+
+    a [fhir:Age];
+    fhir:nodeRole [fhir:treeRoot]?;
+} AND (
+
+# Constraint: UniqueKey:age-1
+# Human readable:There SHALL be a code if there is a value and it SHALL be an expression of time.  If system is present, it SHALL be UCUM.  If value is present, it SHALL be positive.
+# XPath:(f:code or not(f:value)) and (not(exists(f:system)) or f:system/@value='http://unitsofmeasure.org') and (not(f:value/@value) or f:value/@value >=0)
+# Constraint:(code.exists() or value.empty()) and (system.empty() or system = %ucum) and (value.empty() or value.hasValue().not() or value > 0)
+# ShEx:
+
+({ fhir:code . } OR  NOT { fhir:value {fhir:v .} } ) AND ( NOT { fhir:system {fhir:v .} }  OR ({ fhir:system { fhir:v ['%ucum'] }  })) AND ( NOT { fhir:value {fhir:v .} }  OR  NOT { fhir:value  . } OR ({ fhir:value { fhir:v MinExclusive 0 }  }))
+
+)
+ 
+
+# A reference from one resource to another
+<Reference> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Reference];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:link IRI?;
+    fhir:reference @<string>?;              # Literal reference, Relative, 
+                                            # internal or absolute URL 
+    fhir:type @<uri>?;                      # Type the reference refers to (e.g. 
+                                            # "Patient") 
+    fhir:identifier @<Identifier>?;         # Logical reference, when literal 
+                                            # reference is not known 
+    fhir:display @<string>?;                # Text alternative for the resource
+} AND (
+
+# Constraint: UniqueKey:ref-1
+# Human readable:SHALL have a contained resource if a local reference is provided
+# XPath:not(starts-with(f:reference/@value, '#')) or exists(ancestor::*[self::f:entry or self::f:parameter]/f:resource/f:*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')]|/*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')])
+# Constraint:reference.startsWith('#').not() or (reference.substring(1).trace('url') in %rootResource.contained.id.trace('ids')) or (reference='#' and %rootResource!=%resource)
+# ShEx:
+
+ NOT { fhir:reference  SHEX_startsWith_SHEX ('#') } OR ({ fhir:reference SHEX_substring_SHEX (1) SHEX_trace_SHEX ('url') } { fhir:v ['%rootResource'.contained.id SHEX_trace_SHEX ('ids')] } ) OR (({ fhir:reference { fhir:v ['#'] }  }) AND ('%rootResource' { fhir:v [ . -'%resource'] }))
+
+)
+ 
+
+# Defines an expected trigger for a module
+<TriggerDefinition> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:TriggerDefinition];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:type @<code> AND
+    	{fhir:value @fhirvs:trigger-type};  # named-event | periodic | 
+                                            # data-changed | data-added | 
+                                            # data-modified | data-removed | 
+                                            # data-accessed | data-access-ended 
+    fhir:name @<string>?;                   # Name or URI that identifies the 
+                                            # event 
+    fhir:timing (@<Timing>  OR 
+    			(@<Reference>  AND {fhir:link @<Schedule> })  OR 
+    			@<date>  OR 
+    			@<dateTime> )  AND { rdf:type IRI } ?;  # Timing of the event
+    fhir:data @<OneOrMore_DataRequirement>?;  # Triggering data of the event 
+                                            # (multiple = 'and') 
+    fhir:condition @<Expression>?;          # Whether the event triggers 
+                                            # (boolean expression) 
+} AND (
+
+# Constraint: UniqueKey:trd-3
+# Human readable:A named event requires a name, a periodic event requires timing, and a data event requires data
+# XPath:((not(f:type/@value = 'named-event')) or name.exists()) and (not(f:type/@value = 'periodic') or timing.exists()) and (not(starts-with(f:type/@value, 'data-')) or data.exists())
+# Constraint:(type = 'named-event' implies name.exists()) and (type = 'periodic' implies timing.exists()) and (type.startsWith('data-') implies data.exists())
+# ShEx:
+
+(({ fhir:type { fhir:v ['named-event'] }  }) SHEX_Implies_SHEX { fhir:name . }) AND (({ fhir:type { fhir:v ['periodic'] }  }) SHEX_Implies_SHEX { fhir:timing . }) AND ({ fhir:type SHEX_startsWith_SHEX ('data-') } SHEX_Implies_SHEX { fhir:data . })
+
+) AND (
+
+# Constraint: UniqueKey:trd-2
+# Human readable:A condition only if there is a data requirement
+# XPath:not(exists(f:condition)) or exists(f:data)
+# Constraint:condition.exists() implies data.exists()
+# ShEx:
+
+{ fhir:condition . } SHEX_Implies_SHEX { fhir:data . }
+
+) AND (
+
+# Constraint: UniqueKey:trd-1
+# Human readable:Either timing, or a data requirement, but not both
+# XPath:not(exists(f:data)) or not(exists(*[starts-with(local-name(.), 'timing')]))
+# Constraint:data.empty() or timing.empty()
+# ShEx:
+
+ NOT { fhir:data {fhir:v .} }  OR  NOT { fhir:timing {fhir:v .} } 
+
+)
+ 
+
+# A measured or measurable amount
+<Quantity> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Quantity];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:value @<decimal>?;                 # Numerical value (with implicit 
+                                            # precision) 
+    fhir:comparator @<code> AND
+    	{fhir:value @fhirvs:quantity-comparator}?;  # < | <= | >= | > | ad - how to 
+                                            # understand the value 
+    fhir:unit @<string>?;                   # Unit representation
+    fhir:system @<uri>?;                    # System that defines coded unit form
+    fhir:code @<code>?;                     # Coded form of the unit
+} AND (
+
+# Constraint: UniqueKey:qty-3
+# Human readable:If a code for the unit is present, the system SHALL also be present
+# XPath:not(exists(f:code)) or exists(f:system)
+# Constraint:code.empty() or system.exists()
+# ShEx:
+
+ NOT { fhir:code {fhir:v .} }  OR { fhir:system . }
+
+)
+ 
+
+# Primitive Type uri
+<uri> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:uri];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v xsd:anyURI?;                     # Primitive value for uri
+}  
+
+# Primitive Type url
+<url> EXTENDS @<uri> CLOSED {   
+
+    a [fhir:url];
+    fhir:nodeRole [fhir:treeRoot]?;
+}  
+
+# Text node with attribution
+<Annotation> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Annotation];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:author ((@<Reference>  AND {fhir:link @<Practitioner> OR 
+    			 @<PractitionerRole> OR 
+    			 @<Patient> OR 
+    			 @<RelatedPerson> OR 
+    			 @<Organization> })  OR 
+    			@<string> )  AND { rdf:type IRI } ?;  # Individual responsible for the 
+                                            # annotation 
+    fhir:time @<dateTime>?;                 # When the annotation was made
+    fhir:text @<markdown>;                  # The annotation  - text content (as 
+                                            # markdown) 
+}  
+
+# Contact information
+<ContactDetail> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:ContactDetail];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:name @<string>?;                   # Name of an individual to contact
+    fhir:telecom @<OneOrMore_ContactPoint>?;  # Contact details for individual or 
+                                            # organization 
+}  
+
+# Primitive Type boolean
+<boolean> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:boolean];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v xsd:boolean?;                    # Primitive value for boolean
+}  
+
+# An expression that can be used to generate a value
+<Expression> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Expression];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:description @<string>?;            # Natural language description of 
+                                            # the condition 
+    fhir:name @<id>?;                       # Short name assigned to expression 
+                                            # for reuse 
+    fhir:language @<code>;                  # text/cql | text/fhirpath | 
+                                            # application/x-fhir-query | etc. 
+    fhir:expression @<string>?;             # Expression in specified language
+    fhir:reference @<uri>?;                 # Where the expression is found
+} AND (
+
+# Constraint: UniqueKey:exp-1
+# Human readable:An expression or a reference must be provided
+# XPath:exists(f:expression) or exists(f:reference)
+# Constraint:expression.exists() or reference.exists()
+# ShEx:
+
+{ fhir:expression . } OR { fhir:reference . }
+
+)
+ 
+
+# Reference to a resource or a concept
+<CodeableReference> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:CodeableReference];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:concept @<CodeableConcept>?;       # Reference to a concept (by class)
+    fhir:reference @<Reference>?;           # Reference to a resource (by 
+                                            # instance) 
+}  
+
+# A Signature - XML DigSig, JWS, Graphical image of signature, etc.
+<Signature> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Signature];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:type @<OneOrMore_Coding>?;         # Indication of the reason the 
+                                            # entity signed the object(s) 
+    fhir:when @<instant>?;                  # When the signature was created
+    fhir:who @<Reference> AND {fhir:link 
+    			@<Device> OR 
+    			@<Organization> OR 
+    			@<Patient> OR 
+    			@<Practitioner> OR 
+    			@<PractitionerRole> OR 
+    			@<RelatedPerson> }?;  # Who signed
+    fhir:onBehalfOf @<Reference> AND {fhir:link 
+    			@<Device> OR 
+    			@<Organization> OR 
+    			@<Patient> OR 
+    			@<Practitioner> OR 
+    			@<PractitionerRole> OR 
+    			@<RelatedPerson> }?;  # The party represented
+    fhir:targetFormat @<code> AND
+    	{fhir:value @fhirvs:mimetypes}?;  # The technical format of the signed 
+                                            # resources 
+    fhir:sigFormat @<code> AND
+    	{fhir:value @fhirvs:mimetypes}?;  # The technical format of the 
+                                            # signature 
+    fhir:data @<base64Binary>?;             # The actual signature content (XML 
+                                            # DigSig. JWS, picture, etc.) 
+}  
+
+# Primitive Type unsignedInt
+<unsignedInt> EXTENDS @<integer> CLOSED {   
+
+    a [fhir:unsignedInt];
+    fhir:nodeRole [fhir:treeRoot]?;
+}  
+
+# Primitive Type time
+<time> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:time];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v xsd:time?;                       # Primitive value for time
+}  
+
+# A fixed quantity (no comparator)
+<SimpleQuantity> EXTENDS @<Quantity> CLOSED {   
+
+    a [fhir:SimpleQuantity];
+    fhir:nodeRole [fhir:treeRoot]?;
+} AND (
+
+# Constraint: UniqueKey:sqty-1
+# Human readable:The comparator is not used on a SimpleQuantity
+# XPath:not(exists(f:comparator))
+# Constraint:comparator.empty()
+# ShEx:
+
+ NOT { fhir:comparator {fhir:v .} } 
+
+)
+ 
+
+# Amount of medication administered, to be administered or typical amount to be administered
+<Dosage.doseAndRate> EXTENDS @<Element> CLOSED {   
+    fhir:type @<CodeableConcept>?;          # The kind of dose or rate specified
+    fhir:dose (@<Range>  OR 
+    			@<SimpleQuantity> )  AND { rdf:type IRI } ?;  # Amount of medication per dose
+    fhir:rate (@<Ratio>  OR 
+    			@<Range>  OR 
+    			@<SimpleQuantity> )  AND { rdf:type IRI } ?;  # Amount of medication per unit of 
+                                            # time 
+}  
+
+# What codes are expected
+<DataRequirement.codeFilter> EXTENDS @<Element> CLOSED {   
+    fhir:path @<string>?;                   # A code-valued attribute to filter 
+                                            # on 
+    fhir:searchParam @<string>?;            # A coded (token) parameter to 
+                                            # search on 
+    fhir:valueSet @<canonical>?;            # Valueset for the filter
+    fhir:code @<OneOrMore_Coding>?;         # What code is expected
+} AND (
+
+# Constraint: UniqueKey:sqty-1
+# Human readable:The comparator is not used on a SimpleQuantity
+# XPath:not(exists(f:comparator))
+# Constraint:comparator.empty()
+# ShEx:
+
+ NOT { fhir:comparator {fhir:v .} } 
+
+)
+ 
+
+# What dates/date ranges are expected
+<DataRequirement.dateFilter> EXTENDS @<Element> CLOSED {   
+    fhir:path @<string>?;                   # A date-valued attribute to filter 
+                                            # on 
+    fhir:searchParam @<string>?;            # A date valued parameter to search 
+                                            # on 
+    fhir:value (@<dateTime>  OR 
+    			@<Period>  OR 
+    			@<Duration> )  AND { rdf:type IRI } ?;  # The value of the filter, as a 
+                                            # Period, DateTime, or Duration 
+                                            # value 
+} AND (
+
+# Constraint: UniqueKey:sqty-1
+# Human readable:The comparator is not used on a SimpleQuantity
+# XPath:not(exists(f:comparator))
+# Constraint:comparator.empty()
+# ShEx:
+
+ NOT { fhir:comparator {fhir:v .} } 
+
+)
+ 
+
+# Order of the results
+<DataRequirement.sort> EXTENDS @<Element> CLOSED {   
+    fhir:path @<string>;                    # The name of the attribute to 
+                                            # perform the sort 
+    fhir:direction @<code> AND
+    	{fhir:value @fhirvs:sort-direction};  # ascending | descending
+}  
+
+# When the event is to occur
+<Timing.repeat> EXTENDS @<Element> CLOSED {   
+    fhir:bounds (@<Duration>  OR 
+    			@<Range>  OR 
+    			@<Period> )  AND { rdf:type IRI } ?;  # Length/Range of lengths, or (Start 
+                                            # and/or end) limits 
+    fhir:count @<positiveInt>?;             # Number of times to repeat
+    fhir:countMax @<positiveInt>?;          # Maximum number of times to repeat
+    fhir:duration @<decimal>?;              # How long when it happens
+    fhir:durationMax @<decimal>?;           # How long when it happens (Max)
+    fhir:durationUnit @<code> AND
+    	{fhir:value @fhirvs:units-of-time}?;  # s | min | h | d | wk | mo | a - 
+                                            # unit of time (UCUM) 
+    fhir:frequency @<positiveInt>?;         # Indicates the number of 
+                                            # repetitions that should occur 
+                                            # within a period. I.e. Event occurs 
+                                            # frequency times per period 
+    fhir:frequencyMax @<positiveInt>?;      # Event occurs up to frequencyMax 
+                                            # times per period 
+    fhir:period @<decimal>?;                # The duration to which the 
+                                            # frequency applies. I.e. Event 
+                                            # occurs frequency times per period 
+    fhir:periodMax @<decimal>?;             # Upper limit of period (3-4 hours)
+    fhir:periodUnit @<code> AND
+    	{fhir:value @fhirvs:units-of-time}?;  # s | min | h | d | wk | mo | a - 
+                                            # unit of time (UCUM) 
+    fhir:dayOfWeek @<OneOrMore_code> AND
+    	{fhir:value @fhirvs:days-of-week}?;  # mon | tue | wed | thu | fri | sat 
+                                            # | sun 
+    fhir:timeOfDay @<OneOrMore_time>?;      # Time of day for action
+    fhir:when @<OneOrMore_code> AND
+    	{fhir:value @fhirvs:event-timing}?;  # Code for time period of occurrence
+    fhir:offset @<unsignedInt>?;            # Minutes from event (before or 
+                                            # after) 
+} AND (
+
+# Constraint: UniqueKey:sqty-1
+# Human readable:The comparator is not used on a SimpleQuantity
+# XPath:not(exists(f:comparator))
+# Constraint:comparator.empty()
+# ShEx:
+
+ NOT { fhir:comparator {fhir:v .} } 
+
+)
+ 
+
+#---------------------- Cardinality Types (OneOrMore) -------------------
+
+<OneOrMore_code> CLOSED {
+    rdf:first @<code>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_code> 
+}
+
+<OneOrMore_Coding> CLOSED {
+    rdf:first @<Coding>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Coding> 
+}
+
+<OneOrMore_string> CLOSED {
+    rdf:first @<string>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_string> 
+}
+
+<OneOrMore_ElementDefinition.type> CLOSED {
+    rdf:first @<ElementDefinition.type>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ElementDefinition.type> 
+}
+
+<OneOrMore_ElementDefinition.example> CLOSED {
+    rdf:first @<ElementDefinition.example>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ElementDefinition.example> 
+}
+
+<OneOrMore_id> CLOSED {
+    rdf:first @<id>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_id> 
+}
+
+<OneOrMore_ElementDefinition.constraint> CLOSED {
+    rdf:first @<ElementDefinition.constraint>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ElementDefinition.constraint> 
+}
+
+<OneOrMore_ElementDefinition.mapping> CLOSED {
+    rdf:first @<ElementDefinition.mapping>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ElementDefinition.mapping> 
+}
+
+<OneOrMore_canonical> CLOSED {
+    rdf:first @<canonical>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_canonical> 
+}
+
+<OneOrMore_ElementDefinition.slicing.discriminator> CLOSED {
+    rdf:first @<ElementDefinition.slicing.discriminator>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ElementDefinition.slicing.discriminator> 
+}
+
+<OneOrMore_DataRequirement.codeFilter> CLOSED {
+    rdf:first @<DataRequirement.codeFilter>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_DataRequirement.codeFilter> 
+}
+
+<OneOrMore_DataRequirement.dateFilter> CLOSED {
+    rdf:first @<DataRequirement.dateFilter>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_DataRequirement.dateFilter> 
+}
+
+<OneOrMore_DataRequirement.sort> CLOSED {
+    rdf:first @<DataRequirement.sort>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_DataRequirement.sort> 
+}
+
+<OneOrMore_CodeableConcept> CLOSED {
+    rdf:first @<CodeableConcept>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_CodeableConcept> 
+}
+
+<OneOrMore_Dosage.doseAndRate> CLOSED {
+    rdf:first @<Dosage.doseAndRate>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Dosage.doseAndRate> 
+}
+
+<OneOrMore_Ratio> CLOSED {
+    rdf:first @<Ratio>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Ratio> 
+}
+
+<OneOrMore_dateTime> CLOSED {
+    rdf:first @<dateTime>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_dateTime> 
+}
+
+<OneOrMore_ContactDetail> CLOSED {
+    rdf:first @<ContactDetail>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ContactDetail> 
+}
+
+<OneOrMore_DataRequirement> CLOSED {
+    rdf:first @<DataRequirement>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_DataRequirement> 
+}
+
+<OneOrMore_ContactPoint> CLOSED {
+    rdf:first @<ContactPoint>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ContactPoint> 
+}
+
+<OneOrMore_time> CLOSED {
+    rdf:first @<time>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_time> 
+}
+
+#---------------------- Reference Types -------------------
+
+#---------------------- Value Sets ------------------------
+
+# This value set includes all possible codes from BCP-13 (http://tools.ietf.org/html/bcp13)
+fhirvs:mimetypes EXTERNAL
+
+# Real world event relating to the schedule.
+fhirvs:event-timing ["MORN" "MORN.early" "MORN.late" "NOON" "AFT" "AFT.early" "AFT.late" "EVE" "EVE.early" "EVE.late" "NIGHT" "PHS" "IMD" "HS" "WAKE" "C" "CM" "CD" "CV" "AC" "ACM" "ACD" "ACV" "PC" "PCM" "PCD" "PCV"]
+
+# The possible sort directions, ascending or descending.
+fhirvs:sort-direction ["ascending" "descending"]
+
+# Indication of the degree of conformance expectations associated with a binding.
+fhirvs:binding-strength ["required" "extensible" "preferred" "example"]
+
+# The days of the week.
+fhirvs:days-of-week ["mon" "tue" "wed" "thu" "fri" "sat" "sun"]
+
+# The type of contributor.
+fhirvs:contributor-type ["author" "editor" "reviewer" "endorser"]
+
+# The type of an address (physical / postal).
+fhirvs:address-type ["postal" "physical" "both"]
+
+# Currency codes from ISO 4217 (see https://www.iso.org/iso-4217-currency-codes.html)
+fhirvs:currencies EXTERNAL
+
+# The type of relationship to the related artifact.
+fhirvs:related-artifact-type ["documentation" "justification" "citation" "predecessor" "successor" "derived-from" "depends-on" "composed-of" "part-of" "amends" "amended-with" "appends" "appended-with" "cites" "cited-by" "comments-on" "comment-in" "contains" "contained-in" "corrects" "correction-in" "replaces" "replaced-with" "retracts" "retracted-by" "signs" "similar-to" "supports" "supported-with" "transforms" "transformed-into" "transformed-with"]
+
+# A unit of time (units from UCUM).
+fhirvs:units-of-time EXTERNAL
+
+# Whether an operation parameter is an input or an output parameter.
+fhirvs:operation-parameter-use ["in" "out"]
+
+# Telecommunications form for contact point.
+fhirvs:contact-point-system ["phone" "fax" "email" "pager" "url" "sms" "other"]
+
+# The use of an address.
+fhirvs:address-use ["home" "work" "temp" "old" "billing"]
+
+# Use of contact point.
+fhirvs:contact-point-use ["home" "work" "temp" "old" "mobile"]
+
+# SHALL applications comply with this constraint?
+fhirvs:constraint-severity ["error" "warning"]
+
+# How an element value is interpreted when discrimination is evaluated.
+fhirvs:discriminator-type ["value" "exists" "pattern" "type" "profile"]
+
+# How resource references can be aggregated.
+fhirvs:resource-aggregation-mode ["contained" "referenced" "bundled"]
+
+# Identifies the purpose for this identifier, if known .
+fhirvs:identifier-use ["usual" "official" "temp" "secondary" "old"]
+
+# How slices are interpreted when evaluating an instance.
+fhirvs:resource-slicing-rules ["closed" "open" "openAtEnd"]
+
+# The use of a human name.
+fhirvs:name-use ["usual" "official" "temp" "nickname" "anonymous" "old" "maiden"]
+
+# Whether a reference needs to be version specific or version independent, or whether either can be used.
+fhirvs:reference-version-rules ["either" "independent" "specific"]
+
+# A list of all the concrete types defined in this version of the FHIR specification - Abstract Types, Data Types and Resource Types.
+fhirvs:all-types ["Address" "Age" "Annotation" "Attachment" "BackboneElement" "BackboneType" "Base" "CodeableConcept" "CodeableReference" "Coding" "ContactDetail" "ContactPoint" "Contributor" "Count" "DataRequirement" "DataType" "Distance" "Dosage" "Duration" "Element" "ElementDefinition" "Expression" "ExtendedContactDetail" "Extension" "HumanName" "Identifier" "MarketingStatus" "Meta" "Money" "MoneyQuantity" "Narrative" "ParameterDefinition" "Period" "Population" "PrimitiveType" "ProductShelfLife" "Quantity" "Range" "Ratio" "RatioRange" "Reference" "RelatedArtifact" "SampledData" "Signature" "SimpleQuantity" "Timing" "TriggerDefinition" "UsageContext" "base64Binary" "boolean" "canonical" "code" "date" "dateTime" "decimal" "id" "instant" "integer" "integer64" "markdown" "oid" "positiveInt" "string" "time" "unsignedInt" "uri" "url" "uuid" "xhtml" "Resource" "Binary" "Bundle" "DomainResource" "Account" "AdministrableProductDefinition" "AdverseEvent" "AllergyIntolerance" "Appointment" "AppointmentResponse" "ArtifactAssessment" "AuditEvent" "Basic" "BiologicallyDerivedProduct" "BodyStructure" "CanonicalResource" "CapabilityStatement" "CapabilityStatement2" "CodeSystem" "CompartmentDefinition" "ExampleScenario" "GraphDefinition" "ImplementationGuide" "MessageDefinition" "MetadataResource" "ActivityDefinition" "ChargeItemDefinition" "Citation" "ConceptMap" "ConditionDefinition" "EventDefinition" "Evidence" "EvidenceReport" "EvidenceVariable" "Library" "Measure" "NamingSystem" "PlanDefinition" "Questionnaire" "OperationDefinition" "SearchParameter" "StructureDefinition" "StructureMap" "SubscriptionTopic" "TerminologyCapabilities" "TestScript" "ValueSet" "CarePlan" "CareTeam" "ChargeItem" "Claim" "ClaimResponse" "ClinicalImpression" "ClinicalUseDefinition" "Communication" "CommunicationRequest" "Composition" "Condition" "Consent" "Contract" "Coverage" "CoverageEligibilityRequest" "CoverageEligibilityResponse" "DetectedIssue" "Device" "DeviceDefinition" "DeviceDispense" "DeviceMetric" "DeviceRequest" "DeviceUsage" "DiagnosticReport" "DocumentManifest" "DocumentReference" "Encounter" "Endpoint" "EnrollmentRequest" "EnrollmentResponse" "EpisodeOfCare" "ExplanationOfBenefit" "FamilyMemberHistory" "Flag" "FormularyItem" "Goal" "Group" "GuidanceResponse" "HealthcareService" "ImagingSelection" "ImagingStudy" "Immunization" "ImmunizationEvaluation" "ImmunizationRecommendation" "Ingredient" "InsurancePlan" "InventoryReport" "Invoice" "Linkage" "List" "Location" "ManufacturedItemDefinition" "MeasureReport" "Medication" "MedicationAdministration" "MedicationDispense" "MedicationKnowledge" "MedicationRequest" "MedicationUsage" "MedicinalProductDefinition" "MessageHeader" "MolecularSequence" "NutritionIntake" "NutritionOrder" "NutritionProduct" "Observation" "ObservationDefinition" "OperationOutcome" "Organization" "OrganizationAffiliation" "PackagedProductDefinition" "Patient" "PaymentNotice" "PaymentReconciliation" "Permission" "Person" "Practitioner" "PractitionerRole" "Procedure" "Provenance" "QuestionnaireResponse" "RegulatedAuthorization" "RelatedPerson" "RequestGroup" "ResearchStudy" "ResearchSubject" "RiskAssessment" "Schedule" "ServiceRequest" "Slot" "Specimen" "SpecimenDefinition" "Subscription" "SubscriptionStatus" "Substance" "SubstanceDefinition" "SubstanceNucleicAcid" "SubstancePolymer" "SubstanceProtein" "SubstanceReferenceInformation" "SubstanceSourceMaterial" "SupplyDelivery" "SupplyRequest" "Task" "TestReport" "Transport" "VerificationResult" "VisionPrescription" "Parameters" "Type" "Any"]
+
+# The type of trigger.
+fhirvs:trigger-type ["named-event" "periodic" "data-changed" "data-added" "data-modified" "data-removed" "data-accessed" "data-access-ended"]
+
+# How a property is represented when serialized.
+fhirvs:property-representation ["xmlAttr" "xmlText" "typeAttr" "cdaText" "xhtml"]
+
+# How the Quantity should be understood and represented.
+fhirvs:quantity-comparator ["<" "<=" ">=" ">" "ad"]

@@ -1,0 +1,96 @@
+﻿PREFIX fhir: <http://hl7.org/fhir/> 
+PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+BASE <http://hl7.org/fhir/shape/>
+
+
+# Publishable Pattern
+<Publishable> CLOSED {   
+
+    a [fhir:Publishable];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:identifier @<OneOrMore_Publishable.identifier>?;  # Additional identifier for the 
+                                            # {{title}} 
+    fhir:title @<Publishable.title>;        # Name for this {{title}} (human 
+                                            # friendly) 
+    fhir:date @<Publishable.date>;          # Date last changed
+    fhir:contact @<OneOrMore_Publishable.contact>?;  # Contact details for the publisher
+    fhir:useContext @<OneOrMore_Publishable.useContext>?;  # The context that the content is 
+                                            # intended to support 
+    fhir:jurisdiction @<OneOrMore_Publishable.jurisdiction>?;  # Intended jurisdiction for 
+                                            # {{title}} (if applicable) 
+    fhir:purpose @<Publishable.purpose>?;   # Why this {{title}} is defined
+    fhir:copyright @<Publishable.copyright>?;  # Use and/or publishing restrictions
+    fhir:approvalDate @<Publishable.approvalDate>?;  # When the {{title}} was approved by 
+                                            # publisher 
+    fhir:lastReviewDate @<Publishable.lastReviewDate>?;  # When the {{title}} was last 
+                                            # reviewed 
+    fhir:effectivePeriod @<Publishable.effectivePeriod>?;  # When the {{title}} is expected to 
+                                            # be used 
+    fhir:topic @<OneOrMore_Publishable.topic>?;  # E.g. Education, Treatment, 
+                                            # Assessment, etc. 
+    fhir:author @<OneOrMore_Publishable.author>?;  # Who authored the {{title}}
+    fhir:editor @<OneOrMore_Publishable.editor>?;  # Who edited the {{title}}
+    fhir:reviewer @<OneOrMore_Publishable.reviewer>?;  # Who reviewed the {{title}}
+    fhir:endorser @<OneOrMore_Publishable.endorser>?;  # Who endorsed the {{title}}
+    fhir:relatedArtifact @<OneOrMore_Publishable.relatedArtifact>?;  # Additional documentation, 
+                                            # citations, etc. 
+}  
+
+#---------------------- Data Types -------------------
+
+#---------------------- Cardinality Types (OneOrMore) -------------------
+
+<OneOrMore_Publishable.identifier> CLOSED {
+    rdf:first @<Publishable.identifier>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Publishable.identifier> 
+}
+
+<OneOrMore_Publishable.contact> CLOSED {
+    rdf:first @<Publishable.contact>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Publishable.contact> 
+}
+
+<OneOrMore_Publishable.useContext> CLOSED {
+    rdf:first @<Publishable.useContext>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Publishable.useContext> 
+}
+
+<OneOrMore_Publishable.jurisdiction> CLOSED {
+    rdf:first @<Publishable.jurisdiction>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Publishable.jurisdiction> 
+}
+
+<OneOrMore_Publishable.topic> CLOSED {
+    rdf:first @<Publishable.topic>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Publishable.topic> 
+}
+
+<OneOrMore_Publishable.author> CLOSED {
+    rdf:first @<Publishable.author>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Publishable.author> 
+}
+
+<OneOrMore_Publishable.editor> CLOSED {
+    rdf:first @<Publishable.editor>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Publishable.editor> 
+}
+
+<OneOrMore_Publishable.reviewer> CLOSED {
+    rdf:first @<Publishable.reviewer>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Publishable.reviewer> 
+}
+
+<OneOrMore_Publishable.endorser> CLOSED {
+    rdf:first @<Publishable.endorser>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Publishable.endorser> 
+}
+
+<OneOrMore_Publishable.relatedArtifact> CLOSED {
+    rdf:first @<Publishable.relatedArtifact>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Publishable.relatedArtifact> 
+}
+
+#---------------------- Reference Types -------------------
+
+#---------------------- Value Sets ------------------------

@@ -1,0 +1,63 @@
+﻿PREFIX fhir: <http://hl7.org/fhir/> 
+PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+BASE <http://hl7.org/fhir/shape/>
+
+
+# Documentation relevant to the 'parent' resource
+<workflow-relatedArtifact> EXTENDS @<Extension> CLOSED {   
+
+    a [fhir:workflow-relatedArtifact];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v @<Extension.url> AND
+    	{fhir:value ["http://hl7.org/fhir/StructureDefinition/workflow-relatedArtifact"]}; 
+    fhir:value (@<RelatedArtifact> )  AND { rdf:type IRI } ; 
+    ^fhir:extension { a [fhir:DiagnosticReport] OR 
+    				a [fhir:Observation]
+    		}
+}  
+
+#---------------------- Data Types -------------------
+
+# Related artifacts for a knowledge resource
+<RelatedArtifact> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:RelatedArtifact];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:type @<RelatedArtifact.type>;      # documentation | justification | 
+                                            # citation | predecessor | successor 
+                                            # | derived-from | depends-on | 
+                                            # composed-of | part-of | amends | 
+                                            # amended-with | appends | 
+                                            # appended-with | cites | cited-by | 
+                                            # comments-on | comment-in | 
+                                            # contains | contained-in | corrects 
+                                            # | correction-in | replaces | 
+                                            # replaced-with | retracts | 
+                                            # retracted-by | signs | similar-to 
+                                            # | supports | supported-with | 
+                                            # transforms | transformed-into | 
+                                            # transformed-with 
+    fhir:classifier @<OneOrMore_RelatedArtifact.classifier>?;  # Additional classifiers
+    fhir:label @<RelatedArtifact.label>?;   # Short label
+    fhir:display @<RelatedArtifact.display>?;  # Brief description of the related 
+                                            # artifact 
+    fhir:citation @<RelatedArtifact.citation>?;  # Bibliographic citation for the 
+                                            # artifact 
+    fhir:document @<RelatedArtifact.document>?;  # What document is being referenced
+    fhir:resource @<RelatedArtifact.resource>?;  # What artifact is being referenced
+    fhir:resourceReference @<RelatedArtifact.resourceReference> AND {fhir:link 
+    			@<Resource> }?;  # What artifact, if not a 
+                                            # conformance resource 
+}  
+
+#---------------------- Cardinality Types (OneOrMore) -------------------
+
+<OneOrMore_RelatedArtifact.classifier> CLOSED {
+    rdf:first @<RelatedArtifact.classifier>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_RelatedArtifact.classifier> 
+}
+
+#---------------------- Reference Types -------------------
+
+#---------------------- Value Sets ------------------------

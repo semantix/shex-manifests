@@ -1,0 +1,36 @@
+﻿PREFIX fhir: <http://hl7.org/fhir/> 
+PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+BASE <http://hl7.org/fhir/shape/>
+
+
+# Declares the source of the parameter
+<valueset-parameterSource> EXTENDS @<Extension> CLOSED {   
+
+    a [fhir:valueset-parameterSource];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v @<Extension.url> AND
+    	{fhir:value ["http://hl7.org/fhir/StructureDefinition/valueset-parameterSource"]}; 
+    fhir:value (@<code> AND
+    	{fhir:value @fhirvs:expansion-parameter-source} )  AND { rdf:type IRI } ; 
+    ^fhir:extension { ^fhir:parameter {^fhir:expansion {a [fhir:ValueSet]}}
+    		}
+}  
+
+#---------------------- Data Types -------------------
+
+# Primitive Type code
+<code> EXTENDS @<string> CLOSED {   
+
+    a [fhir:code];
+    fhir:nodeRole [fhir:treeRoot]?;
+}  
+
+#---------------------- Cardinality Types (OneOrMore) -------------------
+
+#---------------------- Reference Types -------------------
+
+#---------------------- Value Sets ------------------------
+
+# Description Needed Here
+fhirvs:expansion-parameter-source ["input" "server" "codesystem"]

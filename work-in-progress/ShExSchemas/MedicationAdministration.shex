@@ -1,0 +1,256 @@
+﻿PREFIX fhir: <http://hl7.org/fhir/> 
+PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+BASE <http://hl7.org/fhir/shape/>
+
+
+start=@<MedicationAdministration> AND {fhir:nodeRole [fhir:treeRoot]}
+
+
+# Administration of medication to a patient
+<MedicationAdministration> EXTENDS @<DomainResource> CLOSED {   
+
+    a [fhir:MedicationAdministration];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:identifier @<OneOrMore_MedicationAdministration.identifier>?;  # External identifier
+    fhir:instantiatesCanonical @<OneOrMore_MedicationAdministration.instantiatesCanonical>?;  # Instantiates protocol or definition
+    fhir:instantiatesUri @<OneOrMore_MedicationAdministration.instantiatesUri>?;  # Instantiates external protocol or 
+                                            # definition 
+    fhir:basedOn @<OneOrMore_MedicationAdministration.basedOn_CarePlan>?;  # Plan this is fulfilled by this 
+                                            # administration 
+    fhir:partOf @<OneOrMore_MedicationAdministration.partOf_MedicationAdministration_OR_Procedure>?;  # Part of referenced event
+    fhir:status @<MedicationAdministration.status>;  # in-progress | not-done | on-hold | 
+                                            # completed | entered-in-error | 
+                                            # stopped | unknown 
+    fhir:statusReason @<OneOrMore_MedicationAdministration.statusReason>?;  # Reason administration not performed
+    fhir:category @<OneOrMore_MedicationAdministration.category>?;  # Type of medication administration
+    fhir:medication @<MedicationAdministration.medication>;  # What was administered
+    fhir:subject @<MedicationAdministration.subject> AND {fhir:link 
+    			@<Group> OR 
+    			@<Patient> };  # Who received medication
+    fhir:encounter @<MedicationAdministration.encounter> AND {fhir:link 
+    			@<Encounter> }?;  # Encounter administered as part of
+    fhir:supportingInformation @<OneOrMore_MedicationAdministration.supportingInformation_Resource>?;  # Additional information to support 
+                                            # administration 
+    fhir:occurence (@<dateTime>  OR 
+    			@<Period> )  AND { rdf:type IRI } ;  # Start and end time of 
+                                            # administration 
+    fhir:recorded @<MedicationAdministration.recorded>?;  # When the MedicationAdministration 
+                                            # was first captured in the 
+                                            # subject's record 
+    fhir:isSubPotent @<MedicationAdministration.isSubPotent>?;  # Full dose was not administered
+    fhir:subPotentReason @<OneOrMore_MedicationAdministration.subPotentReason>?;  # Reason full dose was not 
+                                            # administered 
+    fhir:performer @<OneOrMore_MedicationAdministration.performer>?;  # Who performed the medication 
+                                            # administration and what they did 
+    fhir:reason @<OneOrMore_MedicationAdministration.reason>?;  # Concept, condition or observation 
+                                            # that supports why the medication 
+                                            # was administered 
+    fhir:request @<MedicationAdministration.request> AND {fhir:link 
+    			@<MedicationRequest> }?;  # Request administration performed 
+                                            # against 
+    fhir:device @<OneOrMore_MedicationAdministration.device_Device>?;  # Device used to administer
+    fhir:note @<OneOrMore_MedicationAdministration.note>?;  # Information about the 
+                                            # administration 
+    fhir:dosage @<MedicationAdministration.dosage>?;  # Details of how medication was taken
+    fhir:eventHistory @<OneOrMore_MedicationAdministration.eventHistory_Provenance>?;  # A list of events of interest in 
+                                            # the lifecycle 
+} AND (
+
+# Constraint: UniqueKey:mad-1
+# Human readable:If dosage attribute is present then SHALL have at least one of dosage.text or dosage.dose or dosage.rate[x]
+# XPath:exists(f:dose) or exists(f:text) or exists(f:*[starts-with(local-name(.), 'rate')])
+# Constraint:(dose.exists() or rate.exists() or text.exists())
+# ShEx:
+
+({ fhir:dose . } OR { fhir:rate . } OR { fhir:text . })
+
+)
+ 
+
+# Details of how medication was taken
+<MedicationAdministration.dosage> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:text @<MedicationAdministration.dosage.text>?;  # Free text dosage instructions e.g. 
+                                            # SIG 
+    fhir:site @<MedicationAdministration.dosage.site>?;  # Body site administered to
+    fhir:route @<MedicationAdministration.dosage.route>?;  # Path of substance into body
+    fhir:method @<MedicationAdministration.dosage.method>?;  # How drug was administered
+    fhir:dose @<MedicationAdministration.dosage.dose>?;  # Amount of medication per dose
+    fhir:rate (@<Ratio>  OR 
+    			@<SimpleQuantity> )  AND { rdf:type IRI } ?;  # Dose quantity per unit of time
+} AND (
+
+# Constraint: UniqueKey:mad-1
+# Human readable:If dosage attribute is present then SHALL have at least one of dosage.text or dosage.dose or dosage.rate[x]
+# XPath:exists(f:dose) or exists(f:text) or exists(f:*[starts-with(local-name(.), 'rate')])
+# Constraint:(dose.exists() or rate.exists() or text.exists())
+# ShEx:
+
+({ fhir:dose . } OR { fhir:rate . } OR { fhir:text . })
+
+)
+ 
+
+# Who performed the medication administration and what they did
+<MedicationAdministration.performer> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:function @<MedicationAdministration.performer.function>?;  # Type of performance
+    fhir:actor @<MedicationAdministration.performer.actor> AND {fhir:link 
+    			@<Device> OR 
+    			@<Patient> OR 
+    			@<Practitioner> OR 
+    			@<PractitionerRole> OR 
+    			@<RelatedPerson> };  # Who performed the medication 
+                                            # administration 
+}  
+
+#---------------------- Data Types -------------------
+
+# Primitive Type dateTime
+<dateTime> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:dateTime];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v @<dateTime.value>?;              # Primitive value for dateTime
+}  
+
+# A fixed quantity (no comparator)
+<SimpleQuantity> EXTENDS @<Quantity> CLOSED {   
+
+    a [fhir:SimpleQuantity];
+    fhir:nodeRole [fhir:treeRoot]?;
+} AND (
+
+# Constraint: UniqueKey:sqty-1
+# Human readable:The comparator is not used on a SimpleQuantity
+# XPath:not(exists(f:comparator))
+# Constraint:comparator.empty()
+# ShEx:
+
+ NOT { fhir:comparator {fhir:v .} } 
+
+)
+ 
+
+# Time range defined by start and end date/time
+<Period> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Period];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:start @<Period.start>?;            # Starting time with inclusive 
+                                            # boundary 
+    fhir:end @<Period.end>?;                # End time with inclusive boundary, 
+                                            # if not ongoing 
+} AND (
+
+# Constraint: UniqueKey:per-1
+# Human readable:If present, start SHALL have a lower or equal value than end
+# XPath:not(exists(f:start/@value)) or not(exists(f:end/@value)) or (xs:dateTime(f:start/@value) <= xs:dateTime(f:end/@value))
+# Constraint:start.hasValue().not() or end.hasValue().not() or (start <= end)
+# ShEx:
+
+ NOT { fhir:start  . } OR  NOT { fhir:end  . } OR ({ fhir:start { fhir:v MaxInclusive { fhir:end } }  })
+
+)
+ 
+
+# A ratio of two Quantity values - a numerator and a denominator
+<Ratio> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Ratio];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:numerator @<Ratio.numerator>?;     # Numerator value
+    fhir:denominator @<Ratio.denominator>?;  # Denominator value
+} AND (
+
+# Constraint: UniqueKey:rat-1
+# Human readable:Numerator and denominator SHALL both be present, or both are absent. If both are absent, there SHALL be some extension present
+# XPath:(count(f:numerator) = count(f:denominator)) and ((count(f:numerator) > 0) or (count(f:extension) > 0))
+# Constraint:(numerator.empty() xor denominator.exists()) and (numerator.exists() or extension.exists())
+# ShEx:
+
+(( NOT { fhir:numerator {fhir:v .} }  AND NOT  { fhir:denominator . }) OR ( NOT  NOT { fhir:numerator {fhir:v .} }  AND  { fhir:denominator . })) AND ({ fhir:numerator . } OR { fhir:extension . })
+
+)
+ 
+
+#---------------------- Cardinality Types (OneOrMore) -------------------
+
+<OneOrMore_MedicationAdministration.identifier> CLOSED {
+    rdf:first @<MedicationAdministration.identifier>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_MedicationAdministration.identifier> 
+}
+
+<OneOrMore_MedicationAdministration.instantiatesCanonical> CLOSED {
+    rdf:first @<MedicationAdministration.instantiatesCanonical>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_MedicationAdministration.instantiatesCanonical> 
+}
+
+<OneOrMore_MedicationAdministration.instantiatesUri> CLOSED {
+    rdf:first @<MedicationAdministration.instantiatesUri>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_MedicationAdministration.instantiatesUri> 
+}
+
+<OneOrMore_MedicationAdministration.basedOn_CarePlan> CLOSED {
+    rdf:first @<MedicationAdministration.basedOn> AND {fhir:link 
+			@<CarePlan> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_MedicationAdministration.basedOn_CarePlan> 
+}
+
+<OneOrMore_MedicationAdministration.partOf_MedicationAdministration_OR_Procedure> CLOSED {
+    rdf:first @<MedicationAdministration.partOf> AND {fhir:link 
+			@<MedicationAdministration> OR 
+			@<Procedure> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_MedicationAdministration.partOf_MedicationAdministration_OR_Procedure> 
+}
+
+<OneOrMore_MedicationAdministration.statusReason> CLOSED {
+    rdf:first @<MedicationAdministration.statusReason>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_MedicationAdministration.statusReason> 
+}
+
+<OneOrMore_MedicationAdministration.category> CLOSED {
+    rdf:first @<MedicationAdministration.category>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_MedicationAdministration.category> 
+}
+
+<OneOrMore_MedicationAdministration.supportingInformation_Resource> CLOSED {
+    rdf:first @<MedicationAdministration.supportingInformation> AND {fhir:link 
+			@<Resource> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_MedicationAdministration.supportingInformation_Resource> 
+}
+
+<OneOrMore_MedicationAdministration.subPotentReason> CLOSED {
+    rdf:first @<MedicationAdministration.subPotentReason>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_MedicationAdministration.subPotentReason> 
+}
+
+<OneOrMore_MedicationAdministration.performer> CLOSED {
+    rdf:first @<MedicationAdministration.performer>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_MedicationAdministration.performer> 
+}
+
+<OneOrMore_MedicationAdministration.reason> CLOSED {
+    rdf:first @<MedicationAdministration.reason>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_MedicationAdministration.reason> 
+}
+
+<OneOrMore_MedicationAdministration.device_Device> CLOSED {
+    rdf:first @<MedicationAdministration.device> AND {fhir:link 
+			@<Device> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_MedicationAdministration.device_Device> 
+}
+
+<OneOrMore_MedicationAdministration.note> CLOSED {
+    rdf:first @<MedicationAdministration.note>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_MedicationAdministration.note> 
+}
+
+<OneOrMore_MedicationAdministration.eventHistory_Provenance> CLOSED {
+    rdf:first @<MedicationAdministration.eventHistory> AND {fhir:link 
+			@<Provenance> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_MedicationAdministration.eventHistory_Provenance> 
+}
+
+#---------------------- Reference Types -------------------
+
+#---------------------- Value Sets ------------------------

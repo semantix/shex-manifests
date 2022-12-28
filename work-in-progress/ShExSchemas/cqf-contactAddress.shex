@@ -1,0 +1,52 @@
+﻿PREFIX fhir: <http://hl7.org/fhir/> 
+PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+BASE <http://hl7.org/fhir/shape/>
+
+
+# Contributor address
+<cqf-contactAddress> EXTENDS @<Extension> CLOSED {   
+
+    a [fhir:cqf-contactAddress];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v @<Extension.url> AND
+    	{fhir:value ["http://hl7.org/fhir/StructureDefinition/cqf-contactAddress"]}; 
+    fhir:value (@<Address> )  AND { rdf:type IRI } ; 
+    ^fhir:extension { a [fhir:ContactDetail]
+    		}
+}  
+
+#---------------------- Data Types -------------------
+
+# An address expressed using postal conventions (as opposed to GPS or other location definition formats)
+<Address> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Address];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:use @<Address.use>?;               # home | work | temp | old | billing 
+                                            # - purpose of this address 
+    fhir:type @<Address.type>?;             # postal | physical | both
+    fhir:text @<Address.text>?;             # Text representation of the address
+    fhir:line @<OneOrMore_Address.line>?;   # Street name, number, direction & 
+                                            # P.O. Box etc. 
+    fhir:city @<Address.city>?;             # Name of city, town etc.
+    fhir:district @<Address.district>?;     # District name (aka county)
+    fhir:state @<Address.state>?;           # Sub-unit of country (abbreviations 
+                                            # ok) 
+    fhir:postalCode @<Address.postalCode>?;  # Postal code for area
+    fhir:country @<Address.country>?;       # Country (e.g. may be ISO 3166 2 or 
+                                            # 3 letter code) 
+    fhir:period @<Address.period>?;         # Time period when address was/is in 
+                                            # use 
+}  
+
+#---------------------- Cardinality Types (OneOrMore) -------------------
+
+<OneOrMore_Address.line> CLOSED {
+    rdf:first @<Address.line>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Address.line> 
+}
+
+#---------------------- Reference Types -------------------
+
+#---------------------- Value Sets ------------------------

@@ -1,0 +1,28 @@
+﻿PREFIX fhir: <http://hl7.org/fhir/> 
+PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+BASE <http://hl7.org/fhir/shape/>
+
+
+# A constraint on the target resource
+<cqf-targetInvariant> EXTENDS @<Extension> CLOSED {   
+
+    a [fhir:cqf-targetInvariant];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:key @<Extension>; 
+    fhir:requirements @<Extension>?; 
+    fhir:severity @<Extension>; 
+    fhir:expression @<Extension>; 
+    fhir:v @<Extension.url> AND
+    	{fhir:value ["http://hl7.org/fhir/StructureDefinition/cqf-targetInvariant"]}; 
+    ^fhir:extension { a [fhir:Element]
+    		}
+}  
+
+#---------------------- Data Types -------------------
+
+#---------------------- Cardinality Types (OneOrMore) -------------------
+
+#---------------------- Reference Types -------------------
+
+#---------------------- Value Sets ------------------------

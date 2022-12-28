@@ -1,0 +1,34 @@
+﻿PREFIX fhir: <http://hl7.org/fhir/> 
+PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+BASE <http://hl7.org/fhir/shape/>
+
+
+# Appearance order for user selection
+<valueset-conceptOrder> EXTENDS @<Extension> CLOSED {   
+
+    a [fhir:valueset-conceptOrder];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v @<Extension.url> AND
+    	{fhir:value ["http://hl7.org/fhir/StructureDefinition/valueset-conceptOrder"]}; 
+    fhir:value (@<integer> )  AND { rdf:type IRI } ; 
+    ^fhir:extension { ^fhir:concept {^fhir:include {^fhir:compose {a [fhir:ValueSet]}}} OR 
+    				^fhir:contains {^fhir:expansion {a [fhir:ValueSet]}}
+    		}
+}  
+
+#---------------------- Data Types -------------------
+
+# Primitive Type integer
+<integer> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:integer];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v @<integer.value>?;               # Primitive value for integer
+}  
+
+#---------------------- Cardinality Types (OneOrMore) -------------------
+
+#---------------------- Reference Types -------------------
+
+#---------------------- Value Sets ------------------------

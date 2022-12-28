@@ -1,0 +1,73 @@
+﻿PREFIX fhir: <http://hl7.org/fhir/> 
+PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+BASE <http://hl7.org/fhir/shape/>
+
+
+start=@<vitalsigns> AND {fhir:nodeRole [fhir:treeRoot]}
+
+
+# FHIR Vital Signs Profile
+<vitalsigns> EXTENDS @<Observation> CLOSED {   
+
+    a [fhir:vitalsigns];
+    fhir:nodeRole [fhir:treeRoot]?;
+} AND (
+
+# Constraint: UniqueKey:vs-2
+# Human readable:If there is no component or hasMember element then either a value[x] or a data absent reason must be present.
+# XPath:f:component or f:memberOF or f:*[starts-with(local-name(.), 'value')] or f:dataAbsentReason
+# Constraint:(component.empty() and hasMember.empty()) implies (dataAbsentReason.exists() or value.exists())
+# ShEx:
+
+( NOT { fhir:component {fhir:v .} }  AND  NOT { fhir:hasMember {fhir:v .} } ) AND ({ fhir:dataAbsentReason . } OR { fhir:value . })
+
+) AND (
+
+# Constraint: UniqueKey:vs-1
+# Human readable:if Observation.effective[x] is dateTime and has a value then that value shall be precise to the day
+# XPath:f:effectiveDateTime[matches(@value, '^\d{4}-\d{2}-\d{2}')]
+# Constraint:($this as dateTime).toString().length() >= 8
+# ShEx:
+
+
+) AND (
+
+# Constraint: UniqueKey:vs-3
+# Human readable:If there is no a value a data absent reason must be present
+# XPath:f:*[starts-with(local-name(.), 'value')] or f:dataAbsentReason
+# Constraint:value.exists() or dataAbsentReason.exists()
+# ShEx:
+
+{ fhir:value . } OR { fhir:dataAbsentReason . }
+
+)
+ 
+
+# Provides guide for interpretation
+<Observation.referenceRange> EXTENDS @<BackboneElement> CLOSED {   
+}  
+
+# Used when reporting systolic and diastolic blood pressure.
+<Observation.component> EXTENDS @<BackboneElement> CLOSED {   
+}  
+
+# Code defined by a terminology system
+<CodeableConcept.coding> EXTENDS @<Coding> CLOSED {   
+}  
+
+# Triggering observation(s)
+<Observation.triggeredBy> EXTENDS @<BackboneElement> CLOSED {   
+}  
+
+# Classification of  type of observation
+<Observation.category> EXTENDS @<CodeableConcept> CLOSED {   
+}  
+
+#---------------------- Data Types -------------------
+
+#---------------------- Cardinality Types (OneOrMore) -------------------
+
+#---------------------- Reference Types -------------------
+
+#---------------------- Value Sets ------------------------

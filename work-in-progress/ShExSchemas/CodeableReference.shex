@@ -1,0 +1,23 @@
+﻿PREFIX fhir: <http://hl7.org/fhir/> 
+PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+BASE <http://hl7.org/fhir/shape/>
+
+
+# Reference to a resource or a concept
+<CodeableReference> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:CodeableReference];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:concept @<CodeableReference.concept>?;  # Reference to a concept (by class)
+    fhir:reference @<CodeableReference.reference>?;  # Reference to a resource (by 
+                                            # instance) 
+}  
+
+#---------------------- Data Types -------------------
+
+#---------------------- Cardinality Types (OneOrMore) -------------------
+
+#---------------------- Reference Types -------------------
+
+#---------------------- Value Sets ------------------------

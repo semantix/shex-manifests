@@ -1,0 +1,69 @@
+﻿PREFIX fhir: <http://hl7.org/fhir/> 
+PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+BASE <http://hl7.org/fhir/shape/>
+
+
+start=@<ResearchSubject> AND {fhir:nodeRole [fhir:treeRoot]}
+
+
+# Physical entity which is the primary unit of interest in the study
+<ResearchSubject> EXTENDS @<DomainResource> CLOSED {   
+
+    a [fhir:ResearchSubject];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:identifier @<OneOrMore_ResearchSubject.identifier>?;  # Business Identifier for research 
+                                            # subject in a study 
+    fhir:status @<ResearchSubject.status>;  # draft | active | retired | unknown
+    fhir:progress @<OneOrMore_ResearchSubject.progress>?;  # Subject status
+    fhir:period @<ResearchSubject.period>?;  # Start and end of participation
+    fhir:study @<ResearchSubject.study> AND {fhir:link 
+    			@<ResearchStudy> };  # Study subject is part of
+    fhir:subject @<ResearchSubject.subject> AND {fhir:link 
+    			@<BiologicallyDerivedProduct> OR 
+    			@<Device> OR 
+    			@<Group> OR 
+    			@<Medication> OR 
+    			@<Patient> OR 
+    			@<Specimen> OR 
+    			@<Substance> };  # Who or what is part of study
+    fhir:assignedArm @<ResearchSubject.assignedArm>?;  # What path should be followed
+    fhir:actualArm @<ResearchSubject.actualArm>?;  # What path was followed
+    fhir:consent @<ResearchSubject.consent> AND {fhir:link 
+    			@<Consent> }?;  # Agreement to participate in study
+}  
+
+# Subject status
+<ResearchSubject.progress> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:type @<ResearchSubject.progress.type>?;  # state | milestone
+    fhir:subjectState @<ResearchSubject.progress.subjectState>?;  # candidate | eligible | follow-up | 
+                                            # ineligible | not-registered | 
+                                            # off-study | on-study | 
+                                            # on-study-intervention | 
+                                            # on-study-observation | 
+                                            # pending-on-study | 
+                                            # potential-candidate | screening | 
+                                            # withdrawn 
+    fhir:milestone @<ResearchSubject.progress.milestone>?;  # SignedUp | Screened | Randomized
+    fhir:reason @<ResearchSubject.progress.reason>?;  # State change reason
+    fhir:startDate @<ResearchSubject.progress.startDate>?;  # State change date
+    fhir:endDate @<ResearchSubject.progress.endDate>?;  # State change date
+}  
+
+#---------------------- Data Types -------------------
+
+#---------------------- Cardinality Types (OneOrMore) -------------------
+
+<OneOrMore_ResearchSubject.identifier> CLOSED {
+    rdf:first @<ResearchSubject.identifier>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ResearchSubject.identifier> 
+}
+
+<OneOrMore_ResearchSubject.progress> CLOSED {
+    rdf:first @<ResearchSubject.progress>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ResearchSubject.progress> 
+}
+
+#---------------------- Reference Types -------------------
+
+#---------------------- Value Sets ------------------------

@@ -1,0 +1,89 @@
+﻿PREFIX fhir: <http://hl7.org/fhir/> 
+PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+BASE <http://hl7.org/fhir/shape/>
+
+
+start=@<DocumentManifest> AND {fhir:nodeRole [fhir:treeRoot]}
+
+
+# A list that defines a set of documents
+<DocumentManifest> EXTENDS @<DomainResource> CLOSED {   
+
+    a [fhir:DocumentManifest];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:masterIdentifier @<DocumentManifest.masterIdentifier>?;  # Unique Identifier for the set of 
+                                            # documents 
+    fhir:identifier @<OneOrMore_DocumentManifest.identifier>?;  # Other identifiers for the manifest
+    fhir:status @<DocumentManifest.status>;  # current | superseded | 
+                                            # entered-in-error 
+    fhir:type @<DocumentManifest.type>?;    # Kind of document set
+    fhir:subject @<DocumentManifest.subject> AND {fhir:link 
+    			@<Device> OR 
+    			@<Group> OR 
+    			@<Patient> OR 
+    			@<Practitioner> }?;  # The subject of the set of documents
+    fhir:created @<DocumentManifest.created>?;  # When this document manifest created
+    fhir:author @<OneOrMore_DocumentManifest.author_Device_OR_Organization_OR_Patient_OR_Practitioner_OR_PractitionerRole_OR_RelatedPerson>?;  # Who and/or what authored the 
+                                            # DocumentManifest 
+    fhir:recipient @<OneOrMore_DocumentManifest.recipient_Organization_OR_Patient_OR_Practitioner_OR_PractitionerRole_OR_RelatedPerson>?;  # Intended to get notified about 
+                                            # this set of documents 
+    fhir:source @<DocumentManifest.source>?;  # The source 
+                                            # system/application/software 
+    fhir:description @<DocumentManifest.description>?;  # Human-readable description (title)
+    fhir:content @<OneOrMore_DocumentManifest.content_Resource>;  # Items in manifest
+    fhir:related @<OneOrMore_DocumentManifest.related>?;  # Related things
+}  
+
+# Related things
+<DocumentManifest.related> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:identifier @<DocumentManifest.related.identifier>?;  # Identifiers of things that are 
+                                            # related 
+    fhir:ref @<DocumentManifest.related.ref> AND {fhir:link 
+    			@<Resource> }?;  # Related Resource
+}  
+
+#---------------------- Data Types -------------------
+
+#---------------------- Cardinality Types (OneOrMore) -------------------
+
+<OneOrMore_DocumentManifest.identifier> CLOSED {
+    rdf:first @<DocumentManifest.identifier>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_DocumentManifest.identifier> 
+}
+
+<OneOrMore_DocumentManifest.author_Device_OR_Organization_OR_Patient_OR_Practitioner_OR_PractitionerRole_OR_RelatedPerson> CLOSED {
+    rdf:first @<DocumentManifest.author> AND {fhir:link 
+			@<Device> OR 
+			@<Organization> OR 
+			@<Patient> OR 
+			@<Practitioner> OR 
+			@<PractitionerRole> OR 
+			@<RelatedPerson> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_DocumentManifest.author_Device_OR_Organization_OR_Patient_OR_Practitioner_OR_PractitionerRole_OR_RelatedPerson> 
+}
+
+<OneOrMore_DocumentManifest.recipient_Organization_OR_Patient_OR_Practitioner_OR_PractitionerRole_OR_RelatedPerson> CLOSED {
+    rdf:first @<DocumentManifest.recipient> AND {fhir:link 
+			@<Organization> OR 
+			@<Patient> OR 
+			@<Practitioner> OR 
+			@<PractitionerRole> OR 
+			@<RelatedPerson> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_DocumentManifest.recipient_Organization_OR_Patient_OR_Practitioner_OR_PractitionerRole_OR_RelatedPerson> 
+}
+
+<OneOrMore_DocumentManifest.content_Resource> CLOSED {
+    rdf:first @<DocumentManifest.content> AND {fhir:link 
+			@<Resource> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_DocumentManifest.content_Resource> 
+}
+
+<OneOrMore_DocumentManifest.related> CLOSED {
+    rdf:first @<DocumentManifest.related>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_DocumentManifest.related> 
+}
+
+#---------------------- Reference Types -------------------
+
+#---------------------- Value Sets ------------------------

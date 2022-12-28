@@ -1,0 +1,250 @@
+﻿PREFIX fhir: <http://hl7.org/fhir/> 
+PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+BASE <http://hl7.org/fhir/shape/>
+
+
+start=@<NutritionProduct> AND {fhir:nodeRole [fhir:treeRoot]}
+
+
+# A product used for nutritional purposes (i.e. food or supplement)
+<NutritionProduct> EXTENDS @<DomainResource> CLOSED {   
+
+    a [fhir:NutritionProduct];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:code @<NutritionProduct.code>?;    # A code that can identify the 
+                                            # detailed nutrients and ingredients 
+                                            # in a specific food product 
+    fhir:status @<NutritionProduct.status>;  # active | inactive | 
+                                            # entered-in-error 
+    fhir:category @<OneOrMore_NutritionProduct.category>?;  # Broad product groups or categories 
+                                            # used to classify the product, such 
+                                            # as Legume and Legume Products, 
+                                            # Beverages, or Beef Products 
+    fhir:manufacturer @<OneOrMore_NutritionProduct.manufacturer_Organization>?;  # Manufacturer, representative or 
+                                            # officially responsible for the 
+                                            # product 
+    fhir:nutrient @<OneOrMore_NutritionProduct.nutrient>?;  # The product's nutritional 
+                                            # information expressed by the 
+                                            # nutrients 
+    fhir:ingredient @<OneOrMore_NutritionProduct.ingredient>?;  # Ingredients contained in this 
+                                            # product 
+    fhir:knownAllergen @<OneOrMore_NutritionProduct.knownAllergen>?;  # Known or suspected allergens that 
+                                            # are a part of this product 
+    fhir:characteristic @<OneOrMore_NutritionProduct.characteristic>?;  # Specifies descriptive properties 
+                                            # of the nutrition product 
+    fhir:instance @<OneOrMore_NutritionProduct.instance>?;  # One or several physical instances 
+                                            # or occurrences of the nutrition 
+                                            # product 
+    fhir:note @<OneOrMore_NutritionProduct.note>?;  # Comments made about the product
+}  
+
+# Specifies descriptive properties of the nutrition product
+<NutritionProduct.characteristic> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:type @<NutritionProduct.characteristic.type>;  # Code specifying the type of 
+                                            # characteristic 
+    fhir:value (@<CodeableConcept>  OR 
+    			@<string>  OR 
+    			@<SimpleQuantity>  OR 
+    			@<base64Binary>  OR 
+    			@<Attachment>  OR 
+    			@<boolean> )  AND { rdf:type IRI } ;  # The value of the characteristic
+}  
+
+# The product's nutritional information expressed by the nutrients
+<NutritionProduct.nutrient> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:item @<NutritionProduct.nutrient.item>?;  # The (relevant) nutrients in the 
+                                            # product 
+    fhir:amount @<OneOrMore_NutritionProduct.nutrient.amount>?;  # The amount of nutrient expressed 
+                                            # in one or more units: X per pack / 
+                                            # per serving / per dose 
+}  
+
+# One or several physical instances or occurrences of the nutrition product
+<NutritionProduct.instance> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:quantity @<NutritionProduct.instance.quantity>?;  # The amount of items or instances
+    fhir:identifier @<OneOrMore_NutritionProduct.instance.identifier>?;  # The identifier for the physical 
+                                            # instance, typically a serial 
+                                            # number or manufacturer number 
+    fhir:name @<NutritionProduct.instance.name>?;  # The name for the specific product
+    fhir:lotNumber @<NutritionProduct.instance.lotNumber>?;  # The identification of the batch or 
+                                            # lot of the product 
+    fhir:expiry @<NutritionProduct.instance.expiry>?;  # The expiry date or date and time 
+                                            # for the product 
+    fhir:useBy @<NutritionProduct.instance.useBy>?;  # The date until which the product 
+                                            # is expected to be good for 
+                                            # consumption 
+    fhir:biologicalSourceEvent @<NutritionProduct.instance.biologicalSourceEvent>?;  # An identifier that supports 
+                                            # traceability to the event during 
+                                            # which material in this product 
+                                            # from one or more biological 
+                                            # entities was obtained or pooled 
+}  
+
+# Ingredients contained in this product
+<NutritionProduct.ingredient> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:item @<NutritionProduct.ingredient.item>;  # The ingredient contained in the 
+                                            # product 
+    fhir:amount @<OneOrMore_NutritionProduct.ingredient.amount>?;  # The amount of ingredient that is 
+                                            # in the product 
+}  
+
+#---------------------- Data Types -------------------
+
+# Primitive Type boolean
+<boolean> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:boolean];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v @<boolean.value>?;               # Primitive value for boolean
+}  
+
+# Primitive Type string
+<string> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:string];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v @<string.value>?;                # Primitive value for string
+}  
+
+# Primitive Type base64Binary
+<base64Binary> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:base64Binary];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v @<base64Binary.value>?;          # Primitive value for base64Binary
+}  
+
+# A fixed quantity (no comparator)
+<SimpleQuantity> EXTENDS @<Quantity> CLOSED {   
+
+    a [fhir:SimpleQuantity];
+    fhir:nodeRole [fhir:treeRoot]?;
+} AND (
+
+# Constraint: UniqueKey:sqty-1
+# Human readable:The comparator is not used on a SimpleQuantity
+# XPath:not(exists(f:comparator))
+# Constraint:comparator.empty()
+# ShEx:
+
+ NOT { fhir:comparator {fhir:v .} } 
+
+)
+ 
+
+# Content in a format defined elsewhere
+<Attachment> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Attachment];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:contentType @<Attachment.contentType>?;  # Mime type of the content, with 
+                                            # charset etc. 
+    fhir:language @<Attachment.language>?;  # Human language of the content 
+                                            # (BCP-47) 
+    fhir:data @<Attachment.data>?;          # Data inline, base64ed
+    fhir:url @<Attachment.url>?;            # Uri where the data can be found
+    fhir:size @<Attachment.size>?;          # Number of bytes of content (if url 
+                                            # provided) 
+    fhir:hash @<Attachment.hash>?;          # Hash of the data (sha-1, base64ed)
+    fhir:title @<Attachment.title>?;        # Label to display in place of the 
+                                            # data 
+    fhir:creation @<Attachment.creation>?;  # Date attachment was first created
+    fhir:height @<Attachment.height>?;      # Height of the image in pixels 
+                                            # (photo/video) 
+    fhir:width @<Attachment.width>?;        # Width of the image in pixels 
+                                            # (photo/video) 
+    fhir:frames @<Attachment.frames>?;      # Number of frames if > 1 (photo)
+    fhir:duration @<Attachment.duration>?;  # Length in seconds (audio / video)
+    fhir:pages @<Attachment.pages>?;        # Number of printed pages
+} AND (
+
+# Constraint: UniqueKey:att-1
+# Human readable:If the Attachment has data, it SHALL have a contentType
+# XPath:not(exists(f:data)) or exists(f:contentType)
+# Constraint:data.empty() or contentType.exists()
+# ShEx:
+
+ NOT { fhir:data {fhir:v .} }  OR { fhir:contentType . }
+
+)
+ 
+
+# Concept - reference to a terminology or just  text
+<CodeableConcept> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:CodeableConcept];
+    fhir:nodeRole [fhir:treeRoot]?;
+    a NONLITERAL*;
+    fhir:coding @<OneOrMore_CodeableConcept.coding>?;  # Code defined by a terminology 
+                                            # system 
+    fhir:text @<CodeableConcept.text>?;     # Plain text representation of the 
+                                            # concept 
+}  
+
+#---------------------- Cardinality Types (OneOrMore) -------------------
+
+<OneOrMore_NutritionProduct.category> CLOSED {
+    rdf:first @<NutritionProduct.category>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_NutritionProduct.category> 
+}
+
+<OneOrMore_NutritionProduct.manufacturer_Organization> CLOSED {
+    rdf:first @<NutritionProduct.manufacturer> AND {fhir:link 
+			@<Organization> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_NutritionProduct.manufacturer_Organization> 
+}
+
+<OneOrMore_NutritionProduct.nutrient> CLOSED {
+    rdf:first @<NutritionProduct.nutrient>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_NutritionProduct.nutrient> 
+}
+
+<OneOrMore_NutritionProduct.ingredient> CLOSED {
+    rdf:first @<NutritionProduct.ingredient>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_NutritionProduct.ingredient> 
+}
+
+<OneOrMore_NutritionProduct.knownAllergen> CLOSED {
+    rdf:first @<NutritionProduct.knownAllergen>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_NutritionProduct.knownAllergen> 
+}
+
+<OneOrMore_NutritionProduct.characteristic> CLOSED {
+    rdf:first @<NutritionProduct.characteristic>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_NutritionProduct.characteristic> 
+}
+
+<OneOrMore_NutritionProduct.instance> CLOSED {
+    rdf:first @<NutritionProduct.instance>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_NutritionProduct.instance> 
+}
+
+<OneOrMore_NutritionProduct.note> CLOSED {
+    rdf:first @<NutritionProduct.note>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_NutritionProduct.note> 
+}
+
+<OneOrMore_NutritionProduct.nutrient.amount> CLOSED {
+    rdf:first @<NutritionProduct.nutrient.amount>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_NutritionProduct.nutrient.amount> 
+}
+
+<OneOrMore_NutritionProduct.instance.identifier> CLOSED {
+    rdf:first @<NutritionProduct.instance.identifier>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_NutritionProduct.instance.identifier> 
+}
+
+<OneOrMore_NutritionProduct.ingredient.amount> CLOSED {
+    rdf:first @<NutritionProduct.ingredient.amount>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_NutritionProduct.ingredient.amount> 
+}
+
+<OneOrMore_CodeableConcept.coding> CLOSED {
+    rdf:first @<CodeableConcept.coding>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_CodeableConcept.coding> 
+}
+
+#---------------------- Reference Types -------------------
+
+#---------------------- Value Sets ------------------------

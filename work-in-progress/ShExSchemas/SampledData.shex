@@ -1,0 +1,31 @@
+﻿PREFIX fhir: <http://hl7.org/fhir/> 
+PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+BASE <http://hl7.org/fhir/shape/>
+
+
+# A series of measurements taken by a device
+<SampledData> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:SampledData];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:origin @<SampledData.origin>;      # Zero value and units
+    fhir:period @<SampledData.period>;      # Number of milliseconds between 
+                                            # samples 
+    fhir:factor @<SampledData.factor>?;     # Multiply data by this before 
+                                            # adding to origin 
+    fhir:lowerLimit @<SampledData.lowerLimit>?;  # Lower limit of detection
+    fhir:upperLimit @<SampledData.upperLimit>?;  # Upper limit of detection
+    fhir:dimensions @<SampledData.dimensions>;  # Number of sample points at each 
+                                            # time point 
+    fhir:data @<SampledData.data>?;         # Decimal values with spaces, or "E" 
+                                            # | "U" | "L" 
+}  
+
+#---------------------- Data Types -------------------
+
+#---------------------- Cardinality Types (OneOrMore) -------------------
+
+#---------------------- Reference Types -------------------
+
+#---------------------- Value Sets ------------------------

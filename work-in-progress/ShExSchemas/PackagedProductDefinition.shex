@@ -1,0 +1,590 @@
+﻿PREFIX fhir: <http://hl7.org/fhir/> 
+PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+BASE <http://hl7.org/fhir/shape/>
+
+
+start=@<PackagedProductDefinition> AND {fhir:nodeRole [fhir:treeRoot]}
+
+
+# A medically related item or items, in a container or package
+<PackagedProductDefinition> EXTENDS @<DomainResource> CLOSED {   
+
+    a [fhir:PackagedProductDefinition];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:identifier @<OneOrMore_Identifier>?;  # A unique identifier for this 
+                                            # package as whole - not for the 
+                                            # content of the package 
+    fhir:name @<string>?;                   # A name for this package. Typically 
+                                            # as listed in a drug formulary, 
+                                            # catalogue, inventory etc 
+    fhir:type @<CodeableConcept>?;          # A high level category e.g. 
+                                            # medicinal product, raw material, 
+                                            # shipping container etc 
+    fhir:packageFor @<OneOrMore_Reference_MedicinalProductDefinition>?;  # The product that this is a pack for
+    fhir:status @<CodeableConcept>?;        # The status within the lifecycle of 
+                                            # this item. High level - not 
+                                            # intended to duplicate details 
+                                            # elsewhere e.g. legal status, or 
+                                            # authorization/marketing status 
+    fhir:statusDate @<dateTime>?;           # The date at which the given status 
+                                            # became applicable 
+    fhir:containedItemQuantity @<OneOrMore_Quantity>?;  # A total of the complete count of 
+                                            # contained items of a particular 
+                                            # type/form, independent of 
+                                            # sub-packaging or organization. 
+                                            # This can be considered as the pack 
+                                            # size 
+    fhir:description @<markdown>?;          # Textual description. Note that 
+                                            # this is not the name of the 
+                                            # package or product 
+    fhir:legalStatusOfSupply @<OneOrMore_PackagedProductDefinition.legalStatusOfSupply>?;  # The legal status of supply of the 
+                                            # packaged item as classified by the 
+                                            # regulator 
+    fhir:marketingStatus @<OneOrMore_MarketingStatus>?;  # Allows specifying that an item is 
+                                            # on the market for sale, or that it 
+                                            # is not available, and the dates 
+                                            # and locations associated 
+    fhir:characteristic @<OneOrMore_CodeableConcept>?;  # Allows the key features to be 
+                                            # recorded, such as "hospital pack", 
+                                            # "nurse prescribable" 
+    fhir:copackagedIndicator @<boolean>?;   # Identifies if the drug product is 
+                                            # supplied with another item such as 
+                                            # a diluent or adjuvant 
+    fhir:manufacturer @<OneOrMore_Reference_Organization>?;  # Manufacturer of this package type 
+                                            # (multiple means these are all 
+                                            # possible manufacturers) 
+    fhir:attachedDocument @<OneOrMore_Reference_DocumentReference>?;  # Additional information or 
+                                            # supporting documentation about the 
+                                            # packaged product 
+    fhir:packaging @<PackagedProductDefinition.packaging>?;  # A packaging item, as a container 
+                                            # for medically related items, 
+                                            # possibly with other packaging 
+                                            # items within, or a packaging 
+                                            # component, such as bottle cap 
+}  
+
+# Allows containers (and parts of containers) within containers, still a single packaged product
+<PackagedProductDefinition.packaging.packaging> CLOSED {   
+}  
+
+# A packaging item, as a container for medically related items, possibly with other packaging items within, or a packaging component, such as bottle cap
+<PackagedProductDefinition.packaging> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:identifier @<OneOrMore_Identifier>?;  # An identifier that is specific to 
+                                            # this particular part of the 
+                                            # packaging. Including possibly a 
+                                            # Data Carrier Identifier 
+    fhir:type @<CodeableConcept>?;          # The physical type of the container 
+                                            # of the items 
+    fhir:quantity @<integer>?;              # The quantity of this level of 
+                                            # packaging in the package that 
+                                            # contains it (with the outermost 
+                                            # level being 1) 
+    fhir:material @<OneOrMore_CodeableConcept>?;  # Material type of the package item
+    fhir:alternateMaterial @<OneOrMore_CodeableConcept>?;  # A possible alternate material for 
+                                            # this part of the packaging, that 
+                                            # is allowed to be used instead of 
+                                            # the usual material 
+    fhir:shelfLifeStorage @<OneOrMore_ProductShelfLife>?;  # Shelf Life and storage information
+    fhir:manufacturer @<OneOrMore_Reference_Organization>?;  # Manufacturer of this packaging 
+                                            # item (multiple means these are all 
+                                            # potential manufacturers) 
+    fhir:property @<OneOrMore_PackagedProductDefinition.packaging.property>?;  # General characteristics of this 
+                                            # item 
+    fhir:containedItem @<OneOrMore_PackagedProductDefinition.packaging.containedItem>?;  # The item(s) within the packaging
+    fhir:packaging @<OneOrMore_PackagedProductDefinition.packaging>?;  # Allows containers (and parts of 
+                                            # containers) within containers, 
+                                            # still a single packaged product 
+}  
+
+# The item(s) within the packaging
+<PackagedProductDefinition.packaging.containedItem> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:item @<CodeableReference>;         # The actual item(s) of medication, 
+                                            # as manufactured, or a device, or 
+                                            # other medically related item 
+                                            # (food, biologicals, raw materials, 
+                                            # medical fluids, gases etc.), as 
+                                            # contained in the package 
+    fhir:amount @<Quantity>?;               # The number of this type of item 
+                                            # within this packaging 
+}  
+
+# General characteristics of this item
+<PackagedProductDefinition.packaging.property> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:type @<CodeableConcept>;           # A code expressing the type of 
+                                            # characteristic 
+    fhir:value (@<CodeableConcept>  OR 
+    			@<Quantity>  OR 
+    			@<date>  OR 
+    			@<boolean>  OR 
+    			@<Attachment> )  AND { rdf:type IRI } ?;  # A value for the characteristic
+}  
+
+# The legal status of supply of the packaged item as classified by the regulator
+<PackagedProductDefinition.legalStatusOfSupply> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:code @<CodeableConcept>?;          # The actual status of supply. In 
+                                            # what situation this package type 
+                                            # may be supplied for use 
+    fhir:jurisdiction @<CodeableConcept>?;  # The place where the legal status 
+                                            # of supply applies 
+}  
+
+#---------------------- Data Types -------------------
+
+# Primitive Type dateTime
+<dateTime> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:dateTime];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v xsd:gYear OR xsd:gYearMonth OR xsd:date OR xsd:dateTime?;  # Primitive value for dateTime
+}  
+
+# Primitive Type date
+<date> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:date];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v xsd:gYear OR xsd:gYearMonth OR xsd:date?;  # Primitive value for date
+}  
+
+# Primitive Type string
+<string> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:string];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v xsd:string MAXLENGTH 1048576?;   # Primitive value for string
+}  
+
+# A reference from one resource to another
+<Reference> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Reference];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:link IRI?;
+    fhir:reference @<string>?;              # Literal reference, Relative, 
+                                            # internal or absolute URL 
+    fhir:type @<uri>?;                      # Type the reference refers to (e.g. 
+                                            # "Patient") 
+    fhir:identifier @<Identifier>?;         # Logical reference, when literal 
+                                            # reference is not known 
+    fhir:display @<string>?;                # Text alternative for the resource
+} AND (
+
+# Constraint: UniqueKey:ref-1
+# Human readable:SHALL have a contained resource if a local reference is provided
+# XPath:not(starts-with(f:reference/@value, '#')) or exists(ancestor::*[self::f:entry or self::f:parameter]/f:resource/f:*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')]|/*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')])
+# Constraint:reference.startsWith('#').not() or (reference.substring(1).trace('url') in %rootResource.contained.id.trace('ids')) or (reference='#' and %rootResource!=%resource)
+# ShEx:
+
+ NOT { fhir:reference  SHEX_startsWith_SHEX ('#') } OR ({ fhir:reference SHEX_substring_SHEX (1) SHEX_trace_SHEX ('url') } { fhir:v ['%rootResource'.contained.id SHEX_trace_SHEX ('ids')] } ) OR (({ fhir:reference { fhir:v ['#'] }  }) AND ('%rootResource' { fhir:v [ . -'%resource'] }))
+
+)
+ 
+
+# A measured or measurable amount
+<Quantity> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Quantity];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:value @<decimal>?;                 # Numerical value (with implicit 
+                                            # precision) 
+    fhir:comparator @<code> AND
+    	{fhir:value @fhirvs:quantity-comparator}?;  # < | <= | >= | > | ad - how to 
+                                            # understand the value 
+    fhir:unit @<string>?;                   # Unit representation
+    fhir:system @<uri>?;                    # System that defines coded unit form
+    fhir:code @<code>?;                     # Coded form of the unit
+} AND (
+
+# Constraint: UniqueKey:qty-3
+# Human readable:If a code for the unit is present, the system SHALL also be present
+# XPath:not(exists(f:code)) or exists(f:system)
+# Constraint:code.empty() or system.exists()
+# ShEx:
+
+ NOT { fhir:code {fhir:v .} }  OR { fhir:system . }
+
+)
+ 
+
+# Content in a format defined elsewhere
+<Attachment> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Attachment];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:contentType @<code> AND
+    	{fhir:value @fhirvs:mimetypes}?;  # Mime type of the content, with 
+                                            # charset etc. 
+    fhir:language @<code>?;                 # Human language of the content 
+                                            # (BCP-47) 
+    fhir:data @<base64Binary>?;             # Data inline, base64ed
+    fhir:url @<url>?;                       # Uri where the data can be found
+    fhir:size @<integer64>?;                # Number of bytes of content (if url 
+                                            # provided) 
+    fhir:hash @<base64Binary>?;             # Hash of the data (sha-1, base64ed)
+    fhir:title @<string>?;                  # Label to display in place of the 
+                                            # data 
+    fhir:creation @<dateTime>?;             # Date attachment was first created
+    fhir:height @<positiveInt>?;            # Height of the image in pixels 
+                                            # (photo/video) 
+    fhir:width @<positiveInt>?;             # Width of the image in pixels 
+                                            # (photo/video) 
+    fhir:frames @<positiveInt>?;            # Number of frames if > 1 (photo)
+    fhir:duration @<decimal>?;              # Length in seconds (audio / video)
+    fhir:pages @<positiveInt>?;             # Number of printed pages
+} AND (
+
+# Constraint: UniqueKey:att-1
+# Human readable:If the Attachment has data, it SHALL have a contentType
+# XPath:not(exists(f:data)) or exists(f:contentType)
+# Constraint:data.empty() or contentType.exists()
+# ShEx:
+
+ NOT { fhir:data {fhir:v .} }  OR { fhir:contentType . }
+
+)
+ 
+
+# Primitive Type integer
+<integer> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:integer];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v xsd:int MININCLUSIVE -2147483648 MAXINCLUSIVE 2147483647?;  # Primitive value for integer
+}  
+
+# The shelf-life and storage information for a medicinal product item or container can be described using this class
+<ProductShelfLife> EXTENDS @<BackboneType> CLOSED {   
+
+    a [fhir:ProductShelfLife];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:type @<CodeableConcept>?;          # This describes the shelf life, 
+                                            # taking into account various 
+                                            # scenarios such as shelf life of 
+                                            # the packaged Medicinal Product 
+                                            # itself, shelf life after 
+                                            # transformation where necessary and 
+                                            # shelf life after the first opening 
+                                            # of a bottle, etc. The shelf life 
+                                            # type shall be specified using an 
+                                            # appropriate controlled vocabulary 
+                                            # The controlled term and the 
+                                            # controlled term identifier shall 
+                                            # be specified 
+    fhir:period (@<Duration>  OR 
+    			@<string> )  AND { rdf:type IRI } ?;  # The shelf life time period can be 
+                                            # specified using a numerical value 
+                                            # for the period of time and its 
+                                            # unit of time measurement The unit 
+                                            # of measurement shall be specified 
+                                            # in accordance with ISO 11240 and 
+                                            # the resulting terminology The 
+                                            # symbol and the symbol identifier 
+                                            # shall be used 
+    fhir:specialPrecautionsForStorage @<OneOrMore_CodeableConcept>?;  # Special precautions for storage, 
+                                            # if any, can be specified using an 
+                                            # appropriate controlled vocabulary 
+                                            # The controlled term and the 
+                                            # controlled term identifier shall 
+                                            # be specified 
+}  
+
+# The marketing status describes the date when a medicinal product is actually put on the market or the date as of which it is no longer available
+<MarketingStatus> EXTENDS @<BackboneType> CLOSED {   
+
+    a [fhir:MarketingStatus];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:country @<CodeableConcept>?;       # The country in which the marketing 
+                                            # authorisation has been granted 
+                                            # shall be specified It should be 
+                                            # specified using the ISO 3166 ‑ 1 
+                                            # alpha-2 code elements 
+    fhir:jurisdiction @<CodeableConcept>?;  # Where a Medicines Regulatory 
+                                            # Agency has granted a marketing 
+                                            # authorisation for which specific 
+                                            # provisions within a jurisdiction 
+                                            # apply, the jurisdiction can be 
+                                            # specified using an appropriate 
+                                            # controlled terminology The 
+                                            # controlled term and the controlled 
+                                            # term identifier shall be specified 
+    fhir:status @<CodeableConcept>;         # This attribute provides 
+                                            # information on the status of the 
+                                            # marketing of the medicinal product 
+                                            # See ISO/TS 20443 for more 
+                                            # information and examples 
+    fhir:dateRange @<Period>?;              # The date when the Medicinal 
+                                            # Product is placed on the market by 
+                                            # the Marketing Authorisation Holder 
+                                            # (or where applicable, the 
+                                            # manufacturer/distributor) in a 
+                                            # country and/or jurisdiction shall 
+                                            # be provided A complete date 
+                                            # consisting of day, month and year 
+                                            # shall be specified using the ISO 
+                                            # 8601 date format NOTE “Placed on 
+                                            # the market” refers to the release 
+                                            # of the Medicinal Product into the 
+                                            # distribution chain 
+    fhir:restoreDate @<dateTime>?;          # The date when the Medicinal 
+                                            # Product is placed on the market by 
+                                            # the Marketing Authorisation Holder 
+                                            # (or where applicable, the 
+                                            # manufacturer/distributor) in a 
+                                            # country and/or jurisdiction shall 
+                                            # be provided A complete date 
+                                            # consisting of day, month and year 
+                                            # shall be specified using the ISO 
+                                            # 8601 date format NOTE “Placed on 
+                                            # the market” refers to the release 
+                                            # of the Medicinal Product into the 
+                                            # distribution chain 
+}  
+
+# An identifier intended for computation
+<Identifier> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Identifier];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:use @<code> AND
+    	{fhir:value @fhirvs:identifier-use}?;  # usual | official | temp | 
+                                            # secondary | old (If known) 
+    fhir:type @<CodeableConcept>?;          # Description of identifier
+    fhir:system @<uri>?;                    # The namespace for the identifier 
+                                            # value 
+    fhir:value @<string>?;                  # The value that is unique
+    fhir:period @<Period>?;                 # Time period when id is/was valid 
+                                            # for use 
+    fhir:assigner @<Reference> AND {fhir:link 
+    			@<Organization> }?;  # Organization that issued id (may 
+                                            # be just text) 
+}  
+
+# Primitive Type boolean
+<boolean> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:boolean];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v xsd:boolean?;                    # Primitive value for boolean
+}  
+
+# Reference to a resource or a concept
+<CodeableReference> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:CodeableReference];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:concept @<CodeableConcept>?;       # Reference to a concept (by class)
+    fhir:reference @<Reference>?;           # Reference to a resource (by 
+                                            # instance) 
+}  
+
+# Primitive Type markdown
+<markdown> EXTENDS @<string> CLOSED {   
+
+    a [fhir:markdown];
+    fhir:nodeRole [fhir:treeRoot]?;
+}  
+
+# Concept - reference to a terminology or just  text
+<CodeableConcept> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:CodeableConcept];
+    fhir:nodeRole [fhir:treeRoot]?;
+    a NONLITERAL*;
+    fhir:coding @<OneOrMore_Coding>?;       # Code defined by a terminology 
+                                            # system 
+    fhir:text @<string>?;                   # Plain text representation of the 
+                                            # concept 
+}  
+
+# Primitive Type code
+<code> EXTENDS @<string> CLOSED {   
+
+    a [fhir:code];
+    fhir:nodeRole [fhir:treeRoot]?;
+}  
+
+# A reference to a code defined by a terminology system
+<Coding> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Coding];
+    fhir:nodeRole [fhir:treeRoot]?;
+    a NONLITERAL?;
+    fhir:system @<uri>?;                    # Identity of the terminology system
+    fhir:version @<string>?;                # Version of the system - if relevant
+    fhir:code @<code>?;                     # Symbol in syntax defined by the 
+                                            # system 
+    fhir:display @<string>?;                # Representation defined by the 
+                                            # system 
+    fhir:userSelected @<boolean>?;          # If this coding was chosen directly 
+                                            # by the user 
+}  
+
+# Primitive Type positiveInt
+<positiveInt> EXTENDS @<integer> CLOSED {   
+
+    a [fhir:positiveInt];
+    fhir:nodeRole [fhir:treeRoot]?;
+}  
+
+# Primitive Type integer64
+<integer64> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:integer64];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v xsd:long MININCLUSIVE -9223372036854775808 MAXINCLUSIVE 9223372036854775807?;  # Primitive value for integer64
+}  
+
+# Time range defined by start and end date/time
+<Period> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Period];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:start @<dateTime>?;                # Starting time with inclusive 
+                                            # boundary 
+    fhir:end @<dateTime>?;                  # End time with inclusive boundary, 
+                                            # if not ongoing 
+} AND (
+
+# Constraint: UniqueKey:per-1
+# Human readable:If present, start SHALL have a lower or equal value than end
+# XPath:not(exists(f:start/@value)) or not(exists(f:end/@value)) or (xs:dateTime(f:start/@value) <= xs:dateTime(f:end/@value))
+# Constraint:start.hasValue().not() or end.hasValue().not() or (start <= end)
+# ShEx:
+
+ NOT { fhir:start  . } OR  NOT { fhir:end  . } OR ({ fhir:start { fhir:v MaxInclusive { fhir:end } }  })
+
+)
+ 
+
+# A length of time
+<Duration> EXTENDS @<Quantity> CLOSED {   
+
+    a [fhir:Duration];
+    fhir:nodeRole [fhir:treeRoot]?;
+} AND (
+
+# Constraint: UniqueKey:drt-1
+# Human readable:There SHALL be a code if there is a value and it SHALL be an expression of time.  If system is present, it SHALL be UCUM.
+# XPath:(f:code or not(f:value)) and (not(exists(f:system)) or f:system/@value='http://unitsofmeasure.org')
+# Constraint:code.exists() implies ((system = %ucum) and value.exists())
+# ShEx:
+
+{ fhir:code . } SHEX_Implies_SHEX (({ fhir:system { fhir:v ['%ucum'] }  }) AND { fhir:value . })
+
+)
+ 
+
+# Primitive Type uri
+<uri> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:uri];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v xsd:anyURI?;                     # Primitive value for uri
+}  
+
+# Primitive Type url
+<url> EXTENDS @<uri> CLOSED {   
+
+    a [fhir:url];
+    fhir:nodeRole [fhir:treeRoot]?;
+}  
+
+# Primitive Type base64Binary
+<base64Binary> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:base64Binary];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v xsd:base64Binary?;               # Primitive value for base64Binary
+}  
+
+# Primitive Type decimal
+<decimal> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:decimal];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v xsd:decimal OR xsd:double?;      # Primitive value for decimal
+}  
+
+#---------------------- Cardinality Types (OneOrMore) -------------------
+
+<OneOrMore_Identifier> CLOSED {
+    rdf:first @<Identifier>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Identifier> 
+}
+
+<OneOrMore_Reference_MedicinalProductDefinition> CLOSED {
+    rdf:first @<Reference> AND {fhir:link 
+			@<MedicinalProductDefinition> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Reference_MedicinalProductDefinition> 
+}
+
+<OneOrMore_Quantity> CLOSED {
+    rdf:first @<Quantity>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Quantity> 
+}
+
+<OneOrMore_PackagedProductDefinition.legalStatusOfSupply> CLOSED {
+    rdf:first @<PackagedProductDefinition.legalStatusOfSupply>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_PackagedProductDefinition.legalStatusOfSupply> 
+}
+
+<OneOrMore_MarketingStatus> CLOSED {
+    rdf:first @<MarketingStatus>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_MarketingStatus> 
+}
+
+<OneOrMore_CodeableConcept> CLOSED {
+    rdf:first @<CodeableConcept>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_CodeableConcept> 
+}
+
+<OneOrMore_Reference_Organization> CLOSED {
+    rdf:first @<Reference> AND {fhir:link 
+			@<Organization> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Reference_Organization> 
+}
+
+<OneOrMore_Reference_DocumentReference> CLOSED {
+    rdf:first @<Reference> AND {fhir:link 
+			@<DocumentReference> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Reference_DocumentReference> 
+}
+
+<OneOrMore_ProductShelfLife> CLOSED {
+    rdf:first @<ProductShelfLife>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ProductShelfLife> 
+}
+
+<OneOrMore_PackagedProductDefinition.packaging.property> CLOSED {
+    rdf:first @<PackagedProductDefinition.packaging.property>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_PackagedProductDefinition.packaging.property> 
+}
+
+<OneOrMore_PackagedProductDefinition.packaging.containedItem> CLOSED {
+    rdf:first @<PackagedProductDefinition.packaging.containedItem>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_PackagedProductDefinition.packaging.containedItem> 
+}
+
+<OneOrMore_PackagedProductDefinition.packaging> CLOSED {
+    rdf:first @<PackagedProductDefinition.packaging>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_PackagedProductDefinition.packaging> 
+}
+
+<OneOrMore_Coding> CLOSED {
+    rdf:first @<Coding>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Coding> 
+}
+
+#---------------------- Reference Types -------------------
+
+#---------------------- Value Sets ------------------------
+
+# Identifies the purpose for this identifier, if known .
+fhirvs:identifier-use ["usual" "official" "temp" "secondary" "old"]
+
+# This value set includes all possible codes from BCP-13 (http://tools.ietf.org/html/bcp13)
+fhirvs:mimetypes EXTERNAL
+
+# How the Quantity should be understood and represented.
+fhirvs:quantity-comparator ["<" "<=" ">=" ">" "ad"]

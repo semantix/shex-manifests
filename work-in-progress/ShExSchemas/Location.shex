@@ -1,0 +1,117 @@
+﻿PREFIX fhir: <http://hl7.org/fhir/> 
+PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+BASE <http://hl7.org/fhir/shape/>
+
+
+start=@<Location> AND {fhir:nodeRole [fhir:treeRoot]}
+
+
+# Details and position information for a physical place
+<Location> EXTENDS @<DomainResource> CLOSED {   
+
+    a [fhir:Location];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:identifier @<OneOrMore_Location.identifier>?;  # Unique code or number identifying 
+                                            # the location to its users 
+    fhir:status @<Location.status>?;        # active | suspended | inactive
+    fhir:operationalStatus @<Location.operationalStatus>?;  # The operational status of the 
+                                            # location (typically only for a 
+                                            # bed/room) 
+    fhir:name @<Location.name>?;            # Name of the location as used by 
+                                            # humans 
+    fhir:alias @<OneOrMore_Location.alias>?;  # A list of alternate names that the 
+                                            # location is known as, or was known 
+                                            # as, in the past 
+    fhir:description @<Location.description>?;  # Additional details about the 
+                                            # location that could be displayed 
+                                            # as further information to identify 
+                                            # the location beyond its name 
+    fhir:mode @<Location.mode>?;            # instance | kind
+    fhir:type @<OneOrMore_Location.type>?;  # Type of function performed
+    fhir:contact @<OneOrMore_Location.contact>?;  # Official contact details for the 
+                                            # location 
+    fhir:telecom @<OneOrMore_Location.telecom>?;  # Deprecated - use contact.telecom
+    fhir:address @<Location.address>?;      # Physical location
+    fhir:physicalType @<Location.physicalType>?;  # Physical form of the location
+    fhir:position @<Location.position>?;    # The absolute geographic location
+    fhir:managingOrganization @<Location.managingOrganization> AND {fhir:link 
+    			@<Organization> }?;  # Organization responsible for 
+                                            # provisioning and upkeep 
+    fhir:partOf @<Location.partOf> AND {fhir:link 
+    			@<Location> }?;  # Another Location this one is 
+                                            # physically a part of 
+    fhir:hoursOfOperation @<OneOrMore_Location.hoursOfOperation>?;  # What days/times during a week is 
+                                            # this location usually open 
+    fhir:availabilityExceptions @<Location.availabilityExceptions>?;  # Description of availability 
+                                            # exceptions 
+    fhir:endpoint @<OneOrMore_Location.endpoint_Endpoint>?;  # Technical endpoints providing 
+                                            # access to services operated for 
+                                            # the location 
+}  
+
+# The absolute geographic location
+<Location.position> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:longitude @<Location.position.longitude>;  # Longitude with WGS84 datum
+    fhir:latitude @<Location.position.latitude>;  # Latitude with WGS84 datum
+    fhir:altitude @<Location.position.altitude>?;  # Altitude with WGS84 datum
+}  
+
+# What days/times during a week is this location usually open
+<Location.hoursOfOperation> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:daysOfWeek @<OneOrMore_Location.hoursOfOperation.daysOfWeek>?;  # mon | tue | wed | thu | fri | sat 
+                                            # | sun 
+    fhir:allDay @<Location.hoursOfOperation.allDay>?;  # Always available? i.e. 24 hour 
+                                            # service 
+    fhir:openingTime @<Location.hoursOfOperation.openingTime>?;  # Time that the Location opens
+    fhir:closingTime @<Location.hoursOfOperation.closingTime>?;  # Time that the Location closes
+}  
+
+#---------------------- Data Types -------------------
+
+#---------------------- Cardinality Types (OneOrMore) -------------------
+
+<OneOrMore_Location.identifier> CLOSED {
+    rdf:first @<Location.identifier>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Location.identifier> 
+}
+
+<OneOrMore_Location.alias> CLOSED {
+    rdf:first @<Location.alias>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Location.alias> 
+}
+
+<OneOrMore_Location.type> CLOSED {
+    rdf:first @<Location.type>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Location.type> 
+}
+
+<OneOrMore_Location.contact> CLOSED {
+    rdf:first @<Location.contact>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Location.contact> 
+}
+
+<OneOrMore_Location.telecom> CLOSED {
+    rdf:first @<Location.telecom>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Location.telecom> 
+}
+
+<OneOrMore_Location.hoursOfOperation> CLOSED {
+    rdf:first @<Location.hoursOfOperation>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Location.hoursOfOperation> 
+}
+
+<OneOrMore_Location.endpoint_Endpoint> CLOSED {
+    rdf:first @<Location.endpoint> AND {fhir:link 
+			@<Endpoint> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Location.endpoint_Endpoint> 
+}
+
+<OneOrMore_Location.hoursOfOperation.daysOfWeek> CLOSED {
+    rdf:first @<Location.hoursOfOperation.daysOfWeek>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Location.hoursOfOperation.daysOfWeek> 
+}
+
+#---------------------- Reference Types -------------------
+
+#---------------------- Value Sets ------------------------

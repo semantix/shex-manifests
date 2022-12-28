@@ -1,0 +1,201 @@
+﻿PREFIX fhir: <http://hl7.org/fhir/> 
+PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+BASE <http://hl7.org/fhir/shape/>
+
+
+start=@<AllergyIntolerance> AND {fhir:nodeRole [fhir:treeRoot]}
+
+
+# Allergy or Intolerance (generally: Risk of adverse reaction to a substance)
+<AllergyIntolerance> EXTENDS @<DomainResource> CLOSED {   
+
+    a [fhir:AllergyIntolerance];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:identifier @<OneOrMore_AllergyIntolerance.identifier>?;  # External ids for this item
+    fhir:clinicalStatus @<AllergyIntolerance.clinicalStatus>?;  # active | inactive | resolved
+    fhir:verificationStatus @<AllergyIntolerance.verificationStatus>?;  # unconfirmed | presumed | confirmed 
+                                            # | refuted | entered-in-error 
+    fhir:type @<AllergyIntolerance.type>?;  # allergy | intolerance - Underlying 
+                                            # mechanism (if known) 
+    fhir:category @<OneOrMore_AllergyIntolerance.category>?;  # food | medication | environment | 
+                                            # biologic 
+    fhir:criticality @<AllergyIntolerance.criticality>?;  # low | high | unable-to-assess
+    fhir:code @<AllergyIntolerance.code>?;  # Code that identifies the allergy 
+                                            # or intolerance 
+    fhir:patient @<AllergyIntolerance.patient> AND {fhir:link 
+    			@<Patient> };  # Who the sensitivity is for
+    fhir:encounter @<AllergyIntolerance.encounter> AND {fhir:link 
+    			@<Encounter> }?;  # Encounter when the allergy or 
+                                            # intolerance was asserted 
+    fhir:onset (@<dateTime>  OR 
+    			@<Age>  OR 
+    			@<Period>  OR 
+    			@<Range>  OR 
+    			@<string> )  AND { rdf:type IRI } ?;  # When allergy or intolerance was 
+                                            # identified 
+    fhir:recordedDate @<AllergyIntolerance.recordedDate>?;  # Date allergy or intolerance was 
+                                            # first recorded 
+    fhir:participant @<OneOrMore_AllergyIntolerance.participant>?;  # Who or what participated in the 
+                                            # activities related to the allergy 
+                                            # or intolerance and how they were 
+                                            # involved 
+    fhir:lastOccurrence @<AllergyIntolerance.lastOccurrence>?;  # Date(/time) of last known 
+                                            # occurrence of a reaction 
+    fhir:note @<OneOrMore_AllergyIntolerance.note>?;  # Additional text not captured in 
+                                            # other fields 
+    fhir:reaction @<OneOrMore_AllergyIntolerance.reaction>?;  # Adverse Reaction Events linked to 
+                                            # exposure to substance 
+}  
+
+# Adverse Reaction Events linked to exposure to substance
+<AllergyIntolerance.reaction> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:substance @<AllergyIntolerance.reaction.substance>?;  # Specific substance or 
+                                            # pharmaceutical product considered 
+                                            # to be responsible for event 
+    fhir:manifestation @<OneOrMore_AllergyIntolerance.reaction.manifestation>;  # Clinical symptoms/signs associated 
+                                            # with the Event 
+    fhir:description @<AllergyIntolerance.reaction.description>?;  # Description of the event as a whole
+    fhir:onset @<AllergyIntolerance.reaction.onset>?;  # Date(/time) when manifestations 
+                                            # showed 
+    fhir:severity @<AllergyIntolerance.reaction.severity>?;  # mild | moderate | severe (of event 
+                                            # as a whole) 
+    fhir:exposureRoute @<AllergyIntolerance.reaction.exposureRoute>?;  # How the subject was exposed to the 
+                                            # substance 
+    fhir:note @<OneOrMore_AllergyIntolerance.reaction.note>?;  # Text about event not captured in 
+                                            # other fields 
+}  
+
+# Who or what participated in the activities related to the allergy or intolerance and how they were involved
+<AllergyIntolerance.participant> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:function @<AllergyIntolerance.participant.function>?;  # Type of involvement
+    fhir:actor @<AllergyIntolerance.participant.actor> AND {fhir:link 
+    			@<CareTeam> OR 
+    			@<Device> OR 
+    			@<Organization> OR 
+    			@<Patient> OR 
+    			@<Practitioner> OR 
+    			@<PractitionerRole> OR 
+    			@<RelatedPerson> };  # Who or what participated in the 
+                                            # activities related to the allergy 
+                                            # or intolerance 
+}  
+
+#---------------------- Data Types -------------------
+
+# Primitive Type dateTime
+<dateTime> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:dateTime];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v @<dateTime.value>?;              # Primitive value for dateTime
+}  
+
+# Primitive Type string
+<string> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:string];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v @<string.value>?;                # Primitive value for string
+}  
+
+# Time range defined by start and end date/time
+<Period> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Period];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:start @<Period.start>?;            # Starting time with inclusive 
+                                            # boundary 
+    fhir:end @<Period.end>?;                # End time with inclusive boundary, 
+                                            # if not ongoing 
+} AND (
+
+# Constraint: UniqueKey:per-1
+# Human readable:If present, start SHALL have a lower or equal value than end
+# XPath:not(exists(f:start/@value)) or not(exists(f:end/@value)) or (xs:dateTime(f:start/@value) <= xs:dateTime(f:end/@value))
+# Constraint:start.hasValue().not() or end.hasValue().not() or (start <= end)
+# ShEx:
+
+ NOT { fhir:start  . } OR  NOT { fhir:end  . } OR ({ fhir:start { fhir:v MaxInclusive { fhir:end } }  })
+
+)
+ 
+
+# Set of values bounded by low and high
+<Range> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Range];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:low @<Range.low>?;                 # Low limit
+    fhir:high @<Range.high>?;               # High limit
+} AND (
+
+# Constraint: UniqueKey:rng-2
+# Human readable:If present, low SHALL have a lower value than high
+# XPath:not(exists(f:low/f:value/@value)) or not(exists(f:high/f:value/@value)) or (number(f:low/f:value/@value) <= number(f:high/f:value/@value))
+# Constraint:low.value.empty() or high.value.empty() or (low <= high)
+# ShEx:
+
+ NOT { fhir:low fhir:value {fhir:v .} }  OR  NOT { fhir:high fhir:value {fhir:v .} }  OR ({ fhir:low { fhir:v MaxInclusive { fhir:high } }  })
+
+)
+ 
+
+# A duration of time during which an organism (or a process) has existed
+<Age> EXTENDS @<Quantity> CLOSED {   
+
+    a [fhir:Age];
+    fhir:nodeRole [fhir:treeRoot]?;
+} AND (
+
+# Constraint: UniqueKey:age-1
+# Human readable:There SHALL be a code if there is a value and it SHALL be an expression of time.  If system is present, it SHALL be UCUM.  If value is present, it SHALL be positive.
+# XPath:(f:code or not(f:value)) and (not(exists(f:system)) or f:system/@value='http://unitsofmeasure.org') and (not(f:value/@value) or f:value/@value >=0)
+# Constraint:(code.exists() or value.empty()) and (system.empty() or system = %ucum) and (value.empty() or value.hasValue().not() or value > 0)
+# ShEx:
+
+({ fhir:code . } OR  NOT { fhir:value {fhir:v .} } ) AND ( NOT { fhir:system {fhir:v .} }  OR ({ fhir:system { fhir:v ['http://unitsofmeasure.org'] }  })) AND ( NOT { fhir:value {fhir:v .} }  OR  NOT { fhir:value  . } OR ({ fhir:value { fhir:v MinExclusive 0 }  }))
+
+)
+ 
+
+#---------------------- Cardinality Types (OneOrMore) -------------------
+
+<OneOrMore_AllergyIntolerance.identifier> CLOSED {
+    rdf:first @<AllergyIntolerance.identifier>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_AllergyIntolerance.identifier> 
+}
+
+<OneOrMore_AllergyIntolerance.category> CLOSED {
+    rdf:first @<AllergyIntolerance.category>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_AllergyIntolerance.category> 
+}
+
+<OneOrMore_AllergyIntolerance.participant> CLOSED {
+    rdf:first @<AllergyIntolerance.participant>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_AllergyIntolerance.participant> 
+}
+
+<OneOrMore_AllergyIntolerance.note> CLOSED {
+    rdf:first @<AllergyIntolerance.note>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_AllergyIntolerance.note> 
+}
+
+<OneOrMore_AllergyIntolerance.reaction> CLOSED {
+    rdf:first @<AllergyIntolerance.reaction>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_AllergyIntolerance.reaction> 
+}
+
+<OneOrMore_AllergyIntolerance.reaction.manifestation> CLOSED {
+    rdf:first @<AllergyIntolerance.reaction.manifestation>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_AllergyIntolerance.reaction.manifestation> 
+}
+
+<OneOrMore_AllergyIntolerance.reaction.note> CLOSED {
+    rdf:first @<AllergyIntolerance.reaction.note>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_AllergyIntolerance.reaction.note> 
+}
+
+#---------------------- Reference Types -------------------
+
+#---------------------- Value Sets ------------------------

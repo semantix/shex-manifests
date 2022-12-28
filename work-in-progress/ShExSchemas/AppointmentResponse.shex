@@ -1,0 +1,67 @@
+﻿PREFIX fhir: <http://hl7.org/fhir/> 
+PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+BASE <http://hl7.org/fhir/shape/>
+
+
+start=@<AppointmentResponse> AND {fhir:nodeRole [fhir:treeRoot]}
+
+
+# A reply to an appointment request for a patient and/or practitioner(s), such as a confirmation or rejection
+<AppointmentResponse> EXTENDS @<DomainResource> CLOSED {   
+
+    a [fhir:AppointmentResponse];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:identifier @<OneOrMore_AppointmentResponse.identifier>?;  # External Ids for this item
+    fhir:appointment @<AppointmentResponse.appointment> AND {fhir:link 
+    			@<Appointment> };  # Appointment this response relates 
+                                            # to 
+    fhir:start @<AppointmentResponse.start>?;  # Time from appointment, or 
+                                            # requested new start time 
+    fhir:end @<AppointmentResponse.end>?;   # Time from appointment, or 
+                                            # requested new end time 
+    fhir:participantType @<OneOrMore_AppointmentResponse.participantType>?;  # Role of participant in the 
+                                            # appointment 
+    fhir:actor @<AppointmentResponse.actor> AND {fhir:link 
+    			@<Device> OR 
+    			@<Group> OR 
+    			@<HealthcareService> OR 
+    			@<Location> OR 
+    			@<Patient> OR 
+    			@<Practitioner> OR 
+    			@<PractitionerRole> OR 
+    			@<RelatedPerson> }?;  # Person(s), Location, 
+                                            # HealthcareService, or Device 
+    fhir:participantStatus @<AppointmentResponse.participantStatus>;  # accepted | declined | tentative | 
+                                            # needs-action 
+    fhir:comment @<AppointmentResponse.comment>?;  # Additional comments
+} AND (
+
+# Constraint: UniqueKey:apr-1
+# Human readable:Either the participantType or actor must be specified
+# XPath:(exists(f:participantType) or exists(f:actor))
+# Constraint:participantType.exists() or actor.exists()
+# ShEx:
+
+{ fhir:participantType . } OR { fhir:actor . }
+
+)
+ 
+
+#---------------------- Data Types -------------------
+
+#---------------------- Cardinality Types (OneOrMore) -------------------
+
+<OneOrMore_AppointmentResponse.identifier> CLOSED {
+    rdf:first @<AppointmentResponse.identifier>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_AppointmentResponse.identifier> 
+}
+
+<OneOrMore_AppointmentResponse.participantType> CLOSED {
+    rdf:first @<AppointmentResponse.participantType>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_AppointmentResponse.participantType> 
+}
+
+#---------------------- Reference Types -------------------
+
+#---------------------- Value Sets ------------------------

@@ -1,0 +1,146 @@
+﻿PREFIX fhir: <http://hl7.org/fhir/> 
+PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+BASE <http://hl7.org/fhir/shape/>
+
+
+start=@<ArtifactAssessment> AND {fhir:nodeRole [fhir:treeRoot]}
+
+
+# Adds metadata-supported comments, classifiers or ratings related to a Resource
+<ArtifactAssessment> EXTENDS @<DomainResource> CLOSED {   
+
+    a [fhir:ArtifactAssessment];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:identifier @<OneOrMore_ArtifactAssessment.identifier>?;  # Additional identifier for the 
+                                            # artifact assessment 
+    fhir:citeAs ((@<Reference>  AND {fhir:link @<Citation> })  OR 
+    			@<markdown> )  AND { rdf:type IRI } ?;  # How to cite the comment or rating
+    fhir:date @<ArtifactAssessment.date>?;  # Date last changed
+    fhir:copyright @<ArtifactAssessment.copyright>?;  # Use and/or publishing restrictions
+    fhir:approvalDate @<ArtifactAssessment.approvalDate>?;  # When the artifact assessment was 
+                                            # approved by publisher 
+    fhir:lastReviewDate @<ArtifactAssessment.lastReviewDate>?;  # When the artifact assessment was 
+                                            # last reviewed 
+    fhir:artifact ((@<Reference>  AND {fhir:link @<Resource> })  OR 
+    			@<canonical>  OR 
+    			@<uri> )  AND { rdf:type IRI } ;  # The artifact assessed, commented 
+                                            # upon or rated 
+    fhir:content @<OneOrMore_ArtifactAssessment.content>?;  # Comment, classifier, or rating 
+                                            # content 
+    fhir:workflowStatus @<ArtifactAssessment.workflowStatus>?;  # submitted | triaged | 
+                                            # waiting-for-input | 
+                                            # resolved-no-change | 
+                                            # resolved-change-required | 
+                                            # deferred | duplicate | applied | 
+                                            # published 
+    fhir:disposition @<ArtifactAssessment.disposition>?;  # unresolved | not-persuasive | 
+                                            # persuasive | 
+                                            # persuasive-with-modification | 
+                                            # not-persuasive-with-modification 
+}  
+
+# Contained content
+<ArtifactAssessment.content.component> CLOSED {   
+}  
+
+# Comment, classifier, or rating content
+<ArtifactAssessment.content> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:informationType @<ArtifactAssessment.content.informationType>?;  # comment | classifier | rating | 
+                                            # container | response | 
+                                            # change-request 
+    fhir:summary @<ArtifactAssessment.content.summary>?;  # Brief summary of the content
+    fhir:type @<ArtifactAssessment.content.type>?;  # What type of content
+    fhir:classifier @<OneOrMore_ArtifactAssessment.content.classifier>?;  # Rating, classifier, or assessment
+    fhir:author @<ArtifactAssessment.content.author> AND {fhir:link 
+    			@<Device> OR 
+    			@<Organization> OR 
+    			@<Patient> OR 
+    			@<Practitioner> OR 
+    			@<PractitionerRole> }?;  # Who authored the content
+    fhir:path @<OneOrMore_ArtifactAssessment.content.path>?;  # What the comment is directed to
+    fhir:relatedArtifact @<OneOrMore_ArtifactAssessment.content.relatedArtifact>?;  # Additional information
+    fhir:freeToShare @<ArtifactAssessment.content.freeToShare>?;  # Acceptable to publicly share the 
+                                            # resource content 
+    fhir:component @<OneOrMore_ArtifactAssessment.content>?;  # Contained content
+}  
+
+#---------------------- Data Types -------------------
+
+# A reference from one resource to another
+<Reference> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Reference];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:link IRI?;
+    fhir:reference @<Reference.reference>?;  # Literal reference, Relative, 
+                                            # internal or absolute URL 
+    fhir:type @<Reference.type>?;           # Type the reference refers to (e.g. 
+                                            # "Patient") 
+    fhir:identifier @<Reference.identifier>?;  # Logical reference, when literal 
+                                            # reference is not known 
+    fhir:display @<Reference.display>?;     # Text alternative for the resource
+} AND (
+
+# Constraint: UniqueKey:ref-1
+# Human readable:SHALL have a contained resource if a local reference is provided
+# XPath:not(starts-with(f:reference/@value, '#')) or exists(ancestor::*[self::f:entry or self::f:parameter]/f:resource/f:*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')]|/*/f:contained/f:*[f:id/@value=substring-after(current()/f:reference/@value, '#')])
+# Constraint:reference.startsWith('#').not() or (reference.substring(1).trace('url') in %rootResource.contained.id.trace('ids')) or (reference='#' and %rootResource!=%resource)
+# ShEx:
+
+
+)
+ 
+
+# Primitive Type markdown
+<markdown> EXTENDS @<string> CLOSED {   
+
+    a [fhir:markdown];
+    fhir:nodeRole [fhir:treeRoot]?;
+}  
+
+# Primitive Type canonical
+<canonical> EXTENDS @<uri> CLOSED {   
+
+    a [fhir:canonical];
+    fhir:nodeRole [fhir:treeRoot]?;
+}  
+
+# Primitive Type uri
+<uri> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:uri];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v @<uri.value>?;                   # Primitive value for uri
+}  
+
+#---------------------- Cardinality Types (OneOrMore) -------------------
+
+<OneOrMore_ArtifactAssessment.identifier> CLOSED {
+    rdf:first @<ArtifactAssessment.identifier>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ArtifactAssessment.identifier> 
+}
+
+<OneOrMore_ArtifactAssessment.content> CLOSED {
+    rdf:first @<ArtifactAssessment.content>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ArtifactAssessment.content> 
+}
+
+<OneOrMore_ArtifactAssessment.content.classifier> CLOSED {
+    rdf:first @<ArtifactAssessment.content.classifier>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ArtifactAssessment.content.classifier> 
+}
+
+<OneOrMore_ArtifactAssessment.content.path> CLOSED {
+    rdf:first @<ArtifactAssessment.content.path>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ArtifactAssessment.content.path> 
+}
+
+<OneOrMore_ArtifactAssessment.content.relatedArtifact> CLOSED {
+    rdf:first @<ArtifactAssessment.content.relatedArtifact>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ArtifactAssessment.content.relatedArtifact> 
+}
+
+#---------------------- Reference Types -------------------
+
+#---------------------- Value Sets ------------------------

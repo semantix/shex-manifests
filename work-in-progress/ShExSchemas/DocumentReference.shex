@@ -1,0 +1,208 @@
+﻿PREFIX fhir: <http://hl7.org/fhir/> 
+PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+BASE <http://hl7.org/fhir/shape/>
+
+
+start=@<DocumentReference> AND {fhir:nodeRole [fhir:treeRoot]}
+
+
+# A reference to a document
+<DocumentReference> EXTENDS @<DomainResource> CLOSED {   
+
+    a [fhir:DocumentReference];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:identifier @<OneOrMore_DocumentReference.identifier>?;  # Business identifiers for the 
+                                            # document 
+    fhir:basedOn @<OneOrMore_DocumentReference.basedOn_Appointment_OR_AppointmentResponse_OR_CarePlan_OR_Claim_OR_CommunicationRequest_OR_Contract_OR_CoverageEligibilityRequest_OR_DeviceRequest_OR_EnrollmentRequest_OR_EpisodeOfCare_OR_ImmunizationRecommendation_OR_MedicationRequest_OR_NutritionOrder_OR_RequestGroup_OR_ServiceRequest_OR_SupplyRequest_OR_VisionPrescription>?;  # Procedure that caused this media 
+                                            # to be created 
+    fhir:status @<DocumentReference.status>;  # current | superseded | 
+                                            # entered-in-error 
+    fhir:docStatus @<DocumentReference.docStatus>?;  # preliminary | final | amended | 
+                                            # entered-in-error | deprecated 
+    fhir:type @<DocumentReference.type>?;   # Kind of document (LOINC if 
+                                            # possible) 
+    fhir:category @<OneOrMore_DocumentReference.category>?;  # Categorization of document
+    fhir:subject @<DocumentReference.subject> AND {fhir:link 
+    			@<Resource> }?;  # Who/what is the subject of the 
+                                            # document 
+    fhir:context @<OneOrMore_DocumentReference.context_Appointment_OR_Encounter_OR_EpisodeOfCare>?;  # Context of the document content
+    fhir:event @<OneOrMore_DocumentReference.event>?;  # Main clinical acts documented
+    fhir:facilityType @<DocumentReference.facilityType>?;  # Kind of facility where patient was 
+                                            # seen 
+    fhir:practiceSetting @<DocumentReference.practiceSetting>?;  # Additional details about where the 
+                                            # content was created (e.g. clinical 
+                                            # specialty) 
+    fhir:period @<DocumentReference.period>?;  # Time of service that is being 
+                                            # documented 
+    fhir:date @<DocumentReference.date>?;   # When this document reference was 
+                                            # created 
+    fhir:author @<OneOrMore_DocumentReference.author_CareTeam_OR_Device_OR_Organization_OR_Patient_OR_Practitioner_OR_PractitionerRole_OR_RelatedPerson>?;  # Who and/or what authored the 
+                                            # document 
+    fhir:attester @<OneOrMore_DocumentReference.attester>?;  # Attests to accuracy of the document
+    fhir:custodian @<DocumentReference.custodian> AND {fhir:link 
+    			@<Organization> }?;  # Organization which maintains the 
+                                            # document 
+    fhir:relatesTo @<OneOrMore_DocumentReference.relatesTo>?;  # Relationships to other documents
+    fhir:description @<DocumentReference.description>?;  # Human-readable description
+    fhir:securityLabel @<OneOrMore_DocumentReference.securityLabel>?;  # Document security-tags
+    fhir:content @<OneOrMore_DocumentReference.content>;  # Document referenced
+    fhir:sourcePatientInfo @<DocumentReference.sourcePatientInfo> AND {fhir:link 
+    			@<Patient> }?;  # Patient demographics from source
+}  
+
+# Content profile rules for the document
+<DocumentReference.content.profile> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:value (@<Coding>  OR 
+    			@<uri>  OR 
+    			@<canonical> )  AND { rdf:type IRI } ;  # Code|uri|canonical
+}  
+
+# Document referenced
+<DocumentReference.content> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:attachment @<DocumentReference.content.attachment>;  # Where to access the document
+    fhir:profile @<OneOrMore_DocumentReference.content.profile>?;  # Content profile rules for the 
+                                            # document 
+}  
+
+# Attests to accuracy of the document
+<DocumentReference.attester> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:mode @<DocumentReference.attester.mode>;  # personal | professional | legal | 
+                                            # official 
+    fhir:time @<DocumentReference.attester.time>?;  # When the document was attested
+    fhir:party @<DocumentReference.attester.party> AND {fhir:link 
+    			@<Organization> OR 
+    			@<Patient> OR 
+    			@<Practitioner> OR 
+    			@<PractitionerRole> OR 
+    			@<RelatedPerson> }?;  # Who attested the document
+}  
+
+# Relationships to other documents
+<DocumentReference.relatesTo> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:code @<DocumentReference.relatesTo.code>;  # The relationship type with another 
+                                            # document 
+    fhir:target @<DocumentReference.relatesTo.target> AND {fhir:link 
+    			@<DocumentReference> };  # Target of the relationship
+}  
+
+#---------------------- Data Types -------------------
+
+# A reference to a code defined by a terminology system
+<Coding> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Coding];
+    fhir:nodeRole [fhir:treeRoot]?;
+    a NONLITERAL?;
+    fhir:system @<Coding.system>?;          # Identity of the terminology system
+    fhir:version @<Coding.version>?;        # Version of the system - if relevant
+    fhir:code @<Coding.code>?;              # Symbol in syntax defined by the 
+                                            # system 
+    fhir:display @<Coding.display>?;        # Representation defined by the 
+                                            # system 
+    fhir:userSelected @<Coding.userSelected>?;  # If this coding was chosen directly 
+                                            # by the user 
+}  
+
+# Primitive Type canonical
+<canonical> EXTENDS @<uri> CLOSED {   
+
+    a [fhir:canonical];
+    fhir:nodeRole [fhir:treeRoot]?;
+}  
+
+# Primitive Type uri
+<uri> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:uri];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v @<uri.value>?;                   # Primitive value for uri
+}  
+
+#---------------------- Cardinality Types (OneOrMore) -------------------
+
+<OneOrMore_DocumentReference.identifier> CLOSED {
+    rdf:first @<DocumentReference.identifier>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_DocumentReference.identifier> 
+}
+
+<OneOrMore_DocumentReference.basedOn_Appointment_OR_AppointmentResponse_OR_CarePlan_OR_Claim_OR_CommunicationRequest_OR_Contract_OR_CoverageEligibilityRequest_OR_DeviceRequest_OR_EnrollmentRequest_OR_EpisodeOfCare_OR_ImmunizationRecommendation_OR_MedicationRequest_OR_NutritionOrder_OR_RequestGroup_OR_ServiceRequest_OR_SupplyRequest_OR_VisionPrescription> CLOSED {
+    rdf:first @<DocumentReference.basedOn> AND {fhir:link 
+			@<Appointment> OR 
+			@<AppointmentResponse> OR 
+			@<CarePlan> OR 
+			@<Claim> OR 
+			@<CommunicationRequest> OR 
+			@<Contract> OR 
+			@<CoverageEligibilityRequest> OR 
+			@<DeviceRequest> OR 
+			@<EnrollmentRequest> OR 
+			@<EpisodeOfCare> OR 
+			@<ImmunizationRecommendation> OR 
+			@<MedicationRequest> OR 
+			@<NutritionOrder> OR 
+			@<RequestGroup> OR 
+			@<ServiceRequest> OR 
+			@<SupplyRequest> OR 
+			@<VisionPrescription> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_DocumentReference.basedOn_Appointment_OR_AppointmentResponse_OR_CarePlan_OR_Claim_OR_CommunicationRequest_OR_Contract_OR_CoverageEligibilityRequest_OR_DeviceRequest_OR_EnrollmentRequest_OR_EpisodeOfCare_OR_ImmunizationRecommendation_OR_MedicationRequest_OR_NutritionOrder_OR_RequestGroup_OR_ServiceRequest_OR_SupplyRequest_OR_VisionPrescription> 
+}
+
+<OneOrMore_DocumentReference.category> CLOSED {
+    rdf:first @<DocumentReference.category>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_DocumentReference.category> 
+}
+
+<OneOrMore_DocumentReference.context_Appointment_OR_Encounter_OR_EpisodeOfCare> CLOSED {
+    rdf:first @<DocumentReference.context> AND {fhir:link 
+			@<Appointment> OR 
+			@<Encounter> OR 
+			@<EpisodeOfCare> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_DocumentReference.context_Appointment_OR_Encounter_OR_EpisodeOfCare> 
+}
+
+<OneOrMore_DocumentReference.event> CLOSED {
+    rdf:first @<DocumentReference.event>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_DocumentReference.event> 
+}
+
+<OneOrMore_DocumentReference.author_CareTeam_OR_Device_OR_Organization_OR_Patient_OR_Practitioner_OR_PractitionerRole_OR_RelatedPerson> CLOSED {
+    rdf:first @<DocumentReference.author> AND {fhir:link 
+			@<CareTeam> OR 
+			@<Device> OR 
+			@<Organization> OR 
+			@<Patient> OR 
+			@<Practitioner> OR 
+			@<PractitionerRole> OR 
+			@<RelatedPerson> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_DocumentReference.author_CareTeam_OR_Device_OR_Organization_OR_Patient_OR_Practitioner_OR_PractitionerRole_OR_RelatedPerson> 
+}
+
+<OneOrMore_DocumentReference.attester> CLOSED {
+    rdf:first @<DocumentReference.attester>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_DocumentReference.attester> 
+}
+
+<OneOrMore_DocumentReference.relatesTo> CLOSED {
+    rdf:first @<DocumentReference.relatesTo>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_DocumentReference.relatesTo> 
+}
+
+<OneOrMore_DocumentReference.securityLabel> CLOSED {
+    rdf:first @<DocumentReference.securityLabel>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_DocumentReference.securityLabel> 
+}
+
+<OneOrMore_DocumentReference.content> CLOSED {
+    rdf:first @<DocumentReference.content>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_DocumentReference.content> 
+}
+
+<OneOrMore_DocumentReference.content.profile> CLOSED {
+    rdf:first @<DocumentReference.content.profile>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_DocumentReference.content.profile> 
+}
+
+#---------------------- Reference Types -------------------
+
+#---------------------- Value Sets ------------------------

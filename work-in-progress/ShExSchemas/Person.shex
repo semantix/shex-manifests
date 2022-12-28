@@ -1,0 +1,116 @@
+﻿PREFIX fhir: <http://hl7.org/fhir/> 
+PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+BASE <http://hl7.org/fhir/shape/>
+
+
+start=@<Person> AND {fhir:nodeRole [fhir:treeRoot]}
+
+
+# A generic person record
+<Person> EXTENDS @<DomainResource> CLOSED {   
+
+    a [fhir:Person];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:identifier @<OneOrMore_Person.identifier>?;  # A human identifier for this person
+    fhir:active @<Person.active>?;          # This person's record is in active 
+                                            # use 
+    fhir:name @<OneOrMore_Person.name>?;    # A name associated with the person
+    fhir:telecom @<OneOrMore_Person.telecom>?;  # A contact detail for the person
+    fhir:gender @<Person.gender>?;          # male | female | other | unknown
+    fhir:birthDate @<Person.birthDate>?;    # The date on which the person was 
+                                            # born 
+    fhir:deceased (@<boolean>  OR 
+    			@<dateTime> )  AND { rdf:type IRI } ?;  # Indicates if the individual is 
+                                            # deceased or not 
+    fhir:address @<OneOrMore_Person.address>?;  # One or more addresses for the 
+                                            # person 
+    fhir:maritalStatus @<Person.maritalStatus>?;  # Marital (civil) status of a person
+    fhir:photo @<OneOrMore_Person.photo>?;  # Image of the person
+    fhir:managingOrganization @<Person.managingOrganization> AND {fhir:link 
+    			@<Organization> }?;  # The organization that is the 
+                                            # custodian of the person record 
+    fhir:communication @<OneOrMore_Person.communication>?;  # A language which may be used to 
+                                            # communicate with the person about 
+                                            # his or her health 
+    fhir:link @<OneOrMore_Person.link>?;    # Link to a resource that concerns 
+                                            # the same actual person 
+}  
+
+# Link to a resource that concerns the same actual person
+<Person.link> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:target @<Person.link.target> AND {fhir:link 
+    			@<Patient> OR 
+    			@<Person> OR 
+    			@<Practitioner> OR 
+    			@<RelatedPerson> };  # The resource to which this actual 
+                                            # person is associated 
+    fhir:assurance @<Person.link.assurance>?;  # level1 | level2 | level3 | level4
+}  
+
+# A language which may be used to communicate with the person about his or her health
+<Person.communication> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:language @<Person.communication.language>;  # The language which can be used to 
+                                            # communicate with the person about 
+                                            # his or her health 
+    fhir:preferred @<Person.communication.preferred>?;  # Language preference indicator
+}  
+
+#---------------------- Data Types -------------------
+
+# Primitive Type dateTime
+<dateTime> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:dateTime];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v @<dateTime.value>?;              # Primitive value for dateTime
+}  
+
+# Primitive Type boolean
+<boolean> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:boolean];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v @<boolean.value>?;               # Primitive value for boolean
+}  
+
+#---------------------- Cardinality Types (OneOrMore) -------------------
+
+<OneOrMore_Person.identifier> CLOSED {
+    rdf:first @<Person.identifier>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Person.identifier> 
+}
+
+<OneOrMore_Person.name> CLOSED {
+    rdf:first @<Person.name>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Person.name> 
+}
+
+<OneOrMore_Person.telecom> CLOSED {
+    rdf:first @<Person.telecom>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Person.telecom> 
+}
+
+<OneOrMore_Person.address> CLOSED {
+    rdf:first @<Person.address>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Person.address> 
+}
+
+<OneOrMore_Person.photo> CLOSED {
+    rdf:first @<Person.photo>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Person.photo> 
+}
+
+<OneOrMore_Person.communication> CLOSED {
+    rdf:first @<Person.communication>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Person.communication> 
+}
+
+<OneOrMore_Person.link> CLOSED {
+    rdf:first @<Person.link>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Person.link> 
+}
+
+#---------------------- Reference Types -------------------
+
+#---------------------- Value Sets ------------------------

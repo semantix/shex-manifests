@@ -1,0 +1,33 @@
+﻿PREFIX fhir: <http://hl7.org/fhir/> 
+PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+BASE <http://hl7.org/fhir/shape/>
+
+
+# Number of SOP Instances referred to by this entity
+<auditevent-NumberOfInstances> EXTENDS @<Extension> CLOSED {   
+
+    a [fhir:auditevent-NumberOfInstances];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v @<Extension.url> AND
+    	{fhir:value ["http://hl7.org/fhir/StructureDefinition/auditevent-NumberOfInstances"]}; 
+    fhir:value (@<integer> )  AND { rdf:type IRI } ; 
+    ^fhir:extension { ^fhir:entity {a [fhir:AuditEvent]}
+    		}
+}  
+
+#---------------------- Data Types -------------------
+
+# Primitive Type integer
+<integer> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:integer];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v @<integer.value>?;               # Primitive value for integer
+}  
+
+#---------------------- Cardinality Types (OneOrMore) -------------------
+
+#---------------------- Reference Types -------------------
+
+#---------------------- Value Sets ------------------------

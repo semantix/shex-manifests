@@ -1,0 +1,140 @@
+﻿PREFIX fhir: <http://hl7.org/fhir/> 
+PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+BASE <http://hl7.org/fhir/shape/>
+
+
+start=@<ClinicalImpression> AND {fhir:nodeRole [fhir:treeRoot]}
+
+
+# A clinical assessment performed when planning treatments and management strategies for a patient
+<ClinicalImpression> EXTENDS @<DomainResource> CLOSED {   
+
+    a [fhir:ClinicalImpression];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:identifier @<OneOrMore_ClinicalImpression.identifier>?;  # Business identifier
+    fhir:status @<ClinicalImpression.status>;  # preparation | in-progress | 
+                                            # not-done | on-hold | stopped | 
+                                            # completed | entered-in-error | 
+                                            # unknown 
+    fhir:statusReason @<ClinicalImpression.statusReason>?;  # Reason for current status
+    fhir:description @<ClinicalImpression.description>?;  # Why/how the assessment was 
+                                            # performed 
+    fhir:subject @<ClinicalImpression.subject> AND {fhir:link 
+    			@<Group> OR 
+    			@<Patient> };  # Patient or group assessed
+    fhir:encounter @<ClinicalImpression.encounter> AND {fhir:link 
+    			@<Encounter> }?;  # The Encounter during which this 
+                                            # ClinicalImpression was created 
+    fhir:effective (@<dateTime>  OR 
+    			@<Period> )  AND { rdf:type IRI } ?;  # Time of assessment
+    fhir:date @<ClinicalImpression.date>?;  # When the assessment was documented
+    fhir:performer @<ClinicalImpression.performer> AND {fhir:link 
+    			@<Practitioner> OR 
+    			@<PractitionerRole> }?;  # The clinician performing the 
+                                            # assessment 
+    fhir:previous @<ClinicalImpression.previous> AND {fhir:link 
+    			@<ClinicalImpression> }?;  # Reference to last assessment
+    fhir:problem @<OneOrMore_ClinicalImpression.problem_AllergyIntolerance_OR_Condition>?;  # Relevant impressions of patient 
+                                            # state 
+    fhir:protocol @<OneOrMore_ClinicalImpression.protocol>?;  # Clinical Protocol followed
+    fhir:summary @<ClinicalImpression.summary>?;  # Summary of the assessment
+    fhir:finding @<OneOrMore_ClinicalImpression.finding>?;  # Possible or likely findings and 
+                                            # diagnoses 
+    fhir:prognosisCodeableConcept @<OneOrMore_ClinicalImpression.prognosisCodeableConcept>?;  # Estimate of likely outcome
+    fhir:prognosisReference @<OneOrMore_ClinicalImpression.prognosisReference_RiskAssessment>?;  # RiskAssessment expressing likely 
+                                            # outcome 
+    fhir:supportingInfo @<OneOrMore_ClinicalImpression.supportingInfo_Resource>?;  # Information supporting the 
+                                            # clinical impression 
+    fhir:note @<OneOrMore_ClinicalImpression.note>?;  # Comments made about the 
+                                            # ClinicalImpression 
+}  
+
+# Possible or likely findings and diagnoses
+<ClinicalImpression.finding> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:item @<ClinicalImpression.finding.item>?;  # What was found
+    fhir:basis @<ClinicalImpression.finding.basis>?;  # Which investigations support 
+                                            # finding 
+}  
+
+#---------------------- Data Types -------------------
+
+# Primitive Type dateTime
+<dateTime> EXTENDS @<PrimitiveType> CLOSED {   
+
+    a [fhir:dateTime];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v @<dateTime.value>?;              # Primitive value for dateTime
+}  
+
+# Time range defined by start and end date/time
+<Period> EXTENDS @<DataType> CLOSED {   
+
+    a [fhir:Period];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:start @<Period.start>?;            # Starting time with inclusive 
+                                            # boundary 
+    fhir:end @<Period.end>?;                # End time with inclusive boundary, 
+                                            # if not ongoing 
+} AND (
+
+# Constraint: UniqueKey:per-1
+# Human readable:If present, start SHALL have a lower or equal value than end
+# XPath:not(exists(f:start/@value)) or not(exists(f:end/@value)) or (xs:dateTime(f:start/@value) <= xs:dateTime(f:end/@value))
+# Constraint:start.hasValue().not() or end.hasValue().not() or (start <= end)
+# ShEx:
+
+ NOT { fhir:start  . } OR  NOT { fhir:end  . } OR ({ fhir:start { fhir:v MaxInclusive { fhir:end } }  })
+
+)
+ 
+
+#---------------------- Cardinality Types (OneOrMore) -------------------
+
+<OneOrMore_ClinicalImpression.identifier> CLOSED {
+    rdf:first @<ClinicalImpression.identifier>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ClinicalImpression.identifier> 
+}
+
+<OneOrMore_ClinicalImpression.problem_AllergyIntolerance_OR_Condition> CLOSED {
+    rdf:first @<ClinicalImpression.problem> AND {fhir:link 
+			@<AllergyIntolerance> OR 
+			@<Condition> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ClinicalImpression.problem_AllergyIntolerance_OR_Condition> 
+}
+
+<OneOrMore_ClinicalImpression.protocol> CLOSED {
+    rdf:first @<ClinicalImpression.protocol>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ClinicalImpression.protocol> 
+}
+
+<OneOrMore_ClinicalImpression.finding> CLOSED {
+    rdf:first @<ClinicalImpression.finding>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ClinicalImpression.finding> 
+}
+
+<OneOrMore_ClinicalImpression.prognosisCodeableConcept> CLOSED {
+    rdf:first @<ClinicalImpression.prognosisCodeableConcept>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ClinicalImpression.prognosisCodeableConcept> 
+}
+
+<OneOrMore_ClinicalImpression.prognosisReference_RiskAssessment> CLOSED {
+    rdf:first @<ClinicalImpression.prognosisReference> AND {fhir:link 
+			@<RiskAssessment> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ClinicalImpression.prognosisReference_RiskAssessment> 
+}
+
+<OneOrMore_ClinicalImpression.supportingInfo_Resource> CLOSED {
+    rdf:first @<ClinicalImpression.supportingInfo> AND {fhir:link 
+			@<Resource> } ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ClinicalImpression.supportingInfo_Resource> 
+}
+
+<OneOrMore_ClinicalImpression.note> CLOSED {
+    rdf:first @<ClinicalImpression.note>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_ClinicalImpression.note> 
+}
+
+#---------------------- Reference Types -------------------
+
+#---------------------- Value Sets ------------------------

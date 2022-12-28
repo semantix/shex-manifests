@@ -1,0 +1,42 @@
+﻿PREFIX fhir: <http://hl7.org/fhir/> 
+PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+BASE <http://hl7.org/fhir/shape/>
+
+
+start=@<Basic> AND {fhir:nodeRole [fhir:treeRoot]}
+
+
+# Resource for non-supported content
+<Basic> EXTENDS @<DomainResource> CLOSED {   
+
+    a [fhir:Basic];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:identifier @<OneOrMore_Basic.identifier>?;  # Business identifier
+    fhir:code @<Basic.code>;                # Kind of Resource
+    fhir:subject @<Basic.subject> AND {fhir:link 
+    			@<Resource> }?;  # Identifies the focus of this 
+                                            # resource 
+    fhir:created @<Basic.created>?;         # When created
+    fhir:author @<Basic.author> AND {fhir:link 
+    			@<CareTeam> OR 
+    			@<Device> OR 
+    			@<Organization> OR 
+    			@<Patient> OR 
+    			@<Practitioner> OR 
+    			@<PractitionerRole> OR 
+    			@<RelatedPerson> }?;  # Who created
+}  
+
+#---------------------- Data Types -------------------
+
+#---------------------- Cardinality Types (OneOrMore) -------------------
+
+<OneOrMore_Basic.identifier> CLOSED {
+    rdf:first @<Basic.identifier>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_Basic.identifier> 
+}
+
+#---------------------- Reference Types -------------------
+
+#---------------------- Value Sets ------------------------

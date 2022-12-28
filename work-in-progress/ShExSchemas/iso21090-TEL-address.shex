@@ -1,0 +1,32 @@
+﻿PREFIX fhir: <http://hl7.org/fhir/> 
+PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+BASE <http://hl7.org/fhir/shape/>
+
+
+# RFC 3966 compliant telephone or fax number
+<iso21090-TEL-address> EXTENDS @<Extension> CLOSED {   
+
+    a [fhir:iso21090-TEL-address];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:v @<Extension.url> AND
+    	{fhir:value ["http://hl7.org/fhir/StructureDefinition/iso21090-TEL-address"]}; 
+    fhir:value (@<url> )  AND { rdf:type IRI } ; 
+    ^fhir:extension { a [fhir:ContactPoint]
+    		}
+}  
+
+#---------------------- Data Types -------------------
+
+# Primitive Type url
+<url> EXTENDS @<uri> CLOSED {   
+
+    a [fhir:url];
+    fhir:nodeRole [fhir:treeRoot]?;
+}  
+
+#---------------------- Cardinality Types (OneOrMore) -------------------
+
+#---------------------- Reference Types -------------------
+
+#---------------------- Value Sets ------------------------

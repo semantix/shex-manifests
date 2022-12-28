@@ -1,0 +1,65 @@
+﻿PREFIX fhir: <http://hl7.org/fhir/> 
+PREFIX fhirvs: <http://hl7.org/fhir/ValueSet/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+BASE <http://hl7.org/fhir/shape/>
+
+
+start=@<DeviceMetric> AND {fhir:nodeRole [fhir:treeRoot]}
+
+
+# Measurement, calculation or setting capability of a medical device
+<DeviceMetric> EXTENDS @<DomainResource> CLOSED {   
+
+    a [fhir:DeviceMetric];
+    fhir:nodeRole [fhir:treeRoot]?;
+    fhir:identifier @<OneOrMore_DeviceMetric.identifier>?;  # Instance identifier
+    fhir:type @<DeviceMetric.type>;         # Identity of metric, for example 
+                                            # Heart Rate or PEEP Setting 
+    fhir:unit @<DeviceMetric.unit>?;        # Unit of Measure for the Metric
+    fhir:source @<DeviceMetric.source> AND {fhir:link 
+    			@<Device> }?;  # Describes the link to the source 
+                                            # Device 
+    fhir:parent @<DeviceMetric.parent> AND {fhir:link 
+    			@<Device> }?;  # Describes the link to the parent 
+                                            # Device 
+    fhir:operationalStatus @<DeviceMetric.operationalStatus>?;  # on | off | standby | 
+                                            # entered-in-error 
+    fhir:color @<DeviceMetric.color>?;      # black | red | green | yellow | 
+                                            # blue | magenta | cyan | white 
+    fhir:category @<DeviceMetric.category>;  # measurement | setting | 
+                                            # calculation | unspecified 
+    fhir:measurementPeriod @<DeviceMetric.measurementPeriod>?;  # Describes the measurement 
+                                            # repetition time 
+    fhir:calibration @<OneOrMore_DeviceMetric.calibration>?;  # Describes the calibrations that 
+                                            # have been performed or that are 
+                                            # required to be performed 
+}  
+
+# Describes the calibrations that have been performed or that are required to be performed
+<DeviceMetric.calibration> EXTENDS @<BackboneElement> CLOSED {   
+    fhir:type @<DeviceMetric.calibration.type>?;  # unspecified | offset | gain | 
+                                            # two-point 
+    fhir:state @<DeviceMetric.calibration.state>?;  # not-calibrated | 
+                                            # calibration-required | calibrated 
+                                            # | unspecified 
+    fhir:time @<DeviceMetric.calibration.time>?;  # Describes the time last 
+                                            # calibration has been performed 
+}  
+
+#---------------------- Data Types -------------------
+
+#---------------------- Cardinality Types (OneOrMore) -------------------
+
+<OneOrMore_DeviceMetric.identifier> CLOSED {
+    rdf:first @<DeviceMetric.identifier>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_DeviceMetric.identifier> 
+}
+
+<OneOrMore_DeviceMetric.calibration> CLOSED {
+    rdf:first @<DeviceMetric.calibration>  ;
+    rdf:rest [rdf:nil] OR @<OneOrMore_DeviceMetric.calibration> 
+}
+
+#---------------------- Reference Types -------------------
+
+#---------------------- Value Sets ------------------------
